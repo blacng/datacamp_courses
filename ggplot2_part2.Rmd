@@ -1,0 +1,97 @@
+---
+title: "GGplot2 Part 2"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Load Libraries
+```{r load libraries, include=TRUE, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(skimr)
+library(knitr)
+library(kableExtra)
+```
+
+
+## Exploring the mtcars dataset
+
+```{r exploring mtcars}
+mtcars_tbl <- as_tibble(mtcars)
+
+glimpse(mtcars_tbl)
+
+kable(head(mtcars_tbl)) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+## Smoothing
+
+```{r geom_smooth, fig.width=6, fig.height=6, fig.align='center'}
+# A scatter plot with LOESS smooth
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "loess")
+
+
+# A scatter plot with an ordinary Least Squares linear model
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+
+# The previous plot, without CI ribbon
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE)
+
+# The previous plot, without points
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  stat_smooth(method = "lm", se=FALSE)
+```
+
+You can use either `stat_smooth()` or `geom_smooth()` to apply a linear model. Remember to always think about how the examples and concepts we discuss throughout the data viz courses can be applied to your own datasets!
+
+## Grouping Variables
+
+```{r fig.width=6, fig.height=6, fig.align='center'}
+# 1 - Define cyl as a factor variable
+ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE)
+
+# 2 - Plot 1, plus another stat_smooth() containing a nested aes()
+ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) +
+  stat_smooth(method = "lm", se = FALSE, group = 1)
+```
+
+Good job! Notice that we can use multiple aesthetic layers, just like we can use multiple geom layers. Each aesthetic layer can be mapped onto a specific geom.
+
+
+
+You can also write math expressions, e.g. $Y = X\beta + \epsilon$,
+footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(iris, 10))
+```
+
+## Stay Tuned
+
+Please visit the [development page](http://github.com/yixuan/prettydoc/) of the 
+`prettydoc` package for latest updates and news. Comments, bug reports and
+pull requests are always welcome.
