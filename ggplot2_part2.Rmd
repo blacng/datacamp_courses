@@ -23,6 +23,7 @@ library(tidyr)
 library(skimr)
 library(knitr)
 library(kableExtra)
+library(RColorBrewer)
 ```
 
 
@@ -40,6 +41,9 @@ kable(head(mtcars_tbl)) %>%
 ## Smoothing
 
 ```{r geom_smooth, fig.width=6, fig.height=6, fig.align='center'}
+
+par(mfrow = c(2, 2))
+
 # A scatter plot with LOESS smooth
 ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point() +
@@ -66,7 +70,7 @@ You can use either `stat_smooth()` or `geom_smooth()` to apply a linear model. R
 
 ## Grouping Variables
 
-```{r fig.width=6, fig.height=6, fig.align='center'}
+```{r grouping_vars, fig.width=6, fig.height=6, fig.align='center'}
 # 1 - Define cyl as a factor variable
 ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
   geom_point() +
@@ -81,17 +85,75 @@ ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
 
 Good job! Notice that we can use multiple aesthetic layers, just like we can use multiple geom layers. Each aesthetic layer can be mapped onto a specific geom.
 
+## Modifying stat_smooth (1)
 
+```{r mod_stat_smooth_1, fig.width=6, fig.height=6, fig.align='center'}
 
-You can also write math expressions, e.g. $Y = X\beta + \epsilon$,
-footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+par(mfrow = c(2, 2))
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(iris, 10))
+# Plot 1: change the LOESS span
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  # Add span below
+  geom_smooth(se = FALSE, span = 0.7)
+
+# Plot 2: Set the second stat_smooth() to use LOESS with a span of 0.7
+ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) +
+  # Change method and add span below
+  stat_smooth(method = "loess", aes(group = 1),
+              se = FALSE, col = "black", span = 0.7)
+
+# Plot 3: Set col to "All", inside the aes layer of stat_smooth()
+ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE) +
+  stat_smooth(method = "loess",
+              # Add col inside aes()
+              aes(group = 1, col = "All"),
+              # Remove the col argument below
+              se = FALSE, span = 0.7)
+
+# Plot 4: Add scale_color_manual to change the colors
+myColors <- c(brewer.pal(3, "Dark2"), "black")
+ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE, span = 0.7) +
+  stat_smooth(method = "loess", 
+              aes(group = 1, col="All"), 
+              se = FALSE, span = 0.7) +
+  # Add correct arguments to scale_color_manual
+  scale_color_manual("Cylinders", values = myColors)
 ```
 
-## Stay Tuned
+## Modifying stat_smooth (2)
 
-Please visit the [development page](http://github.com/yixuan/prettydoc/) of the 
-`prettydoc` package for latest updates and news. Comments, bug reports and
-pull requests are always welcome.
+```{r mod_stat_smooth_2, fig.width=6, fig.height=6, fig.align='center', eval = FALSE, echo=FALSE}
+par(mfrow = c(2, 3))
+
+# Plot 1: Jittered scatter plot, add a linear model (lm) smooth
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_jitter(alpha = 0.2) +
+  stat_smooth(method = "lm", se = FALSE) # smooth
+
+# Plot 2: points, colored by year
+ggplot(Vocab, aes(x = education, y = vocabulary, col = year)) +
+  geom_jitter(alpha = 0.2) 
+
+# Plot 3: lm, colored by year
+ggplot(Vocab, aes(x = education, y = vocabulary, col = factor(year))) +
+  stat_smooth(method = "lm", se = FALSE) # smooth
+  
+# Plot 4: Set a color brewer palette
+ggplot(Vocab, aes(x = education, y = vocabulary, col = factor(year))) +
+  stat_smooth(method = "lm", se = FALSE) +  # smooth
+  scale_color_brewer()  # colors
+
+# Plot 5: Add the group aes, specify alpha and size
+ggplot(Vocab, aes(x = education, y = vocabulary, col = year, group = factor(year))) +
+  stat_smooth(method = "lm", se = FALSE, alpha = 0.6, size = 2) +
+  scale_color_gradientn(colors = brewer.pal(9, "YlOrRd"))
+```
+
+
