@@ -156,4 +156,136 @@ ggplot(Vocab, aes(x = education, y = vocabulary, col = year, group = factor(year
   scale_color_gradientn(colors = brewer.pal(9, "YlOrRd"))
 ```
 
+## Calculating Statics
+
+### Quantiles 
+
+The previous example used the Vocab dataset and applied linear models describing vocabulary by education for different years. Here we'll continue with that example by using stat_quantile() to apply a quantile regression (method rq).
+
+By default, the 1st, 2nd (i.e. median), and 3rd quartiles are modeled as a response to the predictor variable, in this case education. Specific quantiles can be specified with the quantiles argument.
+
+If you want to specify many quantile and color according to year, then things get too busy. We'll explore ways of dealing with this in the next chapter.
+
+```{r stat_quantiles, fig.width=6, fig.height=6, fig.align='center', eval = FALSE, echo=FALSE}
+
+# Use stat_quantile instead of stat_smooth
+ggplot(Vocab, aes(x = education, y = vocabulary, col = year, group = factor(year))) +
+  stat_quantile(alpha = 0.6, size = 2) +
+  scale_color_gradientn(colors = brewer.pal(9,"YlOrRd"))
+
+# Set quantile to 0.5
+ggplot(Vocab, aes(x = education, y = vocabulary, col = year, group = factor(year))) +
+  stat_quantile(quantiles = 0.5, alpha = 0.6, size = 2) +
+  scale_color_gradientn(colors = brewer.pal(9,"YlOrRd"))
+
+```
+
+Quick quantiles! Quantile regression is a great tool for getting a more detailed overview of a large dataset.
+
+### Sum
+
+```{r stat_sum, fig.width=6, fig.height=6, fig.align='center', eval=FALSE, echo=FALSE}
+
+# Plot 1: Jittering only
+p <- ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_jitter(alpha = 0.2)
+
+# Plot 2: Add stat_sum
+p +
+  stat_sum() # sum statistic
+
+# Plot 3: Set size range
+p +
+  stat_sum() + # sum statistic
+  scale_size(range = c(1, 10)) # set size scale
+```
+
+Good job! Remember, typically we'd draw our models on top of the dots, but in this case we didn't so that we could just keep recycling the p object.
+
+### Mean & Standard Deviation
+
+```{r calculating_stats, message=FALSE}
+set.seed(123)
+
+xx <- rnorm(100)
+
+mean(xx)
+
+mean(xx) + (sd(xx) * c(-1, 1))
+
+library(Hmisc)
+smean.sdl(xx, mult = 1)
+
+# ggplot2
+mean_sdl(xx, mult = 1)
+
+# we can use this in ggplot2 by calling the fun.data function
+p <- ggplot(iris, aes(x = Species, y = Sepal.Length)) 
+
+p + stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1))
+
+
+```
+
+By default the `stat_summary()` function uses the `geom_pointrange()`, which requires `y`, `ymin`, and `ymax` - the exact variables returned by `mean.sdl`. So everything works very well together. If we wanted a more typical errorbar style plot, we can independently plot the mean and the use the `point` argument for the `geom` and again call `mean_sdl`, but this time using the errorbar geom. 
+
+```{r stat_summary, fig.width=6, fig.height=6, fig.align='center'}
+ggplot(iris, aes(x = Species, y = Sepal.Length)) + 
+  stat_summary(fun.y = mean, geom = "point") + 
+  stat_summary(fun.data = mean_sdl, 
+                 fun.args = list(mult = 1), 
+                 geom = "errorbar", width = 0.1)
+
+ggplot(iris, aes(x = Species, y = Sepal.Length)) + 
+  stat_summary(fun.y = mean, geom = "bar", fill = "skyblue") + 
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1),
+               geom = "errorbar", width = 0.1)
+
+```
+
+### Confidence Interval
+
+```{r ninetyfivepercent_confidence_interval}
+ERR <- qt(0.975, length(xx) - 1) * (sd(xx) / sqrt(length(xx)))
+
+mean(xx) + (ERR* c(-1, 1))
+            
+smean.cl.normal(xx)
+
+mean_cl_normal(xx)
+
+ggplot(iris, aes(x = Species, y = Sepal.Length)) + 
+  stat_summary(fun.data = mean_cl_normal, width = 0.1)
+```
+
+You can use any function in ggplot as long as the output has the expected format. Other useful `stat_` layer functions are `stat_summary`, `stat_function`, and `stat_qq`. 
+
+| **stat**| **description** |
+|:--------|:-------------|
+|stat_summary()|summarize y values at distinct x values |
+|stat_function()|compute y values from a function of x values|
+|stat_qq()|perform calculations for a quantile-quantile plot|
+
+### Normal distribution
+
+```{r normal_distribution, fig.height=6, fig.width=6, fig.align='center'}
+library(MASS)
+mam.new <- data.frame(body = log10(mammals$body))
+ggplot(mam.new, aes(x = body)) + 
+  geom_histogram(aes( y = ..density..)) + 
+  geom_rug() + 
+  stat_function(fun = dnorm, colour = "red", 
+                arg = list(mean = mean(mam.new$body),
+                           sd = sd(mam.new$body)))
+
+# QQplot
+
+mam.new$slope <- diff(quantile(mam.new$body, c(0.25, 0.75))) /
+diff(qnorm(c(0.25, 0.75)))
+mam.new$int <- quantile(mam.new$body, 0.25) -
+mam.new$slope * qnorm(0.25)
+ggplot(mam.new, aes(sample = body)) + 
+  stat_qq() + 
+  geom_abline(aes(slope = slope, intercept = int), col = "red")
+```
 
