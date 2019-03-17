@@ -3,6 +3,9 @@ title: "GGplot2 Part 2"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
+  pdf_document:
+    df_print: kable
+    toc: true
   prettydoc::html_pretty:
     theme: cayman
     highlight: github
@@ -156,7 +159,7 @@ ggplot(Vocab, aes(x = education, y = vocabulary, col = year, group = factor(year
   scale_color_gradientn(colors = brewer.pal(9, "YlOrRd"))
 ```
 
-## Calculating Statics
+## Calculating Statistics
 
 ### Quantiles 
 
