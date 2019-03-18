@@ -1,5 +1,6 @@
 ---
-title: "GGplot2 Part 2"
+title: "Data Visualization with ggplot2 (Part 2)"
+subtitle: "ggplot2 as a tool for graphical data analysis"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:

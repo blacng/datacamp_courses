@@ -1,0 +1,120 @@
+---
+title: "Data Visualization with ggplot2 (Part 2)"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  #pdf_document:
+    #df_print: kable
+    #toc: yes
+  prettydoc::html_pretty:
+    highlight: github
+    theme: cayman
+    toc: yes
+    toc_depth: 4
+subtitle: Coordinates and Facets
+bibliography: dataviz.bib
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Load Libraries
+```{r load libraries, include=TRUE, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+```
+
+## Zooming In
+
+```{r scale_x_continuous}
+# Basic ggplot() command, coded for you
+p1 <- ggplot(mtcars, aes(x = wt, y = hp, col = am)) + 
+  geom_point() + 
+  geom_smooth() +
+  ggtitle("Plot with smoothing")
+# Add scale_x_continuous()
+p2 <- p1 + scale_x_continuous(limits = c(3, 6), expand = c(0, 0)) +
+  ggtitle("Plot with scale_x_continuous()")
+# Add coord_cartesian(): the proper way to zoom in
+p3 <- p2 + coord_cartesian(xlim = c(3, 6)) +
+  ggtitle("Plot with coord_cartesian()")
+
+```
+
+```{r multi_plot}
+multiplot(p1, p2, p3, cols = 2)
+```
+
+Good job! Always pay attention to the ggplot2 warning messages in case data has been removed from your plot!
+
+## Aspect Ratio
+
+We can set the aspect ratio of a plot with `coord_fixed()` or `coord_equal()`. Both use ratio = 1 as a default. A 1:1 aspect ratio is most appropriate when two continuous variables are on the same scale, as with the iris dataset.
+
+All variables are measured in centimeters, so it only makes sense that one unit on the plot should be the same physical distance on each axis. This gives a more truthful depiction of the relationship between the two variables since the aspect ratio can change the angle of our smoothing line. This would give an erroneous impression of the data.
+
+Of course the underlying linear models don't change, but our perception can be influenced by the angle drawn.
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r aspect_ratio}
+# Complete basic scatter plot function
+base.plot <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, col = Species)) +
+               geom_jitter() +
+               geom_smooth(method = "lm", se = FALSE)
+
+# Plot base.plot: default aspect ratio
+base.plot
+
+# Fix aspect ratio (1:1) of base.plot
+base.plot + coord_equal()
+```
+
+Good job! As a rule of thumb you'll want to use a 1:1 aspect ratio when your axes show the same scales, but there are always exceptions.
+
+## Pie Charts
+
+The `coord_polar()` function converts a planar x-y Cartesian plot to polar coordinates. This can be useful if you are producing pie charts.
+
+We can imagine two forms for pie charts - the typical filled circle, or a colored ring.
+
+As an example, consider the stacked bar chart shown in the viewer. Imagine that we just take the y axis on the left and bend it until it loops back on itself, while expanding the right side as we go along. We'd end up with a pie chart - it's simply a bar chart transformed onto a polar coordinate system.
+
+Typical pie charts omit all of the non-data ink, which we'll learn about in the next chapter. Pie charts are not really better than stacked bar charts, but we'll come back to this point in the fourth chapter on best practices.
+
+The mtcars data frame is available, with cyl converted to a factor for you.
+
+```{r pie_charts}
+# Create a stacked bar plot: wide.bar
+wide.bar <- ggplot(mtcars, aes(x = 1, fill = factor(cyl))) +
+              geom_bar()
+
+# Convert wide.bar to pie chart
+w2 <- wide.bar +
+  coord_polar(theta = "y")
+
+# Create stacked bar plot: thin.bar
+thin.bar <- ggplot(mtcars, aes(x = 1, fill = factor(cyl))) +
+              geom_bar(width =  0.1) +
+              scale_x_continuous(limits = c(0.5,1.5))
+
+# Convert thin.bar to "ring" type pie chart
+t2 <- thin.bar + 
+  coord_polar(theta = "y")
+
+multiplot(wide.bar, w2, thin.bar, t2, cols = 2)
+```
+
+Good job! This function is particularly useful if you are dealing with a cycle, like yearly data, that you would like to see represented as such.
+
+## Facets
+
+Facets are a pretty straightforward and very useful tool in data visualization. They are based on the concept of small multiples popularized by Edward Tufte in his 1983 book, Visualization of Quantitative Information [see @tufte_visual_2001, pp. 42, 48, 168-170]. 
+
+## Works Cited
