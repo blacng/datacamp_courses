@@ -49,7 +49,7 @@ p3 <- p2 + coord_cartesian(xlim = c(3, 6)) +
 ```
 
 ```{r multi_plot}
-multiplot(p1, p2, p3, cols = 2)
+# multiplot(p1, p2, p3, cols = 2)
 ```
 
 Good job! Always pay attention to the ggplot2 warning messages in case data has been removed from your plot!
@@ -108,7 +108,7 @@ thin.bar <- ggplot(mtcars, aes(x = 1, fill = factor(cyl))) +
 t2 <- thin.bar + 
   coord_polar(theta = "y")
 
-multiplot(wide.bar, w2, thin.bar, t2, cols = 2)
+# multiplot(wide.bar, w2, thin.bar, t2, cols = 2)
 ```
 
 Good job! This function is particularly useful if you are dealing with a cycle, like yearly data, that you would like to see represented as such.
