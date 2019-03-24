@@ -1,0 +1,345 @@
+---
+title: "Data Visualization with ggplot2 (Part 2)"
+subtitle: "Best Practices"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: yes
+    toc_depth: 4
+bibliography: dataviz.bib
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Load Libraries
+
+```{r load libraries, include=TRUE, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+library(grid)
+library(ggthemes)
+library(forcats)
+library(GGally)
+```
+
+
+## Best Practices for Graphical Data Representation
+
+In this chapter we will consider common pitfalls and the best way to represent data. This is important both for publications and reports since we want to communicate effectively but also for ourselves since we need to be able to accurately see our data to be able to assess it. 
+
+## Bar Plots
+
+There are two types of bar plots. 
+
+* The first shows the absolute values in each category. 
+* The second shows the distribution, which turns out to be incredibly common and equally terrible. Why is that? Let's return to the Mammalian Sleep dataset.
+
+### Dynamite Bar Plots (Avoid Like a Plague!)
+
+```{r mammalian_sleep}
+# glimpse(msleep)
+
+data("msleep")
+
+msleep2 <- msleep %>%
+  mutate(vore = as_factor(vore,
+                          levels = c("carni", "herbi", "omni", "insecti")),
+         vore = recode_factor(vore,
+         `carni` = "Carnivore",
+         `herbi` = "Herbivore",
+         `omni` = "Ommivore",
+         `insecti` = "Insectivore",
+         .default = NA_character_))
+
+str(msleep2)
+
+levels(msleep2$vore) <- c("Carnivore", "Herbivore", "Omnivore", "Insectivore")
+
+sleep <- msleep2 %>% select(vore, total = sleep_total, rem = sleep_rem)
+
+sleep <- sleep[complete.cases(sleep), ]
+
+d <- ggplot(sleep, aes(vore, total)) + 
+  scale_y_continuous("Total sleep time (h)",
+                     limits = c(0, 24),
+                     breaks = seq(0, 24, 3),
+                     expand = c(0, 0)) +
+  scale_x_discrete("Eating habits") +
+  theme_classic()
+d + 
+  stat_summary(fun.y = mean, geom = "bar",
+               fill = "grey50") + 
+  stat_summary(fun.data = mean_sdl, mult = 1,
+               geom = "errorbar", width = 0.2)
+
+
+  
+```
+
+### Individual Data Points with geom_point()
+
+```{r geom_point, fig.align='center'}
+d + 
+  geom_point(alpha = 0.6, position = position_jitter(width = 0.2))
+```
+
+### Errorbar
+
+```{r errorbar, fig.align='center'}
+d + 
+  geom_point(alpha = 0.6, position = position_jitter(width = 0.2)) + 
+  stat_summary(fun.y = mean, geom = "point", fill = "red") + 
+  stat_summary(fun.data = mean_sdl, mult = 1, geom = "errorbar", 
+               width = 0.2, col = "red")
+```
+
+### Pointrange
+
+```{r pointrange, fig.align="center"}
+d + 
+  geom_point(alpha = 0.6, position = position_jitter(width = 0.2)) + 
+  stat_summary(fun.data = mean_sdl, mult = 1, width = 0.2, col = "red")
+```
+
+## Bar Plots(1)
+
+In the video we saw why "dynamite plots" (bar plots with error bars) are not well suited for their intended purpose of depicting distributions. If you really want error bars on bar plots, you can still get that. However, you'll need to set the positions manually. A point geom will typically serve you much better.
+
+We saw an example of a dynamite plot earlier in this course. Let's return to that code and make sure you know how to handle it. We'll use the `mtcars` dataset for examples. The first part of this exercise will just be a refresher, then we'll get into some details.
+
+```{r bar_plot_1, fig.align='center'}
+# Base layers
+m <- ggplot(mtcars, aes(x = cyl, y = wt))
+
+# Draw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom =  "bar", fill = "skyblue") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1)
+```
+
+Good job! Remember, we can specify any function in fun.data or fun.y and we can also specify any geom, as long as it's appropriate to the data type.
+
+## Bar Plot (2)
+
+In the previous exercise we used the mtcars dataset to draw a dynamite plot about the weight of the cars per cylinder type.
+
+In this exercise we will add a distinction between transmission type, am, for the dynamite plots.
+
+```{r bar_plot_2, fig.align='center'}
+# Base layers
+m <- ggplot(mtcars, aes(x = cyl,y = wt, col = am, fill = am))
+
+# Plot 1: Draw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom = "bar") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1)
+
+# Plot 2: Set position dodge in each stat function
+m +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), 
+               geom = "errorbar", width = 0.1, position = "dodge")
+
+# Set your dodge posn manually
+posn.d <- position_dodge(0.9)
+
+# Plot 3: Redraw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom = "bar", position = posn.d) +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1, position = posn.d)
+```
+
+## Bar Plot (3)
+
+If it is appropriate to use bar plots (see the video for a discussion!), then it would also be nice to give an impression of the number of values in each group.
+
+`stat_summary()` doesn't keep track of the count. `stat_sum()` does (that's the whole point), but it's difficult to access. In this case, the most straightforward thing to do is calculate exactly what we want to plot beforehand. For this exercise we've created a summary data frame called `mtcars.cyl` which contains the average (wt.avg), standard deviations (sd) and count (n) of car weights, according to cylinders, cyl. It also contains the proportion (prop) of each cylinder represented in the entire dataset. Use the console to familiarize yourself with the mtcars.cyl data frame.
+
+```{r bar_plot_3, fig.align='center'}
+# Create mtcars.cyl 
+mtcars.cyl <- mtcars %>%
+  group_by(cyl)%>%
+  summarise(wt.avg = mean(wt),
+            sd = sd(wt),
+            n = n()) %>%
+  mutate(prop = n / sum(n))
+
+glimpse(mtcars.cyl)
+
+# Base layers
+m <- ggplot(mtcars.cyl, aes(x = cyl, y = wt.avg))
+
+# Plot 1: Draw bar plot with geom_bar
+m + geom_bar(stat = "identity", fill = "skyblue")
+
+# Plot 2: Draw bar plot with geom_col
+m + geom_col(fill = "skyblue")
+
+# Plot 3: geom_col with variable widths.
+m + geom_col(fill = "skyblue", width = mtcars.cyl$prop)
+ 
+# Plot 4: Add error bars
+m + geom_col(fill = "skyblue", width = mtcars.cyl$prop) +
+  geom_errorbar(aes(ymin = wt.avg - sd, ymax = wt.avg + sd), width = 0.1)
+            
+```
+
+## Pie Charts 
+
+In the coordinates chapter we discussed how a pie chart is simply a stacked bar chart plotted onto a polar coordinate. I (Rick) mentioned that pie charts are not going to be your first choice for plotting. So, let's return to this topic and find out why. When we make a pie chart, the question we are asking is what proportion of a categorical variable is represented by each sub group? That is, parts-of-a-whole type question. The implicit question is if any subgroup are over or under represented, the circle is a perfect symbol of a whole. We inituitively understand it as representing all possible outcomes. It is filled and there is no room for any other possibilities. However, its benefit stop there. 
+```{r attempt_to_reproduce}
+data("HairEyeColor")
+
+glimpse(HairEyeColor)
+```
+
+### Pie Charts (1)
+
+In this example we're going to consider a typical use of pie charts - a categorical variable as the proportion of another categorical variable. For example, the proportion of each transmission type `am`, in each cylinder, `cyl` class.
+
+The first plotting function in the editor should be familiar to you by now. It's a straightforward bar chart with `position = "fill"`, as shown in the viewer. This is already a good solution to the problem at hand! Let's take it one step further and convert this plot in a pie chart.
+
+```{r pie_charts_1, fig.align='center'}
+# Bar chart
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "fill")
+
+# Convert bar chart to pie chart
+ggplot(mtcars, aes(x = factor(1), fill = am)) +
+  geom_bar(position = "fill", width = 1) +
+  facet_grid(. ~ cyl) + # Facets
+  coord_polar(theta = "y") + # Coordinates
+  theme_void() # theme
+```
+
+### Pie Charts (2)
+
+In the previous example, we looked at one categorical variable (`am`) as a proportion of another (`cyl`). Here, we're interested in two or more categorical variables, independent of each other. The many pie charts in the viewer is an unsatisfactory visualization. We're interested in the relationship between all these variables (e.g. where are 8 cylinder cars represented on the Transmission, Gear and Carburetor variables?) Perhaps we also want continuous variables, such as weight. How can we combine all this information?
+
+The trick is to use a parallel coordinates plot, like [this one](https://s3.amazonaws.com/assets.datacamp.com/course/ggplot2/course_2/parallelcoord.png). Each variable is plotted on its own parallel axis. Individual observations are connected with lines, colored according to a variable of interest. This is a surprisingly useful visualization since we can combine many variables, even if they are on entirely different scales.
+
+A word of caution though: typically it is very taboo to draw lines in this way. It's the reason why we don't draw lines across levels of a nominal variable - the order, and thus the slope of the line, is meaningless. Parallel plots are a (very useful) exception to the rule!
+
+```{r pie_charts_2, fig.align='center'}
+# All columns except am
+group_by_am <- 9
+my_names_am <- (1:11)[-group_by_am]
+
+# Basic parallel plot - each variable plotted as a z-score transformation
+ggparcoord(mtcars, my_names_am, groupColumn = group_by_am, alpha = 0.8) +
+  ggtitle("Parallel Plot of Variables in the mtcars Dataset")
+```
+
+## Plot Matrix (1)
+
+The parallel coordinate plot from the last exercise is an excellent example of an exploratory plot. It presents a massive amount of information and allows the specialist to explore many relationships all at once. Another great example is a plot matrix (a SPLOM, from scatter plot matrix).
+
+`GGally::ggpairs(mtcars2)` will produce the plot of a selection of the mtcars dataset, mtcars2, in the viewer. Depending on the nature of the dataset a specific plot type will be produced and if both variables are continuous the correlation (`rho`) will also be calculated.
+
+The relationship between the variables drat and mpg is shown in two areas. What is the correlation between these two variables? (**0.68**)
+
+```{r plot_matrix_1, fig.align='center', message=FALSE}
+mtcars2 <- mtcars %>% 
+  select(mpg, disp, drat, wt, qsec)
+
+ggpairs(mtcars2)
+```
+
+## Plot Matrix (2)
+
+On the right, another plot matrix is shown based off of a subset of the mtcars data frame. What is the relationship between `disp` and `cyl`? As `cyl` increases, so to does the `disp`.
+
+```{r plot_matrix_2, fig.align='center', message=FALSE}
+mtcars2 <- mtcars %>% 
+  select(mpg, cyl, disp, hp, drat)
+
+ggpairs(mtcars2)
+```
+
+For more information about the `mtcars` dataset, check out this [report](http://rstudio-pubs-static.s3.amazonaws.com/61800_faea93548c6b49cc91cd0c5ef5059894.html), which explains the meaning of each variable in the `mtcars` dataset. 
+
+## Heat Maps
+
+Heat maps are surprisingly popular choice for data visualization, but they are probably one of the least effective types of visualization.  
+
+In the video you saw reasons for not using heat maps. Nonetheless, you may encounter a case in which you really do want to use one. Luckily, they're fairly straightforward to produce in ggplot2.
+
+We begin by specifying two categorical variables for the `x` and `y` aesthetics. At the intersection of each category we'll draw a box, except here we call it a tile, using the **`geom_tile()`** layer. Then we will fill each tile with a continuous variable.
+
+We'll produce the heat map we saw in the video with the built-in `barley` dataset. The barley dataset is in the `lattice` package and has already been loaded for you. Begin by exploring the structure of the data in the console using **`str()`**.
+
+```{r barley}
+# Loading lattice for barley dataset
+library(lattice)
+
+data("barley")
+
+head(barley)
+
+# Trying out spread from tidyr
+barley %>% spread(year, yield)
+```
+
+```{r heat_maps_1, fig.align='center', fig.height=8, fig.width=6}
+# Create color palette
+myColors <- brewer.pal(9, "Reds")
+
+# Build the heat map from scratch
+ggplot(barley, aes(x = year, y = variety, fill = yield)) +
+  geom_tile() + # Geom layer
+  facet_wrap( ~ site, ncol = 1) + # Facet layer
+  scale_fill_gradientn(colors = myColors) # Adjust colors
+```
+
+Good job! You can continue by using breaks, limits and labels to modify the fill scale and update the theme, but this is a pretty good start.
+
+### Heat Maps Alternatives (1)
+
+There are several alternatives to heat maps. The best choice really depends on the data and the story you want to tell with this data. If there is a time component, the most obvious choice is a line plot like what we see in the viewer. Can you come up with the correct commands to create a similar looking plot?
+
+The barley dataset is already available in the workspace. Feel free to check out its structure before you start!
+
+```{r heat_maps_alternatives, fig.align='center', fig.width=8}
+# Line plot; set the aes, geom and facet
+
+ggplot(barley, aes(x = year, y = yield, col = variety, group = variety)) +
+  geom_line() +
+  ylab("Yield (bushels/acre)") +
+  facet_wrap( ~ site, nrow = 1) 
+  # scale_fill_brewer(colors = myColors)
+```
+
+Good job! Whenever you see a heat map, ask yourself it it's really necessary. Many people use them because they look fancy and complicated - signs of poor communication skills.
+
+### Heat Maps Alternatives (2)
+
+In the videos we saw two methods for depicting overlapping measurements of spread. You can use dodged error bars or you can use overlapping transparent ribbons (shown in the viewer). In this exercise we'll try to recreate the second option, the transparent ribbons.
+
+```{r heat_maps_alternatives_2, fig.align="center"}
+# Create overlapping ribbon plot from scratch
+
+p <- ggplot(barley, aes(x = year, y = yield, col = site, group = site, fill = site)) +
+  stat_summary(fun.y = mean, 
+               geom = "line") + 
+  stat_summary(fun.data = mean_sdl, 
+               fun.args = list(mult = 1), 
+               geom = "ribbon", 
+               col = NA, 
+               alpha = 0.1)
+
+p
+
+```
+
+Good job! This concludes the chapter on best practices!
