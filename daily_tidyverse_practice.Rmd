@@ -1,0 +1,237 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+## R Markdown
+
+```{r cars}
+planes %>% 
+  count(tailnum) %>% 
+  filter(n > 1)
+```
+
+```{r}
+flights %>% 
+  count(year, month, day, flight) %>% 
+  filter(n > 1)
+
+(flights.copy <-  flights %>% 
+  mutate(id = row_number()) %>% 
+  select(id, everything()))
+
+# flights.copy <- flights.copy %>% select(-id)
+
+glimpse(flights)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+# library(tibble)
+
+# Question 2
+
+df <- tibble::tibble(year = c(2017, 2017, 2017, 2017),
+                     tag = c("ggplot2", "tidyr", "dplyr", "tibble"),
+                     count = c(5090, 441, 3363, 91.0))
+
+# top_n is a convenient wrapper for filter
+# it filter rows by returning the top values in a column
+
+df %>% top_n(3, count)
+
+# Creating a table in tibble using the tribble function
+
+example_table <- tribble(
+  ~x, ~y, ~z,
+  #--|--|----
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+
+# Question 3
+
+df1 <- tribble(
+  ~x, ~y, ~z1,
+  #--|--|----
+  "A", "P", 1,
+  "B", "P", 2,
+  "C", "P", 3
+)
+
+df2 <- tribble(
+  ~x, ~y, ~z1,
+  #--|--|----
+  "A", "P", 4,
+  "B", "Q", 5,
+  "C", "R", 6
+)
+
+inner_join(df1, df2, by = c("x", "y"))
+
+# Question 4
+
+df <- tribble(
+  ~user, ~start_date, ~end_date,
+  #--|--|----
+  "x", "2011-06-01", "2011-07-02",
+  "y", "2011-09-04", "2011-09-06"
+)
+
+df %>%
+  # as.Date(vars(-user), as.Date) # my answer 
+  mutate_at(vars(-user), as.Date) # correct answer
+
+
+# Question 5
+
+tibble(
+  a = c(1, 2, 3),
+  b = c("x", "y", "z")
+)
+
+# Question 6
+
+sales <- tibble::tibble(day = c(1,1,2,2,2),
+                sales = c(700, 500, 100, 900, 700))
+
+sales %>%
+  group_by(day) %>%
+  mutate(crnt_ttl = cumsum(sales))
+
+# Question 7
+
+df <- tribble(
+ ~user, ~a, ~b, ~c,
+  #--|--|--|----
+  "x", 5, 2, 3,
+  "y", 5, 2, 3,
+  "z", 5, 2,3
+)
+
+df %>%
+  # summarise(is.numeric, sum) # Error: Column `is.numeric` is of unsupported type function
+  summarize_if(is.numeric, sum)
+
+# Question 8
+df <- tribble(
+  ~A, ~B, ~C, ~D1, ~D2, ~D3,
+ #---|---|---|---|--|---
+  "a","b","c", 1, 2, 3
+)
+df %>% 
+# gather(df, measure, value, -(D1, D2, D3))
+gather(measure, value, D1:D3)
+
+
+# Question 8
+
+# small_mpg <- mtcars %>% select(cyl, hwy = mpg) %>% filter (between(small_mpg$cyl, 4, 6 ))
+
+small_mpg <- mtcars %>% select(cyl, hwy = mpg) 
+
+# cyl is an integer
+ggplot(small_mpg, aes(cyl, hwy)) +
+  # geom_point(position = position_jitter(dodge = .25)) # wrong
+  geom_point(position = position_jitter(width = .25))
+```
+
+```{r}
+# Question 9
+
+# > x
+#    p q
+# 1 20 5
+# 2 21 6
+# 
+# > y
+#    p    r
+# 1 20 Jane
+# 2 22 John
+# 
+# > z
+#    p     s
+# 1 20  TRUE
+# 2 23 FALSE
+
+# x %>%
+#   left_join(y, by = "p") %>% 
+#   right_join(z, by = "p")
+
+#  p  q    r     s
+# 1 20  5 Jane  TRUE
+# 2 23 NA <NA> FALSE
+
+# Question 10
+
+library(purrr)
+
+records <- list(
+  list(author = 'Hassan', language = 'python'),
+  list(author = 'Katie', language = 'R')
+  )
+
+map(records, "author")
+
+y = 1:10
+df <- data.frame(x = 1:10)
+
+df %>%
+  # mutate(xy = paste(x, .data$y))
+  mutate(xy = paste(x, .$y)) # - correct
+  # mutate(xy = paste(x, y)) - not correct but does not return an error
+  # mutate(xy = paste(x, df$y)) - same as two above
+
+
+# Question 11
+
+library(stringr)
+
+x <- c("Friday", "Sunday", "March", "February")
+# str_detect(x, days_of_week) - wrong
+str_detect(x, "day")
+
+# Question 12
+
+mtcars_avg <- function (...) {
+  grp_var <- quos(...)
+  
+  mtcars %>%
+    group_by(!!!grp_var) %>%
+    summarize(mean(wt))
+}
+
+mtcars_avg(gear, cyl)
+
+# Question 13
+
+df <- tribble(
+  ~x, ~y, ~z1,
+  #--|--|----
+  "A", "P", 7,
+  "A", "P", 8,
+  "B", "P", 9,
+  "B", "P", 10,
+  "A", "Q", 11,
+  "B", "Q", 12
+)
+
+# Find first two rows of each group
+df %>% 
+    group_by(x) %>%
+    # top_n(1:2) %>%
+    slice(1:2) %>%
+    ungroup()
+```
+
