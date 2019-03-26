@@ -4,11 +4,15 @@ subtitle: "Case Study: California Health Interview Survey Dataset"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+  pdf_document:
+    df_print: tibble
     toc: yes
     toc_depth: 4
+  # prettydoc::html_pretty:
+  #   theme: cayman
+  #   highlight: github
+  #   toc: yes
+  #   toc_depth: 4
 bibliography: dataviz.bib
 ---
 
@@ -59,7 +63,7 @@ Table 1: A table showing the variables and their descriptions of the CHIS datase
 
 ## Import CHIS Dataset from Stata Data File
 
-```{r read_stata_data_file}
+```{r read_stata_data_file, warning=FALSE}
 
 # Load the foreign library to access the read.dta function 
 # read.dta allows us to import Stata data files into R
@@ -79,7 +83,8 @@ head(chis.data.reduced)
 
 # filter for the 4 largest ethnicities
 
-chis.data.reduced <- chis.data.reduced %>% filter(racehpr2 %in% c("LATINO", "ASIAN", "AFRICAN AMERICAN", "WHITE"))
+chis.data.reduced <- chis.data.reduced %>% 
+  filter(racehpr2 %in% c("LATINO", "ASIAN", "AFRICAN AMERICAN", "WHITE"))
 
 # change chis.data.reduced name to adult 
 
@@ -151,7 +156,7 @@ In this chapter we're going to continuously build on our plotting functions and 
 
 ```{r exploring_data, fig.align='center'}
 # Explore the dataset with summary and str
-str(adult)
+# str(adult)
 summary(adult)
 
 # Age histogram
@@ -181,10 +186,12 @@ adult <- adult[adult$SRAGE_P <= 84, ]
 adult <- adult[adult$BMI_P >= 16 & adult$BMI_P < 52, ]
 
 # Relabel the race variable
-adult$RACEHPR2 <- factor(adult$RACEHPR2, labels = c("Latino", "Asian", "African American", "White"))
+adult$RACEHPR2 <- factor(adult$RACEHPR2, 
+                         labels = c("Latino", "Asian", "African American", "White"))
 
 # Relabel the BMI categories variable
-adult$RBMI <- factor(adult$RBMI, labels = c("Under-weight", "Normal-weight", "Over-weight", "Obese"))
+adult$RBMI <- factor(adult$RBMI, 
+                     labels = c("Under-weight", "Normal-weight", "Over-weight", "Obese"))
 ```
 
 ## Multiple Histogram
@@ -200,7 +207,8 @@ Two layers have been pre-defined for you: BMI_fill is a scale layer which we can
 BMI_fill <- scale_fill_brewer("BMI Category", palette = "Reds")
 
 # Theme to fix category display in faceted plot
-fix_strips <- theme(strip.text.y = element_text(angle = 0, hjust = 0, vjust = 0.1, size = 14),
+fix_strips <- theme(strip.text.y = 
+                      element_text(angle = 0, hjust = 0, vjust = 0.1, size = 14),
                     strip.background = element_blank(),
                     legend.position = "none")
 
