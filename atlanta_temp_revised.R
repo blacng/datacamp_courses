@@ -8,7 +8,7 @@ library(scales)
 library(here)
 
 #Read data
-tempdata <- here(read.table("https://d37djvu3ytnwxt.cloudfront.net/assets/courseware/v1/592f3be3e90d2bdfe6a69f62374a1250/asset-v1:GTx+ISYE6501x+3T2017+type@asset+block/temps.txt", header = T)) 
+tempdata <- read.table("https://d37djvu3ytnwxt.cloudfront.net/assets/courseware/v1/592f3be3e90d2bdfe6a69f62374a1250/asset-v1:GTx+ISYE6501x+3T2017+type@asset+block/temps.txt", header = T) 
 
 #Remove 'X' in the variable names
 colnames(tempdata) <- str_replace(colnames(tempdata), "X", "")
