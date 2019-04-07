@@ -1,0 +1,44 @@
+---
+title: "Data Visualization with ggplot2 (Part 3)"
+subtitle: "Statistical Plots"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    df_print: kable
+    toc: yes
+    toc_depth: 4
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: yes
+    toc_depth: 4
+  bibliography: dataviz.bib
+---
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Load Libraries
+
+```{r load libraries, include=TRUE, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+library(grid)
+library(ggthemes)
+library(forcats)
+library(GGally)
+library(here)
+```
+
+## Introduction
+
+Welcome to data visualization with ggplot2 (part 3). This course assumes you are familiar with the concepts and functions of data visualization introduced in the first two courses, part 1 & 2. Those courses should have give you a pretty good idea about what good data visualization is and how to achieve it. Since, this is an advanced course we are to dig a bit deeper into some more advanced ggplot2 functions. Before we get to that we will cap off the material we began in the first two courses by rounding out your knowledge with some niche topics. We will begin by exploring two kinds of specialized plots. In **Chapter 1**, we will consider the first type of specialized plots, those suited for a data savvy audience. These are statistical plots you wouldn't normally see in the popular press like boxplots and density plots. Plus, we will consider how to combine several variables. In **Chapter 2**, we will move on to the second type of specialized plots, those that are suited for a specific data type. We will begin by putting some fundamental concepts of working with large datasets into perspective. And then we will see some specific cases like **kenury plots** (?)
