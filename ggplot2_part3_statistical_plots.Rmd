@@ -4,10 +4,10 @@ subtitle: "Statistical Plots (Chapter 1)"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    df_print: kable
-    toc: yes
-    toc_depth: 4
+  # pdf_document:
+  #   df_print: kable
+  #   toc: yes
+  #   toc_depth: 4
   prettydoc::html_pretty:
     theme: cayman
     highlight: github
@@ -27,6 +27,7 @@ knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
 library(readr)
 library(dplyr)
 library(ggplot2)
+# library(ggplot2movies)
 library(tidyr)
 library(skimr)
 library(knitr)
@@ -115,3 +116,118 @@ ggplot(diamonds, aes(x = carat, y = price, col = color)) +
 Good job! Parametric and non-parametric linear models are common in scatter plots.
 
 ## Box Plots
+
+In this section we'll take a look at our first class of specialized plots---or statistical plots---actually all the plots we've made so far can be called statistical plots since data visualization _*operates at the intersection of design and statistics*_. However, in contrast to the plots we've seen previously, these are more well-suited to an academic audience. We are going to look at two very common plot types for visualizing the distribution of continuous data:
+
+* Box plots
+* Density plots
+
+We'll return to boxplots in the case study when we develop a new statistics layer to produce a two-dimensional box plot. 
+
+Boxplots were originally described by John Tukey in his 1977 classic text, *_Exploratory Data Analysis_* [see @tukey_exploratory_2020, pp. 25, 40]. So actually, they are not that old. Tukey described them as a way to visualize the so-called, *_Five Number Summary_*: Lower Extreme (or minimum), Lower Hinge ($1^{st}$ Quartile or Q1 or 25 Percentile), Median (or Q2), Upper Hinger ($3^{rd}$ Quartile or Q3 or 75 Percentile), Upper Extreme (or maximum). The **Inter-Quartile Range** (IQR) is Q3 - Q1, which is the same thing as the Median of the distribution. The Median is a measurement of location and spread. We can think of the boxplot as a **robust**^[robust statistics are measures on which extreme observations have little effect.] equivalent of the mean and the standard deviation. 
+
+|         | **robust**   | **non-robust**|
+|:--------|:-------------|:-------------|
+|center   |    median    | mean         |
+|spread   |IQR           |SR, range     |
+
+Table 1: median & IQR only depend on the midpoint of the distribution and the values of the end point are irrelevant to its calculation, whereas mean & SD are affected. Hence, mean & SD are usually good for symmetric or normal distributions. 
+
+The Five Number Summary gives us a better impression of the distribution of the dataset. We get an impression of the skew because each of the four segments---the two outer whiskers and the two parts of the inner bar---reflect 25% of the data. There is a further subtle point to boxplots: The ability to show extreme values as distinct features. An extreme value is defined as **falling outside the range of 1.5 times the IQR, either below Q1 or above Q3**. This is called the **fence**^[Note: The fence can be adjusted and the default depends on the software.]. To understand how the fence works, we'll use the same dataset we've working so far, but we'll pull the maximum value further and further away from its starting position causing the dataset to slowly become positively skewed. Any value that surpasses the fence will be drawn as a dot, the boxplot is also updated; the whisker is drawn up to the highest elevation **_within_** the fence. It doesn't matter how many values are outside the fence or how faraway they are, they all get represented as dots. The whiskers never extend beyond the fence. If you are not clear about how the plot is drawn, you can actually get the wrong view of the data distribution. Many people who commonly use or encounter boxplots are not aware that the midline is the median and not the mean. Nor are they aware that the dots represents extreme values that are part of the data, and therefore should not be disregarded. So use these plots with caution. 
+
+### Transformations
+
+In this exercise you'll return to the first plotting exercise and see how box plots compare to dot plots for representing high-density data.
+
+Box plots are very useful, but they don't solve all your problems all the time, for example, when your data are heavily skewed, you will still need to transform it. You'll see that here, using the movies_small dataset, a subset of 10,000 observations of `ggplot2movies::movies`
+
+```{r transformations, fig.height=6, fig.width=6, fig.align='center'}
+# movies_small is available
+
+# Add a boxplot geom
+d <- ggplot(movies_small, aes(x = rating, y = votes)) +
+  geom_point() +
+  geom_boxplot() +
+  stat_summary(fun.data = "mean_cl_normal",
+               geom = "crossbar",
+               width = 0.2,
+               col = "red")
+
+# Untransformed plot
+d
+
+# Transform the scale
+d + scale_y_log10() # the transformation happens before calculating the statistics
+
+# Transform the coordinates
+d + coord_trans(y = "log10") # the transformation happens after calculating the statistics
+```
+
+Good job! Notice how different the normal distribution estimation (red boxes) and boxplots (less prone to outliers) are.
+
+### Cut it up!
+
+If you only have continuous variables, you can convert them into ordinal variables using any of the following functions:
+
+* `cut_interval(x, n)` makes n groups from vector x with equal range.
+* `cut_number(x, n)` makes n groups from vector x with (approximately) equal numbers of observations.
+* `cut_width(x, width)` makes groups of width width from vector x.
+
+This is useful when you want to summarize a complex scatter plot like the one shown in the viewer. By applying these functions to the carat variable and mapping that onto the group aesthetic, you can convert the scatter plot in the viewer into a series of box plots on the fly.
+
+```{r cut_it_up, fig.height=6, fig.width=6, fig.align='center'}
+# Plot object p
+p <- ggplot(diamonds, aes(x = carat, y = price))
+
+# Use cut_interval
+p + geom_boxplot(aes(group = cut_interval(carat, n = 10)))
+
+# Use cut_number
+p + geom_boxplot(aes(group = cut_number(carat, n = 10)))
+
+# Use cut_width
+p + geom_boxplot(aes(group = cut_width(carat, width = 0.25)))
+```
+
+Good job! Going from a continuous to a categorical variable reduces the amount of information, but sometimes that helps us understand the data.
+
+### Understanding quartiles
+
+Be aware that there are many ways to calculate the IQR, short for inter-quartile range (that is $Q3−Q1$). These are defined in the help pages for the `quantile()` function:
+
+> ?quantile
+
+To explore the differences in these types, a function called `plot_quart()` is available, that takes one argument: an integer specifying the number of values. Using `rnorm()` a vector of values will be generated and the quartiles will be calculated using nine different methods. Run the command in the console on the right using different values (for example 4, 10, 50, 100).
+
+What can you say about how the quartiles and the IQR are calculated?
+
+```{r plot_quart_function}
+plot_quart <- function(n) {
+  set.seed(123)
+  playData <- data.frame(raw.values = rnorm(n, 1, 6))
+
+  quan.summary <- data.frame(t(sapply(1:9, function(x) quantile(playData$raw.values, type = x))))
+  names(quan.summary) <- c("Min", "Q1", "Median", "Q3", "Max")
+  quan.summary$Type <- as.factor(1:9)
+
+  library(reshape2)
+  quan.summary <- melt(quan.summary, id = "Type")
+  quan.summary <- list(quartiles = quan.summary, values = playData)
+
+  ggplot(quan.summary$quartiles, aes(x = Type, y = value, col = variable)) +
+    geom_point() +
+    geom_rug(data = quan.summary$values, aes(y = raw.values), sides = "l", inherit.aes = F)
+}
+```
+
+```{r use_plot_quart}
+plot_quart(4)
+
+plot_quart(10)
+
+plot_quart(50)
+
+plot_quart(100)
+```
+
+**The IQR becomes more consistent across methods as the sample size increases**. Yes, the subtle difference between methods is not as pronounced when the sample size is large. In any case, you are likely to encounter spurious artefacts when drawing box plots with small sample sizes.
