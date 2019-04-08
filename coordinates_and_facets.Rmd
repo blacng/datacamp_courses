@@ -59,7 +59,7 @@ Good job! Always pay attention to the ggplot2 warning messages in case data has 
 
 ## Aspect Ratio
 
-We can set the aspect ratio of a plot with `coord_fixed()` or `coord_equal()`. Both use ratio = 1 as a default. A 1:1 aspect ratio is most appropriate when two continuous variables are on the same scale, as with the iris dataset.
+We can set the aspect ratio of a plot with `coord_fixed()` or `coord_equal()`. Both use ratio = 1 as a default. A *1:1 aspect ratio is most appropriate when two continuous variables are on the same scale, as with the iris dataset*.
 
 All variables are measured in centimeters, so it only makes sense that one unit on the plot should be the same physical distance on each axis. This gives a more truthful depiction of the relationship between the two variables since the aspect ratio can change the angle of our smoothing line. This would give an erroneous impression of the data.
 

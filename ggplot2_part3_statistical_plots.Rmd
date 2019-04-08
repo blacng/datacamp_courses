@@ -1,6 +1,6 @@
 ---
 title: "Data Visualization with ggplot2 (Part 3)"
-subtitle: "Statistical Plots"
+subtitle: "Statistical Plots (Chapter 1)"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
@@ -41,4 +41,77 @@ library(here)
 
 ## Introduction
 
-Welcome to data visualization with ggplot2 (part 3). This course assumes you are familiar with the concepts and functions of data visualization introduced in the first two courses, part 1 & 2. Those courses should have give you a pretty good idea about what good data visualization is and how to achieve it. Since, this is an advanced course we are to dig a bit deeper into some more advanced ggplot2 functions. Before we get to that we will cap off the material we began in the first two courses by rounding out your knowledge with some niche topics. We will begin by exploring two kinds of specialized plots. In **Chapter 1**, we will consider the first type of specialized plots, those suited for a data savvy audience. These are statistical plots you wouldn't normally see in the popular press like boxplots and density plots. Plus, we will consider how to combine several variables. In **Chapter 2**, we will move on to the second type of specialized plots, those that are suited for a specific data type. We will begin by putting some fundamental concepts of working with large datasets into perspective. And then we will see some specific cases like **kenury plots** (?)
+Welcome to data visualization with ggplot2 (part 3). This course assumes you are familiar with the concepts and functions of data visualization introduced in the first two courses, part 1 & 2. Those courses should have give you a pretty good idea about what good data visualization is and how to achieve it. Since, this is an advanced course we are to dig a bit deeper into some more advanced ggplot2 functions. Before we get to that we will cap off the material we began in the first two courses by rounding out your knowledge with some niche topics. We will begin by exploring two kinds of specialized plots. In **Chapter 1**, we will consider the first type of specialized plots, those suited for a data savvy audience. These are statistical plots you wouldn't normally see in the popular press like *boxplots* and *density plots*. Plus, we will consider how to combine several variables. In **Chapter 2**, we will move on to the second type of specialized plots, those that are suited for a specific data type. We will begin by putting some fundamental concepts of working with large datasets into perspective. And then we will see some specific cases like **kenuri plots** (?), *networks*, and *diagnostic plots*. 
+
+This topic will continue into **Chapter 3** where we'll consider two main classes of maps: *coral plots* and *carthographic maps*. Finally, we'll see many concepts come together with the last type of specialized plot, **animations**---it's likely we'll cover `gganimate` in this section---which adds video frames as another mapping aesthetic. Depending on your area of expertise you may find out you seldom have a need to use this specialized plot types, but it is still useful to know what's possible within the ggplot2 framework. In **Chapter 4** we are going to get under the hood by digging into the internals of ggplot2 objects. For this we'll begin by looking at the basics of the `grid` package on which ggplot2 is built. The next step is to begin manipulating graphical objects that we made with ggplot2 and look at more efficient ways of doing that with some built-in functions in ggplot2 such as `ggplot_build()`. In the last part, we'll make use of a useful accessory package called `gridExtra`. In **Chapter 5**, we will bring our series on ggplot2 to a close with two case studies. In the first case study we'll look at a feature that was introduced in ggplot2 (2.0), _*extensions*_. We will understand how to build a new geom or stat_function from scratch. This will allow us to use ggplot2 to create exactly the statistics and visualizations we want in a more straightforward manner. In the second case study we are going to reproduce a classic plot by **Edward Tufte** using data familiar to everyone, the weather. Using ggplot2, we will create a unique plot drawing on what we've learned over all three courses. To cap all off, we are going to combine our Tufte weather plot with ggplot2 extensions and turn our unique plot type into a flexible, efficient, and reproducible plot type that we can use with any dataset of the appropriate type. 
+
+## Refresher (1)
+
+As a refresher to statistical plots, let's build a scatter plot with an additional statistic layer.
+
+A dataset called movies_small is coded in your workspace. It is a random sample of 1000 observations from the larger movies dataset, that's inside the ggplot2movies package. The dataset contains information on movies from IMDB. The variable votes is the number of IMDB users who have rated a movie and the rating (converted into a categorical variable) is the average rating for the movie.
+
+```{r refresher_1, fig.height=6, fig.width=6, fig.align='center'}
+# Using the sample function to do a random sampling of a dataset
+# library(ggplot2movies)
+# set.seed(123)
+# movies_small <- movies[sample(nrow(movies), 1000), ]
+# movies_small$rating <- factor(round(movies_small$rating))
+
+(movies_small <- readRDS(here("datasets/ch1_movies_small.RDS"))) %>% as_tibble()
+
+# take a look at the variables in movies_small
+glimpse(movies_small)
+
+# Build a scatter plot with mean and 95% CI
+ggplot(movies_small, aes(x = rating, y = votes)) +
+  geom_point() +
+  stat_summary(fun.data = "mean_cl_normal",
+               geom = "crossbar",
+               width = 0.2,
+               col = "red") +
+  scale_y_log10()
+```
+
+## Refresher (2)
+
+The plot in the graphics device is a variation on an oft-seen `ggplot2` example using the `diamonds` dataset (containing information on several variables of over 50,000 diamonds).
+
+Recall that there are a variety of `scale_` functions. Here, data are transformed or filtered first, after which the plot and associated statistics are computed. For example, scale_y_continuous(limits = c(100, 1000) will remove values outside that range.
+
+Contrast this to `coord_cartesian()`, which computes the statistics before plotting. That means that the plot and summary statistics are performed on the raw data. That's why we say that `coord_cartesian(c(100, 1000))` "zooms in" a plot. This was discussed in the chapter on coordinates in course 2.
+
+Here we're going to expand on this and introduce `scale_x_log10()` and `scale_y_log10()` which perform *log10* transformations, and `coord_equal()`, which sets an aspect ratio of 1 (`coord_fixed()` is also an option).
+
+Your task is to reproduce the plot in the viewer. Before you do this, it might be a good idea to explore diamonds in the console if you are not familiar with it.
+
+```{r refresher_2, fig.height=6, fig.width=6, fig.align='center'}
+# Reproduce the plot
+ggplot(diamonds, aes(x = carat, y = price, col = color)) +
+  geom_point(alpha = 0.5, size = 0.5, shape = 16) +
+  scale_x_log10(expression(log[10](Carat)), limits = c(0.1,10)) +
+  scale_y_log10(expression(log[10](Price)), limits = c(100,100000)) +
+  scale_color_brewer(palette = "YlOrRd") +
+  coord_equal() +
+  theme_classic()
+```
+
+Good job! This is a nice way of transforming data and then plotting it in one command.
+
+## Refresher (3)
+
+```{r refresher_3, fig.height=6, fig.width=6, fig.align='center'}
+# Add smooth layer and facet the plot
+ggplot(diamonds, aes(x = carat, y = price, col = color)) +
+  stat_smooth(method = "lm") +
+  # geom_point(alpha = 0.5, size = 0.5, shape = 16) +
+  scale_x_log10(expression(log[10](Carat)), limits = c(0.1,10)) +
+  scale_y_log10(expression(log[10](Price)), limits = c(100,100000)) +
+  scale_color_brewer(palette = "YlOrRd") +
+  coord_equal() +
+  theme_classic()
+```
+
+Good job! Parametric and non-parametric linear models are common in scatter plots.
+
+## Box Plots
