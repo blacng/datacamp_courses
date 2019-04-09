@@ -4,16 +4,16 @@ subtitle: "Statistical Plots (Chapter 1)"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  # pdf_document:
-  #   df_print: kable
-  #   toc: yes
-  #   toc_depth: 4
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+  pdf_document:
+    df_print: kable
     toc: yes
     toc_depth: 4
-  bibliography: dataviz.bib
+  # prettydoc::html_pretty:
+  #   theme: cayman
+  #   highlight: github
+  #   toc: yes
+  #   toc_depth: 4
+  # bibliography: dataviz.bib
 ---
 
 
@@ -52,7 +52,7 @@ As a refresher to statistical plots, let's build a scatter plot with an addition
 
 A dataset called movies_small is coded in your workspace. It is a random sample of 1000 observations from the larger movies dataset, that's inside the ggplot2movies package. The dataset contains information on movies from IMDB. The variable votes is the number of IMDB users who have rated a movie and the rating (converted into a categorical variable) is the average rating for the movie.
 
-```{r refresher_1, fig.height=6, fig.width=6, fig.align='center'}
+```{r refresher_1, fig.height=4, fig.width=4, fig.align='center'}
 # Using the sample function to do a random sampling of a dataset
 # library(ggplot2movies)
 # set.seed(123)
@@ -86,7 +86,7 @@ Here we're going to expand on this and introduce `scale_x_log10()` and `scale_y_
 
 Your task is to reproduce the plot in the viewer. Before you do this, it might be a good idea to explore diamonds in the console if you are not familiar with it.
 
-```{r refresher_2, fig.height=6, fig.width=6, fig.align='center'}
+```{r refresher_2, fig.height=4, fig.width=4, fig.align='center'}
 # Reproduce the plot
 ggplot(diamonds, aes(x = carat, y = price, col = color)) +
   geom_point(alpha = 0.5, size = 0.5, shape = 16) +
@@ -101,7 +101,7 @@ Good job! This is a nice way of transforming data and then plotting it in one co
 
 ## Refresher (3)
 
-```{r refresher_3, fig.height=6, fig.width=6, fig.align='center'}
+```{r refresher_3, fig.height=4, fig.width=4, fig.align='center'}
 # Add smooth layer and facet the plot
 ggplot(diamonds, aes(x = carat, y = price, col = color)) +
   stat_smooth(method = "lm") +
@@ -141,7 +141,7 @@ In this exercise you'll return to the first plotting exercise and see how box pl
 
 Box plots are very useful, but they don't solve all your problems all the time, for example, when your data are heavily skewed, you will still need to transform it. You'll see that here, using the movies_small dataset, a subset of 10,000 observations of `ggplot2movies::movies`
 
-```{r transformations, fig.height=6, fig.width=6, fig.align='center'}
+```{r transformations, fig.height=4, fig.width=4, fig.align='center'}
 # movies_small is available
 
 # Add a boxplot geom
@@ -175,7 +175,7 @@ If you only have continuous variables, you can convert them into ordinal variabl
 
 This is useful when you want to summarize a complex scatter plot like the one shown in the viewer. By applying these functions to the carat variable and mapping that onto the group aesthetic, you can convert the scatter plot in the viewer into a series of box plots on the fly.
 
-```{r cut_it_up, fig.height=6, fig.width=6, fig.align='center'}
+```{r cut_it_up, fig.height=4, fig.width=4, fig.align='center'}
 # Plot object p
 p <- ggplot(diamonds, aes(x = carat, y = price))
 
@@ -220,7 +220,7 @@ plot_quart <- function(n) {
 }
 ```
 
-```{r use_plot_quart}
+```{r use_plot_quart, fig.height=4, fig.width=4, fig.align='center'}
 plot_quart(4)
 
 plot_quart(10)
