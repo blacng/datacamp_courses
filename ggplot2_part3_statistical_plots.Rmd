@@ -62,7 +62,8 @@ A dataset called movies_small is coded in your workspace. It is a random sample 
 (movies_small <- readRDS(here("datasets/ch1_movies_small.RDS"))) %>% as_tibble()
 
 # take a look at the variables in movies_small
-glimpse(movies_small)
+# glimpse(movies_small) # %>% kableExtra::kable(format = "html", booktabs = T, caption = "Table Variables")  
+# kable_styling(latex_options = c("striped", "hold_position"), full_width = F)
 
 # Build a scatter plot with mean and 95% CI
 ggplot(movies_small, aes(x = rating, y = votes)) +
@@ -141,7 +142,7 @@ In this exercise you'll return to the first plotting exercise and see how box pl
 
 Box plots are very useful, but they don't solve all your problems all the time, for example, when your data are heavily skewed, you will still need to transform it. You'll see that here, using the movies_small dataset, a subset of 10,000 observations of `ggplot2movies::movies`
 
-```{r transformations, fig.height=6, fig.width=6, fig.align='center'}
+```{r transformations, fig.height=6, fig.width=8, fig.align='center'}
 # movies_small is available
 
 # Add a boxplot geom
@@ -221,6 +222,9 @@ plot_quart <- function(n) {
 ```
 
 ```{r use_plot_quart}
+
+par(mfrow = c(2, 2))
+
 plot_quart(4)
 
 plot_quart(10)
@@ -349,7 +353,7 @@ Density plots could work in this situation. The advantage here is that we can ov
 
 The violin plot is a relatively new plot type, which is gaining in popularity. The violin plot basically puts a density plot onto a vertical axis and then mirrors it to create a symmetrical 2-D shape. This can really aid in comparing different distributions. Just like with the regular density plot we should also consider weighting each group according to its *_n_* value. With this plot we can compare many groups within a variable. 
 
-```{r density_plot_mammals, fig.height=6, fig.width=6, fig.align='center'}
+```{r density_plot_mammals, fig.height=6, fig.width=8, fig.align='center'}
 ggplot(mammals, aes(x = sleep_total, fill = vore)) +
   geom_density(col = NA, alpha = 0.35)
 
@@ -362,7 +366,7 @@ ggplot(mammals, aes(x = sleep_total, fill = vore)) +
   geom_density(aes(weight = n), col = NA, alpha = 0.35)
 ```
 
-```{r violin_plots, fig.height=6, fig.width=6, fig.align='center'}
+```{r violin_plots, fig.height=6, fig.width=8, fig.align='center'}
 ggplot(mammals, aes(x = vore, y = sleep_total)) + 
   geom_violin()
 
@@ -378,7 +382,7 @@ The other plot I mentioned was comparing separate variables. For that, let's a t
 
 A 2-D density plot emphasizes the bimodal nature of this dataset so sometimes it can be quite useful to consider distributions in 2-D. We will see density plots make a reappearance when we talk about Kenury plots in the next chapter where we have three variables. Another advantage of the ggplot2 structure is that we can use the underlying statistics with a different `geom` so instead of producing a contour or filled density plot, we can calculate the density by calculating the values using a grid of circles whose sizes varies according to the underlying density.   
 
-```{r old_faithful, fig.height=6, fig.width=6, fig.align='center'}
+```{r old_faithful, fig.height=6, fig.width=8, fig.align='center'}
 data("faithful")
 
 dim(faithful)
@@ -435,7 +439,7 @@ In this exercise you'll combine multiple density plots. Here, you'll combine jus
 
 The first thing to remember is that you can consider values as two separate variables, like in the `test_data` data frame, or as a single continuous variable with their ID as a separate categorical variable, like in the `test_data2` data frame. `test_data2` is more convenient for combining and comparing multiple distributions.
 
-```{r multiple_density_plots, fig.height=4, fig.width=4, fig.align='center'}
+```{r multiple_density_plots, fig.height=6, fig.width=8, fig.align='center'}
 test_data2 <- ch1_test_data2
 
 # Plot with test_data
@@ -457,7 +461,7 @@ When you looked at multiple box plots, you compared the total sleep time of vari
 
 A cleaned up version of the mammalian dataset is available as `mammals`.
 
-```{r multiple_density_plots_2, fig.height=4, fig.width=4, fig.align='center'}
+```{r multiple_density_plots_2, fig.height=6, fig.width=8, fig.align='center'}
 # Individual densities
 # In the first plot, filter the mammals dataset to plot only the vore variable that equals "Insectivore".
 ggplot(mammals[mammals$vore == "Insectivore", ], aes(x = sleep_total, fill = vore)) +
@@ -505,7 +509,7 @@ For this, we need to weight the density plots so that they're relative to each o
 
 The `mammals` data frame is available as before. After executing the commands, it will have the variable n, which we'll use for weighting.
 
-```{r weighted_density_plots, fig.height=4, fig.width=4, fig.align='center'}
+```{r weighted_density_plots, fig.height=6, fig.width=8, fig.align='center'}
 # Unweighted density plot from before
 ggplot(mammals, aes(x = sleep_total, fill = vore)) +
   geom_density(col = NA, alpha = 0.35) +
@@ -534,5 +538,51 @@ ggplot(mammals2, aes(x = vore, y = sleep_total, fill = vore)) +
 ```
 
 Wonderful weighting! These density plots are more detailed and accurate.
+
+### 2D Density Plots (1)
+
+You can consider two orthogonal density plots in the form of a 2D density plot. Just like with a 1D density plot, you can adjust the bandwidth of both axes independently.
+
+The data is stored in the `faithful` data frame, available in the datasets package. The object `p` contains the base definitions of a plot.
+
+```{r 2d_density_plots_1, fig.height=6, fig.width=8, fig.align='center'}
+# Base layers
+p <- ggplot(faithful, aes(x = waiting, y = eruptions)) +
+  scale_y_continuous(limits = c(1, 5.5), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(40, 100), expand = c(0, 0)) +
+  coord_fixed(60 / 4.5)
+
+# 1 - Use geom_density_2d()
+p + geom_density_2d()
+
+# 2 - Use stat_density_2d() with arguments
+p + stat_density_2d(aes(col = ..level..), h = c(5, 0.5))
+```
+
+2D Triumph! Think about the message in your scatter plots, sometimes clusters of high-density are more intersting than linear models.
+
+### 2D Density Plot (2)
+
+Continuing with the density plots from the last exercise, here you'll explore the viridis package. This package contains multi-hue color palettes suitable for continuous variables.
+
+The advantage of these scales is that instead of providing an even color gradient for a continuous scale, they highlight the highest values by using an uneven color gradient on purpose. The high values are lighter colors (yellow versus blue), so they stand out more.
+
+A shaded 2D density plot showing the same data as the previous exercise has been provided for you. Up to you to upgrade it!
+
+```{r 2d_density_plot_2, fig.height=6, fig.width=8, fig.align='center'}
+# Load in the viridis package
+# library(viridis)
+
+# Add viridis color scale
+ggplot(faithful, aes(x = waiting, y = eruptions)) +
+  scale_y_continuous(limits = c(1, 5.5), expand = c(0,0)) +
+  scale_x_continuous(limits = c(40, 100), expand = c(0,0)) +
+  coord_fixed(60/4.5) +
+  stat_density_2d(geom = "tile", aes(fill = ..density..), h=c(5,.5), contour = FALSE) +
+  scale_fill_viridis()
+```
+
+Dynamite density! Off to the next chapter!
+
 
 ## References
