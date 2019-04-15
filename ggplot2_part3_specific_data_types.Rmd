@@ -194,35 +194,180 @@ Massive Matrices! Another great custom visualisation!
 
 ## Ternary Plots
 
-Feel free to use the `knitr` infrastructure with dozens of tunable options in
-your document.
+The first type of specialized plots we'll consider is the **Ternary Plot** also known as **Triangle Plot**. These plots are a ideal way to depict *_compositional trivariate data_*. This means we have a *_parts-of-a-whole problem_*, where our parameters add up to *100%*. A data type that is typically represented with a Ternary plot is *_soil composition_*. One way to describe soil is to understand the proportional composition of three measures: Sand, Silt, and Clay content. Let's take a look at the `africa` dataset containing over 40000 soil samples from all over the continent of Africa. 
 
-```{r fig.width=6, fig.height=6, fig.align='center'}
-set.seed(123)
-n <- 1000
-x1  <- matrix(rnorm(n), ncol = 2)
-x2  <- matrix(rnorm(n, mean = 3, sd = 1.5), ncol = 2)
-x   <- rbind(x1, x2)
-head(x)
-smoothScatter(x, xlab = "x1", ylab = "x2")
+The sum of each row add up to 100. At this point in your dataviz career, you will probably make something like a `proportional stacked bar plot`. 
+
+Ternary plots have three axes: one for each each variable of interest rearranged to form a triangle. (Recall that in geometry an *edge* is a surface like a side of a triangle and a vertex is the corner point). We typically expect that the edges of a plot are its axes like in a scatterplot. That's kind of what is happening here, but the confusing part is that the edges are not the whole story. The axes traverse the middle of the triangle like this for the x axis. The lower left vertex is 100% and the edge opposite is 0%. The tick marks of the x axis are found on the left side of the triangle. For the y axis, the top vertex is 100% and the base edge is 0%, and the tick marks are shown on the right of the triangle. The z axis works in the same way. The lower right vertex is 100% and the edge opposite is 0%, and the tick marks are shown on the bottom of the triangle. If we consider the interplay between a three axes, it becomes clear that this is a parts-of-a-whole problem. If we find a value for any point in the triangle, they will all add up to 100%. The point directly in the middle is where all the axes have equivalent input so 33.3% of each. 
+
+Let's see this in action with some of the soil data. Here the three axes are the Sand, Silt, and Clay content. In the first location, the composition is overwhelmingly made up of Sand. So, the point in our Ternary plot is very close to the vertex of this axis, indicating a high percentage. It must therefore be close to the edges of the remaining axes, which reflects a low abundance there. In the seventh site, Clay is predominant. So, our point is close to the Clay vertex. Of the remaining two axes there is a uneven split. Silt having a high proportion than Sand. So there the point is closer to the Sand axis edge and further away from the Silt edge. As another example, Silt makes the largest proportion at site 8, which is why our third point leans toward the Silt vertex. The positioning of the remaining axes tells us that there is slightly more Sand and Clay content at this site. 
+
+The advantages of this plot type are numerous and akin to a scatter plot. Our complete data set has over 40,000 locations. It will not be helpful to plot them all as a bar chart. But we can keep adding points on a Ternary plot (like the plot below). So, now we can get an overview of the distribution of the dataset and identify any single value within that distribution. Of course, the advantage here is that we can use `geoms` other than points. We can look at the density as a series of contour lines or use a fill to explore a region of high and lower density. 
+
+```{r africa_ternary_plots, fig.height=6, fig.width=6, fig.align='center'}
+load("datasets/africa.RData")
+
+dim(africa)
+
+head(africa)
+
+library(ggtern)
+ggtern(africa, aes(Sand, Silt, Clay)) +
+  geom_point(alpha = 0.2, shape = 16)
+
+ggtern(africa, aes(Sand, Silt, Clay)) + 
+  geom_density_tern()
+
+ggtern(africa, aes(Sand, Silt, Clay)) +
+  stat_density_tern(geom = "polygon",
+                    n = 200,
+                    aes(fill = ..level..,
+                        alpha = ..level..))
+
+ggtern(africa, aes(Sand, Silt, Clay)) +
+  stat_density_tern(geom = "polygon",
+                    n = 200,
+                    aes(fill = ..level..,
+                        alpha = ..level..)) +
+                        guides(fill = FALSE)
 ```
 
-You can include code snippets of languages other than R, but note that
-the block header has no curly brackets around the language name.
+Terrific ternary! Those are some awesome-looking plots!
 
-```cpp
-// [[Rcpp::export]]
-NumericVector timesTwo(NumericVector x) {
-    return x * 2;
-}
+### Proportional / Stacked Bar Plots
+
+efore you head over to ternary plots, let's try to make a classical proportional/stacked bar plot of a subset of the data. We'll use a stacked bar plot and the `coord_flip()` function to flips the x and y axes.
+
+The data frame for the *_African Soil Profiles Database_* is available in your workspace as `africa` and can be found in the `GSIF` package. It contains three columns: `Sand`, `Silt` and `Clay`. A smaller version, containing only 50 observations is stored in `africa_sample`.
+
+In the first course we mentioned that in the data layer, the structure of the data should reflect how you wish to plot it. For a ternary plot, you need to have three separate variables, for example, Sand, Silt and Clay in africa. However, for a proportional/stacked bar plot, you just need two. The type should be defined as three levels within a single factor variable. That is, you want tidy data.
+
+It's also useful to maintain the site IDs as a variable within the data frame, currently, they are stored at row names, which is poor style and not useful.
+
+```{r}
+(africa.sample <- africa 
+  %>% mutate(ID = row_number()) 
+  %>% select (ID, everything()) 
+  %>% sample_n(50))
+
+africa.sample.tidy <- gather(africa.sample, key, value, -ID)
+
+head(africa.sample.tidy)
+
+ggplot(africa.sample.tidy, aes(x = factor(ID), y = value, fill = key)) +
+  geom_col() +
+  coord_flip()
+
+# (africa.sample.2 <- africa 
+#   %>% mutate(ID = row_number()) 
+#   %>% gather(`Sand`,`Silt`,`Clay`, key = "Component", value = "Quantity", -ID) 
+#   %>% sample_n(50))
+#  
+# ggplot(africa.sample.2, aes(x = factor(ID), y = Quantity, fill = Component)) +
+#   geom_col() + # using geom_bar I got this Error: stat_count() must not be used with a y aesthetic.
+#   coord_flip() 
 ```
 
-You can also write math expressions, e.g. $Y = X\beta + \epsilon$,
-footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+Stoked for stacked! Remember stacked bar charts can be used as an alternative to pie charts.
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(iris, 10))
+## Networks Plots
+
+Network analysis is a field of study onto itself, but even though it is not your focus, it is not unusual to encounter relationship data at some point. There are several R packages which can be used to visualize relationship data. Integrating network data with ggplot2 allows you to take advantage of all the tools we've learned so far in these series. Let's begin with a simple example -- a network of blood type donors. There are four different blood types: A, B, AB, O. Each present as $\rho$ negative or positive. In total we've eight different blood types. Not all blood types are compatible i.e. in this case, the question we want to address with our network is the directionality of blood type donors: Which blood type can be used as a donor for the other blood types? There are 27 relationships which we want to visualize which are stored in the dataframe `blood_donors` shown below.  
+
+At this point in our data visualization understanding, we may be tempted to just make a heat map. Here we are just looking at where we have a relationship or not. This is already a good starting point, and maybe this visualization already answers your questions since we can patterns in donors and recipient profiles. For example, we can already see that blood type O- is a universal donor. An alternative will be a dot plot, which would allow us to further use the size of the dots to represent how prevalent a donor is in our data set. However, at this point we just want to look at the relationships so we turn to a network. 
+
+In a network each observation is called a `vertex`, and in the blood_donor dataframe, we've eight vertices arranged in a circle. The arrangement of vertices can alter our perception of the relationship. So, a circle is a good starting point since it will allow us to see all possible relationships clearly. The connections between each vertex is an `edge`. The shape of the network are the nature of the relationships and can be quantified in various ways. Here, each edge has a arrow head since we are talking about a directional relationship, for which blood type is each vertex a donor -- only the relationship present are visualized. Since, this is a `ggplot2` object, we can apply other layers such as facetting. For example, if we have had information about the predominance of each blood type in different ethnicities, we can scale this as of each dot to the variable and facet the network according to ethnicity. 
+
+### Build the Network (1)
+
+Network data may be stored in a variety of ways.
+
+For this example, you'll use an undirected network of romantic relationships in the TV show Mad Men: `geomnet::madmen`.
+
+```{r network_1, fig.width=6, fig.height=6, fig.align='center'}
+# Load geomnet & examine structure of madmen
+# Load the geomnet package and examine the structure of the madmen dataset. 
+# Notice that it is a list of two data frames called edges and vertices. 
+# This is enough information to build the network.
+
+library(geomnet)
+str(madmen)
+
+# Merge edges and vertices
+# Use merge() to merge the madmen$edges and madmen$vertices data frames. 
+# You can connect observations: by.x is the Name1 variable in the edges data frame, 
+# which matches by.y, the label variable in the vertices data frame. 
+# Store the result inside a new data frame mmnet.
+mmnet <- merge(madmen$edges, madmen$vertices,
+               by.x = "Name1", by.y = "label",
+               all = TRUE)
+
+# Examine structure of mmnet
+str(mmnet)
 ```
+
+Remember, the first step is to get the data structure right. 
+
+### Build the Network (2)
+
+Now that your data is in the correct format, you can build the actual network plot.
+
+You'll use the `geom_net()` function, a `ggplot` layer that's in the geomnet package. The `ggnetwork` package is a popular alternative, but we will not discuss that here.
+
+Can you finish the `ggplot()` command?
+
+```{r network_2, fig.width=6, fig.height=6, fig.align='center'}
+# geomnet is pre-loaded
+
+# Merge edges and vertices
+mmnet <- merge(madmen$edges, madmen$vertices,
+               by.x = "Name1", by.y = "label",
+               all = TRUE)
+
+# Finish the ggplot command
+ggplot(data = mmnet, aes(from_id = Name1, to_id = Name2)) +
+  geom_net(aes(col = Gender), 
+               size = 6, 
+               linewidth = 1, 
+               labelon = TRUE, 
+               fontsize = 3, 
+               labelcolour = "black")
+```
+
+Mad about Networks! Can you spot the show's womanizer? Draper, is by far, the show's womanizer. 
+
+### Adjusting the Network
+
+Let's clean up the network a bit. As you can see, since this is in the `ggplot2` framework, you can manually adjust the scales like you have always done.
+
+Here you're going to use the void theme, `theme_void()`, to remove all background elements like axes and grid lines to make a clean network plot.
+
+```{r adjusting_network, fig.width=6, fig.height=6, fig.align='center'}
+# geomnet is pre-loaded and mmnet is defined
+head(mmnet)
+
+# Node colors
+pink_and_blue <- c(female = "#FF69B4", male = "#0099ff")
+
+# Tweak the network plot
+ggplot(data = mmnet, aes(from_id = Name1, to_id = Name2)) +
+  geom_net(aes(col = Gender),
+           size = 6,
+           linewidth = 1,
+           labelon = TRUE,
+           fontsize = 3,
+           labelcolour = "black",
+           # Make the graph directed
+           directed = TRUE) +
+  # Add manual color scale         
+  scale_color_manual(values = pink_and_blue) +
+  # Set x-axis limits
+  xlim(-0.05, 1.05) +
+  # Set void theme
+  theme_void()
+```
+
+Notable Networks! Although blue and pink are typical colors from male and female, feel free to break gender stereotypes!
 
 ## Diagnostic Plots
 
