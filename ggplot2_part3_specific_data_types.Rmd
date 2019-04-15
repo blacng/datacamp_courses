@@ -4,16 +4,16 @@ subtitle: "Plots for Specific Data Types (Chapter 2)"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    df_print: kable
-    toc: yes
-    toc_depth: 4
-  # prettydoc::html_pretty:
-  #   theme: cayman
-  #   highlight: github
+  # pdf_document:
+  #   df_print: kable
   #   toc: yes
   #   toc_depth: 4
-  # bibliography: dataviz.bib
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: yes
+    toc_depth: 4
+  bibliography: dataviz.bib
 ---
 
 
