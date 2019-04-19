@@ -47,7 +47,7 @@ In this chapter we'll wrap up our discussion of specialty plots by considering *
 
 Let's start with Choropleths. You have likely encountered this type of map in popular media, in particular whenever elections are held. If you've completed the Kaggle challenge course, you would have also seen an example of the Choropleths R package. The thing to remember about Choropleths is that basically we are just drawing a bunch of polygons (ok we could also drwa points and lines, but we'll just stick with polygons for the moment). You can imagine that when we will draw a map, like the outline of the United States shown below, it's basically a large polygon with many sides. All we need is a file which tells us the latitude or longitude of the point of the polygon. In some cases, you can find this included in a R package, like the example below. But, in the exercises we will explore how to use special shape files which can contain information about geograhical and political boundaries. Notice that, this is just a basic `ggplot2` plot. We can event adjust the coordinate system to a different projection (as shown below).
 
-```{r us_map, fig.align='center'}
+```{r us_map, fig.align='center', message=FALSE}
 usa <- map_data("usa")
 
 ggplot(usa, aes(long, lat, group = group)) +
@@ -64,7 +64,7 @@ ggplot(usa, aes(long, lat, group = group)) +
 
 Additionally, we may have information on many polygons such as individual states. This will allow us to visualize each individual polygon. Here, we've done that by mapping `region` onto the `fill` aesthetic. 
 
-```{r map_individual_states, fig.align='center'}
+```{r map_individual_states, fig.align='center', message=FALSE}
 states <- map_data("state")
 
 usa <- map_data("usa")
@@ -91,7 +91,7 @@ Now that you have some polygons, there are a number of things you can do. Here y
 
 The data is stored in the `cities` data frame. You'll begin by drawing points of varying sizes, relative to the estimated population. An alternative is to use color instead of size, and in this case a nice trick is to order the data frame, so that the largest cities are drawn on _top_ of the smaller cities. This is so that they will stand out against the background, which is particularly effective when using the viridis color palette.
 
-```{r working-with-maps, fig.align='center'}
+```{r working-with-maps, fig.align='center', message=FALSE}
 # Finish plot 1
 
 cities <- read_delim("datasets/US_Cities.txt", delim = "\t")
@@ -133,7 +133,7 @@ Great! New York appears as a bright yellow anomly in a sea of darker points. If 
 
 To make a choropleth (a map in which areas are shaded according to some measure) you'll need information on state boundaries, which you can find in the `maps` package. Once the map information is converted into a data frame, you can merge this with another data frame containing some quantitative information, like the estimated population, and use that variable in our aesthetic mappings.
 
-```{r state-choropleth, fig.align='center'}
+```{r state-choropleth, fig.align='center', message=FALSE}
 # Use map_data() to create state
 state <- map_data("state") %>% as_tibble()
 
@@ -188,7 +188,7 @@ Let's start by importing the shapefile and creating a map of Germany. All shapef
 
 NOTE: Building these maps is computationally heavy, so it can take some time before you see your results.
 
-```{r maps-from-shapefiles, fig.align='center'}
+```{r maps-from-shapefiles, fig.align='center', message=FALSE}
 library(rgdal)
 germany <- readOGR(dsn = "shapes", layer = "DEU_adm1")
 
@@ -210,7 +210,7 @@ If you check out `bundes`, you'll see that you've lost the state names, so mergi
 
 NOTE: Building these choropleths is computationally heavy, so it can take some time before you see your results
 
-```{r choropleth_from_shapefiles, fig.align='center'}
+```{r choropleth_from_shapefiles, fig.align='center', message=FALSE}
 unemp <- read_delim("datasets/germany_unemployment.txt", delim = "\t")
 
 # re-add state names to bundes
@@ -233,52 +233,265 @@ At the outset this looks fine, but if you count the states, you'll see you only 
 
 ## Cartograhic Maps
 
-`html_pretty` currently supports three page themes (`cayman`, `tactile` and
-`architect`), and two syntax highlight styles (`github` and `vignette`).
-The theme and highlight styles can be specified in the document metadata,
-for example:
+As we saw in the exercise, Choropleths are useful if you have the right data type including the shapefile and associated variables. The other type of maps which you'll commonly see is a Carthographic Map. By this, I mean some kind of a image such as **drawn** (e.g. topographical maps) depicting distinct features of a landscape like altitude and infrastructure or **photographic** such as satelite images or **hybrid** of the two. To obtain this images we'll use the `ggmap` package, which allows us to choose a source and a type of map. For now, we'll stick to the canonical formats although there are various options to customize your map features. For example, we can obtain a google style map with a fairly broad zoom level of 3
 
-```yaml
-output:
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
+```{r google-style-map, fig.align='center', message=FALSE, include=FALSE}
+API_Key <- "AIzaSyDEZB7tX1DbOyTfa0uaQr8QPUHiBSW4Rdg"
+register_google(key = API_Key, write = TRUE)
+
+library(curl)
+def_03 <- get_map(location = "Linkoping, Sweden", zoom = 13)
+ggmap(def_03, extent = "device")
+
+def_03 <- get_map(location = "Linkoping, Sweden", zoom = 15)
+ggmap(def_03, extent = "device")
 ```
+
+This map is centered on Linkoping, Sweden, which is a bit difficult to see since it is so far zoomed out. Increasing the zoom allows us to get closer and closer still. There are many preset map types available such as this `watercolor` style in the `stamen` package (see `?get_stamenmap`) or this black and white style called `toner` style. The `hybrid` style map gives some indication of the road network, but, of course, we can just ask for the `satellite` images in isolation. 
+
+```{r ggmap-styles, fig.align="center", message=FALSE}
+# watercolor style
+wc_13 <- get_map(location = "Berlin, Germany", zoom = 13,
+source = "stamen", maptype = "watercolor")
+ggmap(wc_13, extent = "device")
+
+# toner style
+ton_13 <- get_map(location = "Berlin, Germany", zoom = 13,
+source = "stamen", maptype = "toner")
+ggmap(ton_13, extent = "device")
+
+# hybrid style
+hyb_13 <- get_map(location = "Berlin, Germany", zoom = 13,
+source = "stamen", maptype = "toner-hybrid")
+ggmap(hyb_13, extent = "device")
+
+# satellite style
+sat_13 <- get_map(location = "Berlin, Germany", zoom = 13,
+source = "google", maptype = "satellite")
+ggmap(sat_13, extent = "device")
+```
+
+Now, this is all fine and good, but what we really want is to plot geographic data onto this image using it as a base. For example, if we had a list of sites with their respective latitudes and longitudes. This can be obtained in a number of ways. We may have actual gps data in a field collection; perhaps we have addresses from a database; or, like in the case below, names of landmarks in Berlin. In this case we can use the `geocode` function to query `google` for the lats and longs of these places (as shown below). Since, this is a `ggplot2` object, we can add points using the `geom_point()` layer. The problem here is that the map region is applied before we added this layer. It is not redrawn as we'll typically expect in `ggplot2` because of the way it was obtained.
+
+```{r get-coordinates, fig.align="center", message=FALSE}
+berlin_sites <- c("Brandenburger Tor", "Potsdamer Platz",
+"Victory Column Berlin", "Checkpoint Charlie",
+"Reichstag Berlin", "Alexander Platz")
+
+places <- geocode(berlin_sites)
+
+# Add column with cleaned up names
+places$location <- sub(" Berlin", "", berlin_sites)
+
+glimpse(places)
+```
+
+```{r show-places-on-ggmap, fig.align="center", message=FALSE}
+# google/roadmap - zoom = 13
+road_13 <- get_map(location = "Berlin, Germany", zoom = 13,
+source = "google", maptype = "roadmap")
+ggmap(road_13, extent = "device") +
+  geom_point(data = places, col = "red")
+```
+
+A workaround is to not obtain a general map of our target, but to get a map defined by our points i.e. to define a bounding box (`bbox`) around the points with some buffer room. This is depicted below, but as you can see, it doesn't work perfectly. (Actually, we've lost two points on our map.). We'll solve this problem by changing the buffering around the points, but before we do that, I want to remind you that just all `ggplot2` objects we can modify this by setting mappings. 
+
+```{r bbox, fig.align='center', message=FALSE}
+# Workaround 1: Using Boundary Box
+bbox <- make_bbox(lon = places$lon, lat = places$lat, f = .1)
+boxed_14 <- get_map(location = bbox, zoom = 14,
+                    source = "google", maptype = "roadmap")
+ggmap(boxed_14, extent = "device") +
+  geom_point(data = places, col = "red")
+
+# Workaround 2: Using Boundary Box and ggplot2 mappings
+bbox <- make_bbox(lon = places$lon, lat = places$lat, f = .1)
+boxed_14 <- get_map(location = bbox, zoom = 14,
+                    source = "google", maptype = "roadmap")
+ggmap(boxed_14, extent = "device") +
+  geom_point(data = places, aes(col = location), size = 3) +
+  scale_colour_brewer(palette = "Set1")
+```
+
+Above, we've mapped location onto color. This all comes together in our final plot where we use a `toner` map type and instead of points with a color legend we use `geom_label` to add boxes with text labelling the location of each site. 
+
+### Different templates
+
+`ggmap` provides the `get_map()` function to access Google Maps. In this exercise you'll work with some preloaded `ggmap` objects. The code that created the two maps you'll plot is
+
+```r
+london_map_13 <- get_map(location = "London, England", zoom = 13)
+london_ton_13 <- get_map(location = "London, England", zoom = 13, source = "stamen", maptype = "toner")
+``` 
+These two objects are already loaded in your environment. Feel free to play around with `get_map()` in the console, but be warned, sometimes you might not always get what you expect!
+
+```{r london-maps, message=FALSE, fig.align='center', message=FALSE}
+london_map_13 <- get_map(location = "London, England", zoom = 13)
+london_ton_13 <- get_map(location = "London, England", zoom = 13, source = "stamen", maptype = "toner")
+
+# Create the map of London
+ggmap(london_map_13)
+
+# Create the second map of London
+ggmap(london_ton_13)
+```
+
+Great! All from inside R, pretty amazing!
+
+### Mapping Points onto a Carthographic Map
+
+Now that you know how to get a cartographic map, you'll use `ggplot2` layers to add points. The object `london_sites`, that's available in your workspace, is a character vector of some locations you'd like to plot. You'll add points to the cartographic map you derived in the previous exercise. We've already geocoded the locations in london_sites for you using the code
+
+> xx <- geocode(london_sites)
+
+As you can see, the coordinates are available in a dataframe called `xx`. Additionally, the ggmap object `london_ton_13` from the previous exercise is still available.
+
+```{r mapping-points-carthographic-map, fig.align='center', message=FALSE}
+london_sites <- c("Tower of London, London",   "Buckingham Palace, London",
+                  "Tower Bridge, London", "Westminster Abbey, London")
+
+xx <- geocode(london_sites)
+
+# Add a location column to xx
+xx$location <- sub(", London", "", london_sites)
+
+# Add a geom_points layer
+ggmap(london_ton_13) + 
+  geom_point(data = xx, aes(col = location), size = 6)
+```
+
+Nice! How do you like your map? It looks so cool!.
+
+## Combine Carthographic and Choropleths Maps
+
+Instead of plotting points on a cartographic map, you can also draw polygons, similar to what you saw earlier in this chapter.
+
+The polygons come from the shapefile for the German states that you used previously. You'll use the data frame version, `bundes`, because it's more flexible. The data frame is already available in your workspace along with a `ggmap` of Germany, so you can get started straight away!
+
+```{r combine-cartho-and-choropleths, fig.align='center', message=FALSE}
+# get_map of Germany
+germany_06 <- get_map (location = "Germany")
+
+# Plot map and polygon on top:
+ggmap(germany_06) +
+  geom_polygon(data = bundes,
+               aes(x = long, y = lat, group = group),
+               fill = NA, col = "red") +
+  coord_map()
+```
+
+Great! As usual, the possibilities with ggplot2-based plots are practically endless!
 
 ## Animations
 
-Feel free to use the `knitr` infrastructure with dozens of tunable options in
-your document.
+Animations are a great tool for dealing with dense temporal data, but actually they can be useful as a great exploratory tool for any integer or categorical variable. There are several ways to produce animations in R. 
 
-```{r fig.width=6, fig.height=6, fig.align='center'}
-set.seed(123)
-n <- 1000
-x1  <- matrix(rnorm(n), ncol = 2)
-x2  <- matrix(rnorm(n, mean = 3, sd = 1.5), ncol = 2)
-x   <- rbind(x1, x2)
-head(x)
-smoothScatter(x, xlab = "x1", ylab = "x2")
+* The most cumbersome is to produce individual output files in a `for loop` and then using an external program to compile that into an animated gif or movie. 
+* The next best thing is to use the `animation` package, which saves you from having to externalize the procedure. It can all be done within R. 
+* Here we'll look at `gganimate` which goes one step further and acts as a wrapper for the `animation` package when using `ggplot2` objects. This allows for easy animations when applicable. 
+
+A very effective example of advanced animations is the motion chart developed by Hans Rosling currently professor of international health at the Karolinska Institute in Stockholm and founder of `gapminder`. The `gapminder` project contains UN data on `life expectancy` and `GDP` among many other variables for many countries. In this example we'll look at those two variables plus population and continent as depicted in the dataframe below. We'll try to see the trend over time. As this point, we'll probably make a plot which looks something like the plot below. The aesthetic mapping we use should be clear: population is mapped to size, continent to color, life expectancy is on the y-axis, and gdp per cap is on the x-axis. The problem here is that there is too much information. We may imagine that we could use facets to produce individual plots for each country, but there are 142 countries. We could do that for continents since there are only 5, but that will still not solve the problem of how to represent time for each country. 
+
+Han's solution was to produce a motion chart. A full motion chart has controls for adjusting the time, switching the aesthetic mappings and geoms. We'll take a look of how to make a simple motion chart in the exercises. Here, we'll make a basic form of a motion chart, which will just be a basic animation that cycles through each year. The resulting plot allows you to see how both gdp and life expectancy have both increased around the world. To do this, we'll use a new aesthetic, `frame`, which will be used as a time point in our animations. We use the frame aesthetic like we use other aesthetics we've seen previously such as x, y, size, color, fill, etc. As I mentioned we are not limited to using the year. For example, we could have switched our aesthetic mappings and cycle through each country. We can also adjust the speed at which each image is cycled allowing more time to look at each plot or speeding up the process to give the impression of continuous fluid change. Since, we can save our animations as standalone images, they can be embedded in presentations or websites without any additional software requirement. Or, we can play them in the viewer quickly moving between plots using the forward and reverse controls. 
+
+Let's take a look at another example where we can get a sense of continuous change. Here we consider population size predictions. This animation which is a minimum working example of a publication quality version recently published by Kyle Walker depicts the population prediction for Japan for the coming decades. We have 4 variables: 
+
+* The population prediction will be mapped onto the x-axis,
+* Age onto the y-axis.
+* Sex onto color, and 
+* The animation results from mapping year onto the frame aesthetic. 
+
+The nature of this data gives an impression of fluidity as we watch how the population is expected to change in the coming years in Japan. 
+
+```{r gapminder, message=FALSE, fig.align='center'}
+library(gapminder)
+
+glimpse(gapminder)
+
+# gapminder %>% ggplot( aes(year, pop)) +
+#   geom_point() +
+#   facet_grid(continent ~ .) +
+#   scale_y_log10()
+
+h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
+h_dat <- droplevels(subset(gapminder, country %in% h_countries))
+h_dat$country <- with(h_dat, reorder(country, lifeExp, max))
+ggplot(h_dat, aes(x = year, y = lifeExp)) +
+  geom_line(aes(color = country)) +
+  scale_colour_manual(values = country_colors) +
+  guides(color = guide_legend(reverse = TRUE))
+
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp, 
+                      colour = continent,
+                      size = pop)) +
+  geom_point(alpha = 0.6) + # details omitted
+  scale_x_log10()
 ```
 
-You can include code snippets of languages other than R, but note that
-the block header has no curly brackets around the language name.
+### The Population Pyramid
 
-```cpp
-// [[Rcpp::export]]
-NumericVector timesTwo(NumericVector x) {
-    return x * 2;
+Animations are particularly useful for temporal or geospatial data, and they are surprisingly easy to make! Here, you simply loop over the time variable in your dataset, composing a new plot for each subset in the data. These individual images are then cataloged in an animated GIF file.
+
+To show this you'll use a great animated population pyramid that was presented on the [Revolutions blog](https://blog.revolutionanalytics.com/2016/02/japans-ageing-population-animated-with-r.html). There are many more adjustments you could have made to the plot, but we'll just make a barebones version here.
+
+```{r population-pyramid, fig.align='center', message=FALSE}
+# Load Japan data
+
+japan <- read_delim("datasets/japanPOP.txt", delim = "\t")
+
+# Inspect structure of japan
+str(japan)
+
+# Finish the code inside saveGIF
+
+saveGIF <- function(x, y){
+
+  # Loop through all time points
+  # Create a series of plots using a for loop. 
+  # Use i to iterate over unique(japan$time). 
+  # Inside for loop, each time create a subset of japan for which japan$time == i. 
+  # Call this subset data.
+  for (i in unique(japan$time)) {
+
+    # Subset japan: data
+    data <- subset(japan, time == i)
+
+    # Finish the ggplot command
+    p <- ggplot(data, aes(x = AGE, y = POP, fill = SEX, width = 1)) +
+      coord_flip() +
+      geom_bar(data = data[data$SEX == "Female",], stat = "identity") +
+      geom_bar(data = data[data$SEX == "Male",], stat = "identity") +
+      ggtitle(i)
+
+    print(p)
+
+  }
+  # movie.name = "pyramid.gif", interval = 0.1
 }
+# saveGIF(x = "pyramid.gif", y = 0.1)
 ```
 
-You can also write math expressions, e.g. $Y = X\beta + \epsilon$,
-footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+### Animations with gganimate
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(iris, 10))
+Another method of making animations is to use the `gganimate` package. This provides the `gg_animate()` function, which is basically a convenient wrapper for the functions in the `animation` package, so it's pretty useful for straight-forward plots. `gg_animate()` provides a new aesthetic argument, `frame`, that allows you to side-step having to establish a for loop for each time point, like you did in the previous example.
+
+Here you'll see another example of making an animation, to cycle through years and look at changing linear models. The dataset is the `Vocab` data frame from the `car` package which you encountered in the previous course. It's already available in your workspace.
+
+
+```{r fig.width=6, fig.height=6, fig.align='center', message=FALSE}
+library(car)
+library(gganimate)
+
+# # Update the static plot
+# p <- ggplot(Vocab, aes(x = education, y = vocabulary,
+#                        color = year, group = year,
+#                        frame = year, cumulative = TRUE)) +
+#   stat_smooth(method = "lm", se = FALSE, size = 3)
+# 
+# # Call gg_animate on p
+# x <- gg_animate(p, filename = "vocab.gif", interval = 1.0)
+# 
+# x
 ```
 
-## Stay Tuned
 
-Please visit the [development page](http://github.com/yixuan/prettydoc/) of the 
-`prettydoc` package for latest updates and news. Comments, bug reports and
-pull requests are always welcome.
