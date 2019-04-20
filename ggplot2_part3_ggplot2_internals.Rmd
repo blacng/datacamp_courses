@@ -1,0 +1,493 @@
+---
+title: "Data Visualization with ggplot2 (Part 3)"
+subtitle: "ggplot2 internals (Chapter 3)"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    df_print: kable
+    toc: yes
+    toc_depth: 4
+  # prettydoc::html_pretty:
+  #   theme: cayman
+  #   highlight: github
+  #   toc: yes
+  #   toc_depth: 4
+  bibliography: dataviz.bib
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Load Libraries
+
+```{r load-libraries, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+# library(ggplot2movies)
+library(tidyr)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+library(grid)
+library(ggthemes)
+library(forcats)
+library(GGally)
+library(here)
+library(hexbin)
+```
+
+## Grid Graphics
+
+We will delve into the internals of `ggplot2`. To begin we're going to explore the grid graphics system. The functions and concepts of this video will provide an idea of how graphics work in R. There are essentially two plotting systems in R: 
+
+1. Base Package
+2. Grid graphics
+
+### Base Package
+
+We saw base package earlier in the series. The base package treats the graphic device as a static canvas as shown below. We can accessory functions like `abline` to add visual elements to an already existing plot. 
+
+```{r base-package, fig.align='center'}
+# a scatter plot of mtcars variable wt and mpg 
+
+plot(mtcars$wt, mtcars$mpg, pch = 16, col = "#00000080")
+abline(lm(mpg ~ wt, data = mtcars), col = "red")
+
+# base package - change labels
+plot(mtcars$wt, mtcars$mpg, pch = 16, col = "#00000080")
+abline(lm(mpg ~ wt, data = mtcars), col = "red")
+mtext("Weight", 1, 3)
+mtext("mpg (US gallons)", 2, 3)
+
+# base package - change dots
+plot(mtcars$wt, mtcars$mpg, pch = 16, col = "#00000080")
+abline(lm(mpg ~ wt, data = mtcars), col = "red")
+points(mtcars$wt, mtcars$mpg, pch = 16,
+col = "#C3212766", cex = 2)
+
+# base package - restart
+plot(mtcars$wt, mtcars$mpg, pch = 16, col = "#C3212766",
+     cex = 2, xlab = "Weight", ylab = "mpg (US gallons)")
+abline(lm(mpg ~ wt, data = mtcars), col = "red")
+```
+
+The `grid` package was developed by Paul Murell to overcome the deficiencies in the base package. It doesn't actually make plots by itself, it provides a set of low level functions that are used to construct complex plots. 
+
+> `ggplot2` is built on top of grid graphics
+
+Two important components to grid graphics:
+
+1. The ability to create a variety of graphic outputs
+2. The ability to layer and position outputs with **viewports**
+
+### Viewport Basics (1)
+
+To get familiar with grid graphics, you'll begin with using some `grid` functions. The `grid` package is already loaded into your R session, so you can get started straight away!
+
+Note: In DataCamp's learning interface, each change you make to the plot will appear as a new plot, so you can see the effect of each command.
+
+```{r viewport_basics_1, fig.align='center'}
+# Draw rectangle in null viewport
+grid.rect(gp = gpar(fill = "grey90"))
+# vp <- viewport(x = 0.5, y = 0.5, w = 0.5, h = 0.5,
+#                just = "center")
+# pushViewport(vp)
+
+# Write text in null viewport
+grid.text("null viewport")
+
+# Draw a line
+grid.lines(x = c(0, 0.75), y = c(0.25, 1),
+          gp = gpar(lty = 2, col = "red"))
+```
+
+### Viewport Basics (2)
+
+The code from the previous exercise that populates the null viewport with some basic shapes is already available. Let's take the next step and start manipulating the stack of viewports.
+
+```{r viewport_basics_2, fig.align='center'}
+# Populate null viewport
+grid.rect(gp = gpar(fill = "grey90"))
+grid.text("null viewport")
+grid.lines(x = c(0,0.75), y = c(0.25, 1),
+           gp = gpar(lty = 2, col = "red"))
+
+# Create new viewport: vp
+vp <- viewport(x = 0.5, y = 0.5, w = 0.5, h = 0.5, just = "center")
+
+# Push vp
+pushViewport(vp)
+
+# Populate new viewport with rectangle
+grid.rect(gp = gpar(fill = "blue"))
+```
+
+### Build a Plot from Scratch (1)
+
+Using the viewports, you can create plots, manipulating the space as needed.
+
+In this exercise you'll establish your grid viewport and in the following exercise you'll populate it with values.
+
+```{r build_port_from_scratch_1, fig.align='center'}
+# 1 - Create plot viewport: pvp
+mar <- c(5, 4, 2, 2)
+pvp <- plotViewport(mar)
+
+# 2 - Push pvp
+pushViewport(pvp)
+
+# 3 - Add rectangle
+grid.rect(gp = gpar(fill = "grey80"))
+
+# Create data viewport: dvp
+dvp <- dataViewport(xData = mtcars$wt, yData = mtcars$mpg)
+
+# 4 - Push dvp
+pushViewport(dvp)
+
+# Add two axes
+grid.xaxis()
+grid.yaxis()
+
+```
+
+Great job! You're on your way to building a plot from scratch.
+
+### Build a Plot from Scratch (2)
+
+The work you did before to build a plot from scratch is already included. Now you're ready to add the points and the appropriate labels.
+
+```{r build_plot_from_scratch_2, fig.align='center'}
+# Work from before
+pushViewport(plotViewport(c(5, 4, 2, 2)))
+grid.rect(gp = gpar())
+pushViewport(dataViewport(xData = mtcars$wt, yData = mtcars$mpg))
+grid.xaxis()
+grid.yaxis()
+
+# 1 - Add text to x axis
+grid.text("Weight", y = unit(-3, "lines"))
+
+# 2 - Add text to y axis
+grid.text("MPG", x = unit(-3, "lines"), rot = 90)
+
+# 3 - Add points
+grid.points(x = mtcars$wt, y = mtcars$mpg, pch = 16)
+```
+
+Excellent! The basics of `ggplot2` are present here.
+
+### Modifying a Plot with grid.edit
+
+The commands you've coded up to now to create the plot are available in the editor. The great thing about `grid`, in comparison to `base`, is that you can name the different plot elements, so that you can access them and change them later on. You can do this with the `grid.edit()` function. Give it a try!
+
+```{r mod_plot_grid_edit, fig.align='center'}
+# Work from before
+pushViewport(plotViewport(c(5, 4, 2, 2)))
+grid.rect(gp = gpar())
+pushViewport(dataViewport(xData = mtcars$wt, yData = mtcars$mpg))
+grid.xaxis()
+grid.yaxis()
+
+# Work from before - add names
+grid.text("Weight", y = unit(-3, "lines"), name = "xaxis")
+grid.text("MPG", x = unit(-3, "lines"), rot = 90, name = "yaxis")
+grid.points(x = mtcars$wt, y = mtcars$mpg, pch = 16, name = "datapoints")
+
+# Edit "xaxis"
+grid.edit("xaxis", label = "Weight (1000 lbs)")
+
+# Edit "yaxis"
+grid.edit("yaxis", label = "Miles/(US) gallon")
+
+# Edit "datapoints"
+grid.edit("datapoints",
+          gp = gpar(col = "#C3212766", cex = 2)) 
+# cex = character expansion
+```
+
+Wonderful! This is a great looking-scatter plot.
+
+## Grid Graphics in ggplot2
+
+We can produce graphical objects typically called **grobs**.  
+
+|**Graphic Output**|**Graphics Object**|
+|:----------------:|:-----------------:|
+|grid.rect()       |rectGrob()         |
+|grid.lines()      |linesGrob()        |
+|grid.circle()     |circleGrob()       |
+|grid.polygon()    |polygonGrob()      |
+|grid.text()       |textGrob()         |
+
+Table 1: Graphics output and their respective objects.
+
+Underlying every `ggplot2` object is a collection of grobs. Let's take a look at the plot below. 
+
+```{r grobs_in_ggplot2, fig.align='center'}
+p <- ggplot(iris, aes(x = Sepal.Length,
+                      y = Sepal.Width,
+                      col = Species)) +
+  geom_point(alpha = 0.3, size = 5, shape = 16) +
+  # changed geom_smooth to stat_smooth
+  # same outcome
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_y_continuous("Width", limits = c(2, 4.5), expand = c(0,0)) +
+  scale_x_continuous("Length", limits = c(4, 8), expand = c(0,0)) +
+  coord_equal() +
+  ggtitle("Iris Sepals") +
+  theme(rect = element_blank())
+p
+
+# generate grob table for plot p
+g <- ggplotGrob(p) 
+g 
+```
+
+### Exploring the gTable
+
+In the previous chapter you saw _graphical outputs_ using a variety of `grid` functions. _Graphical Objects_, aka _Grobs_, are the object form of these items and can be found in your `ggplot2` plots. Let's take a look at how these grobs are stored in `ggplot` objects.
+
+```{r exploring_grobs, fig.align='center'}
+# A simple plot p
+p <- ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) + geom_point()
+
+# Create gtab with ggplotGrob()
+gtab <- ggplotGrob(p)
+
+# Print out gtab
+gtab
+
+# Extract the grobs from gtab
+g <- gtab$grobs
+
+# Draw only the legend
+legend_index <- which(vapply(g, inherits, what = "gtable", logical(1)))
+grid.draw(g[[legend_index]])
+```
+
+Nice work! We can grab any grob of interest from the gTable.
+
+### Modifying the gTable
+
+You can visualize the layout of a `gTable` object with `gtable_show_layout()`. In the layout plot, each segment is labelled with its position.
+
+The legend, that you can access with `g[[legend_index]]`, is a `gTable` itself, so you can also show its layout. It's perfectly possible to update this layout by adding new graphical objects, similar to what you saw in the video.
+
+```{r modify_gtable, fig.align='center'}
+library(gtable)
+
+# Code from before
+p <- ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) + geom_point()
+gtab <- ggplotGrob(p)
+g <- gtab$grobs
+legend_index <- which(vapply(g, inherits, what = "gtable", logical(1)))
+grid.draw(g[[legend_index]])
+
+# 1 - Show layout of legend grob
+gtable_show_layout(g[[legend_index]])
+
+# Create text grob
+my_text <- textGrob(label = "Motor Trend, 1974", gp = gpar(fontsize = 7, col = "gray25"))
+
+# 2 - Use gtable_add_grob to modify original gtab
+new_legend <- gtable_add_grob(gtab$grobs[[legend_index]], my_text, 3, 2)
+
+# 3 - Update in gtab
+gtab$grobs[[legend_index]] <- new_legend
+
+# 4 - Draw gtab
+grid.draw(gtab)
+```
+
+Wonderful! Now that we can access every grob, we can also change them to meet any need we have.
+
+## ggplot2 Objects
+
+Let's try to understand the internals of the ggplot2 object. 
+
+```{r navigating_a_ggplot2_object}
+names(p)
+p$data
+p$layers
+p$scales
+p$theme
+p$coordinates
+p$facet
+p$plot_env
+p$labels
+```
+
+When you create a plot to be displayed on a screen or a file, the plot is rendered by the `ggplot_build()` function. If we take a look at `ggplot_build(p)`, we notice three elements are shown: data, panel, and plot. The first two are the main output. The data contains the list of dataframes, one for each layer and the panel object contains all information about the axes such as limits and breaks. The last element is the plot. 
+
+`ggplot_build` is called when we print information to the screen so it contains information that have been calculated from specific statistics function such as histogram binning, box plots, and density plots, which are not found in the original data but are used in the plot. If we want to manipulate a `ggplot_build` object, we can use a `gtable`
+
+### Exploring ggplot objects
+
+`ggplot` objects are basically just a named list that contains the information to make the actual plot. Here you'll explore the structure of this object.
+
+```{r xplor_ggplot_objects, fig.align='center'}
+# Simple plot p
+p <- ggplot(mtcars, aes(x = wt, y = mpg, col = factor(cyl))) + geom_point()
+
+# Examine class() and names()
+class(p)
+names(p)
+
+# Print the scales sub-list
+p$scales$scales
+
+# Update p
+p <- p +
+  scale_x_continuous("Length", limits = c(4, 8), expand = c(0, 0)) +
+  scale_y_continuous("Width", limits = c(2, 4.5), expand = c(0, 0))
+
+# Print the scales sub-list
+p$scales$scales
+```
+
+Nice one! This is pretty detailed, but the more we can access out objects the more custom our visualisations become.
+
+### ggplot_build and ggplot_gtable
+
+In the viewer we have produced a box plot of the mtcars dataset (called p) that you'll use to explore two key ggplot functions for accessing the object internals: `ggplot_build()` and `ggplot_gtable()`.
+
+`ggplot_build()` is executed when you want to display or save an actual ggplot plot. It takes the data input and produces the visual output.
+
+```{r ggplot_build_ggplot_gtable}
+# Box plot of mtcars: p
+p <- ggplot(mtcars, aes(x = factor(cyl), y = wt)) + geom_boxplot()
+
+# Create pbuild
+pbuild <- ggplot_build(p)
+
+# a list of 3 elements
+names(pbuild)
+
+# Print out each element in pbuild
+pbuild$data
+pbuild$layout
+pbuild$plot
+
+# Create gtab from pbuild
+gtab <- ggplot_gtable(pbuild)
+
+# Draw gtab
+grid.draw(gtab)
+```
+
+Good job! Now you can see what's happening under-the-hood when you print out a plot.
+
+### Extracting Details
+
+In the video you saw how to change the clipping parameters of a gTable object. Here, you'll see something more practical: how to extract calculated values.
+
+Many geoms are associated with underlying descriptive statistics which are calculated and then plotted. In these cases you actually don't have the actual values that were plotted. Of course, these values are stored under the hood and you can access them in the results from ggplot_build(). This can be particularly useful for box plots. For example, since there are many methods for calculating Q1 and Q3, if you calculate your IQR and outliers outside of ggplot2 you may end up using a different method and get different results. Sometimes you want to have exactly the values that were plotted.
+
+```{r extracting_plot_details}
+# Box plot of mtcars: p
+p <- ggplot(mtcars, aes(x = factor(cyl), y = wt)) + geom_boxplot()
+
+# Build pdata
+pdata <- ggplot_build(p)$data
+
+# confirm that the first element of the list is a data frame
+class(pdata[[1]])
+
+# Isolate this data frame
+my_df <- pdata[[1]]
+
+# The x labels
+my_df$group <- c("4", "6", "8")
+
+# Print out specific variables
+my_df[c(1:6, 11)]
+```
+
+Good job! Sometimes you want to get specific information that was used to creat a plot.
+
+## gridExtra
+
+```{r gridExtra, message=FALSE}
+library(plyr)
+library(gridExtra)
+
+my_plots <- dlply(mtcars, .(cyl), function(df) {
+  ggplot(df, aes(mpg, wt)) +
+    geom_point() +
+    xlim(range(mtcars$mpg)) +
+    ylim(range(mtcars$wt)) +
+    ggtitle(paste(df$cyl[1], "cylinders"))})
+
+length(my_plots)
+
+names(my_plots)
+```
+
+
+### Arranging plots (1)
+The functions in gridExtra allow you to arrange any number of plots in a variety of ways. Since you can access the legend as a separate object, that means you can also arrange multiple plots with a single legend, as shown in the viewer. This is a good alternative to faceting, since with facets it's not possible to set a different geom for each sub-plot. Here, you can combine any variety of plots and use a consistent color scale with only one legend to unify the whole image.
+
+To do this you'll create a new arrange graphical object, using grid.arrange(), which will combine several pre-existing grobs. Just like with grid.rect() and rectGrob() there are two versions of the arrange grob, one grid.arrange() produces a graphics output, which means you just draw the item to the viewer, and arrangeGrob() which returns a graphical object, aka grob which can be further manipulated.
+
+In this exercise, you'll just create your objects and arrange them using grid.arrange(). In the first steps you created two basic plots, g1 and g2. In the next exercise you'll see what to do about the legend.
+
+```{r arranging_plots_1, fig.align='center'}
+# Add a theme (legend at the bottom)
+g1 <- ggplot(mtcars, aes(wt, mpg, col = cyl)) +
+  geom_point(alpha = 0.5) +
+  theme(legend.position = "bottom")
+
+# Add a theme (no legend)
+g2 <- ggplot(mtcars, aes(disp, fill = cyl)) +
+  geom_histogram(position = "identity", alpha = 0.5, binwidth = 20) +
+  theme(legend.position = "none")
+
+# Load gridExtra
+library(gridExtra)
+
+# Call grid.arrange()
+grid.arrange(g1, g2, ncol = 2)
+```
+
+Cool! Eventually you want to isolate the legend and have it appear as the image in the viewer, so you can let ggplot arrange it in a horizontal layout for us.
+
+### Arranging plots (2)
+
+In the previous exercise you did a bare-bones arrangement of plots, but it would be nicer if the plot looks like the one that's shown in the viewer. You can imagine that you have three panels, not two. There are two asymmetrical rows, the small second row is where the legend is, and two symmetrical columns, where the plots are.
+
+To obtain this plot you need to extract the legend. You already saw this in previous exercises and it has already been done for you; the legend is available as my_legend. Next you need to arrange all the items appropriately.
+
+```{r arranging_plots_2, fig.align='center'}
+# ggplot2, grid and gridExtra have been loaded for you
+# Definitions of g1 and g2
+g1 <- ggplot(mtcars, aes(wt, mpg, col = cyl)) +
+  geom_point() +
+  theme(legend.position = "bottom")
+
+g2 <- ggplot(mtcars, aes(disp, fill = cyl)) +
+  geom_histogram(binwidth = 20) +
+  theme(legend.position = "none")
+
+# Extract the legend from g1
+my_legend <- ggplotGrob(g1)$grobs[[legend_index]]  
+
+# Create g1_noleg
+g1_noleg <- g1 + 
+    theme(legend.position = "none")
+
+# Calculate the height: legend_height
+legend_height <- sum(my_legend$heights)
+
+# Arrange g1_noleg, g2 and my_legend
+grid.arrange(g1_noleg, g2, my_legend,
+             layout_matrix = matrix(c(1, 3, 2, 3), ncol = 2),
+             heights = unit.c(unit(1, "npc") - legend_height, legend_height))
+
+```
+
+Great work! If ggplot2 doesn't provide enough customization possibilities, there's always gridExtra
