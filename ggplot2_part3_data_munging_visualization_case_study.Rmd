@@ -1,0 +1,61 @@
+---
+title: "Data Visualization with ggplot2 (Part 3)"
+subtitle: "Data Munging and Visualization Case Study (Chapter 4)"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    df_print: kable
+    toc: yes
+    toc_depth: 4
+  # prettydoc::html_pretty:
+  #   theme: cayman
+  #   highlight: github
+  #   toc: yes
+  #   toc_depth: 4
+  bibliography: dataviz.bib
+---
+
+## Case Study I - Bag Plot
+
+In this chapter, we're going to wrap up our three part series on `ggplot2` by learning to create and use our own layers. `ggplot(2.0)` introduced the ability to write your own extensions. This is one of the newest and most flexible features of the package and we'll see it in action in this chapter. This is a better version of what we did at the end of the second course. There we wrote a function to calculate and draw a mosaic plot. Extensions go one step further by allowing us to make our own `geom` or `stat` layer, which combines statistics and plotting. As an example we are going to create a **bag plot**. Bag plot was developed by John Tukey (the originator of the box plot). Actually, it is not really surprising since bag plots are basically 2D box plots. In the first chapter we saw 2D density plots, so here we can pick up the conversation and complete the picture with 2D box plots.
+
+Imagine the case of having two continuous variables we want to compare. Recall that we may consider this a single continuous variable grouped to a second factor variable as shown below. If we just want two box plots then the solution is fairly straightforward. However, we don't know the relationship between any two individual data points. One solution will be to connect each data point in a **slope plot** style visualization, but there are some obvious drawbacks. For example, it is difficult to see the distribution of slopes, we'll have to make another plot with just that information and perhaps use those values to draw a box plot. This may be a good solution in some situations since we can see the distribution of the differences in each value not just two independent distributions. However, we can also imagine a situation where two groups are represented in two distinct variables. This will lend itself nicely to making a scatter plot or as we say earlier a 2D density plot.       
+
+```{r boxplots, fig.align='center'}
+# I want create a tibble with a continuous variable and a factor variable 
+# library(reprex)
+# library(tibble)
+# library(forcats)
+
+df <- tibble(value = rnorm(99, 100, 0.5), type = rep(as_factor(c("1", "2", "3")), 33))
+
+df
+
+ggplot(df, aes(x = type, value)) +
+  geom_boxplot() +
+  facet_wrap(~type, ncol = 3, scales = "free")
+```
+
+The bag plot is kind of a cross between these two types. We want to see the details of important points, but we also want to know something about the distribution. There are three concentric rings around the innermost point, which is an approximation of the 2D median. The first ring is the **hull**, which outlines the center region (not that informative). The second ring is the **bag**, which contains 50% of the data points (this is similar to the IQR in the 1D plot). The third ring is the **loop**, which contains all points inside the fence, calculated as some factor enlargement of the bag (default = 3). All points outside the loop are drawn as individual points like the extreme value in a box plot. To obtain these values, we'll the `compute.bagplot` option in the `aplpack` package. This provides a named list containing vectors, matrices, and the dataframe of the coordinates of the individual data points. Corresponding to the polygon for the bag and loop.
+
+In the exercises we'll discover how to use these functions as a basis for a new stats layer. So, instead of using base package we can call on all the advantages of `ggplot2` to produce not only scatter plots but also bag plots, which will be just as flexible for any data set we choose to use. Although bag plots are a pretty useful tool they are not that popular partly because they are poorly understood, but so are box plots and people use them all the time. There are also trends as to what is considered a cool plot type so it maybe that bag plots become a hit someday. Perhaps having a `ggplot2` geom will facilate that. 
+
+My point here is not that you need to use bag plots instead of scatter plots. There are two quick points I want to make:
+
+1. I want to introduce you to a new plotting type.
+2. I want you to understand how to use ggplot2 extensions to create any kind of plot you may need for a specific data visualization solution. 
+
+We'll return to this in the case studies section later. 
+
+
+
+## Case Study II - Weather (Part 1)
+
+
+## Case Study II - Weather (Part 2)
+
+
+## Wrap Up
+
+
