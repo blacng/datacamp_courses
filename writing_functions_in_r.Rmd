@@ -14,17 +14,86 @@ knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
 
 ## A Quick Refresher
 
-`html_pretty` in the [**prettydoc**](http://github.com/yixuan/prettydoc/)
-package is a new output format for creating HTML document from R Markdown files.
-`html_pretty` is more lightweight compared to `html_document`, and is more
-stylish than `html_vignette` when creating package vignettes.
+### Writing a Function
 
-## When and How You Should Write a Function
+The function template is a useful way to writing a function:
 
-`html_pretty` currently supports three page themes (`cayman`, `tactile` and
-`architect`), and two syntax highlight styles (`github` and `vignette`).
-The theme and highlight styles can be specified in the document metadata,
-for example:
+> ```r my fun <- function (arg1, arg2) {
+        # body
+}
+
+`my_fun` is the variable that you want to assign your function to, `arg1` and `arg2` are arguments to the function. The template has two arguments, but you can specify any number of arguments, each separated by a comma. You then replace `# body` with the R code that your function will execute, referring to the inputs by the argument names you specified.
+
+```{r write_fx}
+my_fun <- function(arg1, arg2) {
+  # body
+}
+
+ratio <- function(x, y) {
+  x / y
+}
+
+ratio(3,4)
+
+# Get some metadata of the function ratio
+formals(ratio)
+body(ratio)
+environment(ratio)
+```
+
+The output of the `formals` shows us that the function, `ratio` is defined with two arguments: x and y. The `body` of the function is `x/y` and the `environment` is `global`.  
+
+### Arguments
+
+How did you call your function `ratio()` in the previous exercise? Do you remember the two ways to specify the arguments? (If you have forgotten it might be useful to review the video from Intermediate R)
+
+You probably either did `ratio(3, 4)`, which relies on matching by *position*, or `ratio(x = 3, y = 4)`, which relies on matching by *name*.
+
+For functions you and others use often, it's okay to use positional matching for the first one or two arguments. These are usually the data to be computed on. Good examples are the x argument to the summary functions (`mean()`, `sd()`, etc.) and the `x` and `y` arguments to plotting functions.
+
+However, beyond the first couple of arguments __you should always use matching by name__. It makes your code much easier for you and others to read. This is particularly important if the argument is optional, because it has a default. When overriding a default value, it's good practice to use the name.
+
+Notice that when you call a function, you should place a space around `=` in function calls, and always put a space after a comma, not before (just like in regular English). Using whitespace makes it easier to skim the function for the important components.
+
+```{r rewrite_fx_call}
+# Rewrite the call to follow best practices
+mean(x = c(1:9, NA), trim = 0.1, na.rm = TRUE)
+
+```
+
+
+### Scoping in R
+
+Scoping describes how R looks up values by name. If I assign the value `10` to a variable `x` (as shown below), scoping describes the process R uses to find the value 10. 
+
+```{r understanding_scoping_in_r}
+x <- 10
+
+f <- function() {
+x <- 1
+y <- 2
+c(x, y)
+}
+
+f()
+```
+
+When the above function (`f`) is called, the function begins execution in a new working environment. In this new environment x and y are defined, they are then put in a vector and returned. Unsurprisingly, the returned value is the vector 1, 2. 
+
+> If a variable referred to inside a function does not exist in the function's current working environment, R will look one level up.
+
+```{r}
+# x <- 2
+rm(x)
+
+g <- function() {
+y <- 1
+c(x, y)
+}
+
+g()
+```
+
 
 ```yaml
 output:
