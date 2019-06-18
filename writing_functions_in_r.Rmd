@@ -15,9 +15,9 @@ output:
 knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
 ```
 
-## A Quick Refresher
+# A Quick Refresher
 
-### Writing a Function
+## Writing a Function
 
 The function template is a useful way to writing a function:
 
@@ -48,7 +48,7 @@ environment(ratio)
 
 The output of the `formals` shows us that the function, `ratio` is defined with two arguments: x and y. The `body` of the function is `x/y` and the `environment` is `global`.  
 
-### Arguments
+## Arguments
 
 How did you call your function `ratio()` in the previous exercise? Do you remember the two ways to specify the arguments? (If you have forgotten it might be useful to review the video from Intermediate R)
 
@@ -65,8 +65,21 @@ Notice that when you call a function, you should place a space around `=` in fun
 mean(x = c(1:9, NA), trim = 0.1, na.rm = TRUE)
 ```
 
+### Function output
 
-### Scoping in R
+Consider the following function that takes a numeric value, x, as input:
+
+```r 
+f <- function(x) {
+  if (TRUE) {
+    return(x + 1)
+  }
+  x
+}
+```
+What will be the result of calling f(2)? **3**.  Great job! The body of the conditional is always evaluated and the function returns early without ever running `x`.
+
+## Scoping in R
 
 Scoping describes how R looks up values by name. If I assign the value `10` to a variable `x` (as shown below), scoping describes the process R uses to find the value 10. 
 
@@ -160,12 +173,50 @@ a
 
 This also means any local variable created in the function are never available on the global.  environment. 
 
-#### Summary
+### Summary
 
 * When you call a function, a new environment is made for the function to do its work
 * The new environment is populated with the argument values
 * Objects are looked for first in this environment
 * If they are not found, they are looked for in the environment that the function was created in
+
+### Testing your understanding of scoping (1)
+
+The next few questions are designed to test your understanding of scoping. For first timers, these concepts will be hard and you might not get it the first time through. We decided to include it in the first chapter because it's good to know now, so when something unexpected happens, you know what to come back to and review.
+
+For now, take a careful look at the function featured in each question. Try to predict what the function will return without running it! Being able to reason about a function is an important skill for R programmers.
+
+Consider the following:
+
+```r 
+y <- 10
+f <- function(x) {
+  x + y
+}
+```
+What will f(10) return? **20**. Correct! Because y is not passed in as an argument to the function, R looks outside of the function environment. 
+
+### Testing your understanding of scoping (2)
+
+```r 
+y <- 10
+f <- function(x) {
+  y <- 5
+  x + y
+}
+```
+What will f(10) return? **15**. Nice one! **The value of x is passed in as an argument to the function** and the value of y is defined inside of the function. 
+
+### Testing your understanding of scoping (3)
+
+```r 
+f <- function(x) {
+  y <- 5
+  x + y
+}
+f(5)
+```
+Now, what will typing `y` return? An error. Correct! Even though y is set equal to 5 within the body of the function, the object does not exist in the global environment. 
 
 ```yaml
 output:
@@ -174,7 +225,7 @@ output:
     highlight: github
 ```
 
-## Functional Programming
+## Data Structures
 
 Feel free to use the `knitr` infrastructure with dozens of tunable options in
 your document.
