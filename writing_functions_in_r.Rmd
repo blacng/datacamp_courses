@@ -18,9 +18,11 @@ knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
 
 The function template is a useful way to writing a function:
 
-> ```r my fun <- function (arg1, arg2) {
+```r 
+my fun <- function (arg1, arg2) {
         # body
 }
+```
 
 `my_fun` is the variable that you want to assign your function to, `arg1` and `arg2` are arguments to the function. The template has two arguments, but you can specify any number of arguments, each separated by a comma. You then replace `# body` with the R code that your function will execute, referring to the inputs by the argument names you specified.
 
@@ -82,9 +84,9 @@ When the above function (`f`) is called, the function begins execution in a new 
 
 > If a variable referred to inside a function does not exist in the function's current working environment, R will look one level up.
 
-```{r}
-# x <- 2
-rm(x)
+```{r scoping_1}
+x <- 2
+# rm(x)
 
 g <- function() {
 y <- 1
@@ -92,6 +94,41 @@ c(x, y)
 }
 
 g()
+```
+
+> Scoping describes where, not when, to look for a value. This means the returned value of a function could depend on when you call it. 
+ 
+```{r scoping_2}
+f <- function() x
+x <- 15
+f()
+
+x <- 20
+f()
+
+```
+
+* The behavior shown above reflects an undesirable behavior of a function. This is why when you create a function **make sure your function does not depend on variables other than the arguments**. We'll more about this in Chapter 5 on robust functions. 
+
+> Lookup by name works exactly the same when the name refers to a function. 
+
+```{r lookup_fx_by_name}
+l <- function(x) x + 1
+m <- function() {
+  l <- function(x) x * 2
+  l(10)
+}
+m()
+```
+
+When you the function `m` is called and it reaches the line call `l` with the value, **10**, R uses the `l` function defined locally i.e. `x * 2` and returns **20**. 
+
+If it is obvious you are using a name like a function, R ignores the function object when it looks it up. Here is a tricky example.
+
+```{r}
+c <- 3
+c(c = c)
+
 ```
 
 
