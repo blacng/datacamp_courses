@@ -3,9 +3,12 @@ title: "Writing Functions in R"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+  html_document:
+    theme: united
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE, cache=FALSE}
@@ -35,7 +38,7 @@ ratio <- function(x, y) {
   x / y
 }
 
-ratio(3,4)
+ratio(3, 4)
 
 # Get some metadata of the function ratio
 formals(ratio)
@@ -60,7 +63,6 @@ Notice that when you call a function, you should place a space around `=` in fun
 ```{r rewrite_fx_call}
 # Rewrite the call to follow best practices
 mean(x = c(1:9, NA), trim = 0.1, na.rm = TRUE)
-
 ```
 
 
@@ -72,9 +74,9 @@ Scoping describes how R looks up values by name. If I assign the value `10` to a
 x <- 10
 
 f <- function() {
-x <- 1
-y <- 2
-c(x, y)
+  x <- 1
+  y <- 2
+  c(x, y)
 }
 
 f()
@@ -89,8 +91,8 @@ x <- 2
 # rm(x)
 
 g <- function() {
-y <- 1
-c(x, y)
+  y <- 1
+  c(x, y)
 }
 
 g()
@@ -105,7 +107,6 @@ f()
 
 x <- 20
 f()
-
 ```
 
 * The behavior shown above reflects an undesirable behavior of a function. This is why when you create a function **make sure your function does not depend on variables other than the arguments**. We'll more about this in Chapter 5 on robust functions. 
@@ -123,14 +124,48 @@ m()
 
 When you the function `m` is called and it reaches the line call `l` with the value, **10**, R uses the `l` function defined locally i.e. `x * 2` and returns **20**. 
 
-If it is obvious you are using a name like a function, R ignores the function object when it looks it up. Here is a tricky example.
+If it is obvious you are using a name like a function, R ignores the function object when it looks it up. Here is a tricky example. 
 
-```{r}
+```{r tricky_fx_example}
 c <- 3
 c(c = c)
-
 ```
 
+`c` is being used in 3 ways:
+
+1. As a function and R correctly finds the `c` function and combines values into a vector. 
+2. `c` is being used as a name. 
+3. `c` refers to a value, which R looks up and finds it's 3. 
+
+> Every time a function is called it gets a clean working environment. This means different calls to the same function are completely independent. 
+
+```{r demo_of_fx_clean_envir}
+j <- function() {
+  if (!exists("a")) {
+    a <- 1
+  } else {
+    a <- a + 1
+  }
+  print(a)
+}
+```
+
+Regardless of how many times you call `j`, it will always return 1. Since, each time it is called the working environment is empty. `a` is created in this working environment, but the environment disappears as soon as `j` exits. 
+
+```{r call_j}
+j()
+
+a
+```
+
+This also means any local variable created in the function are never available on the global.  environment. 
+
+#### Summary
+
+* When you call a function, a new environment is made for the function to do its work
+* The new environment is populated with the argument values
+* Objects are looked for first in this environment
+* If they are not found, they are looked for in the environment that the function was created in
 
 ```yaml
 output:
@@ -147,9 +182,9 @@ your document.
 ```{r fig.width=6, fig.height=6, fig.align='center'}
 set.seed(123)
 n <- 1000
-x1  <- matrix(rnorm(n), ncol = 2)
-x2  <- matrix(rnorm(n, mean = 3, sd = 1.5), ncol = 2)
-x   <- rbind(x1, x2)
+x1 <- matrix(rnorm(n), ncol = 2)
+x2 <- matrix(rnorm(n, mean = 3, sd = 1.5), ncol = 2)
+x <- rbind(x1, x2)
 head(x)
 smoothScatter(x, xlab = "x1", ylab = "x2")
 ```
