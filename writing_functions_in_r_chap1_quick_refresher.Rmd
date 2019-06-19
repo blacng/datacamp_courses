@@ -1,5 +1,6 @@
 ---
 title: "Writing Functions in R"
+subtitle: "A Quick Refresher"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
@@ -340,24 +341,6 @@ tricky_list[["model"]][["coefficients"]][["wt"]]
 
 Extracting the 4th element with `[]` brackets returns a list with a single element containing a list with two elements i.e. a list containing the `d` element. If instead we use the `[[]]`, we'll remove one level of the hierarchy and simply get a list with two elements i.e. the `d` element itself. 
 
-```cpp
-// [[Rcpp::export]]
-NumericVector timesTwo(NumericVector x) {
-    return x * 2;
-}
-```
+# For Loops
 
-You can also write math expressions, e.g. $Y = X\beta + \epsilon$,
-footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(iris, 10))
-```
-
-## Advanced Input and Output
-
-Please visit the [development page](http://github.com/yixuan/prettydoc/) of the 
-`prettydoc` package for latest updates and news. Comments, bug reports and
-pull requests are always welcome.
-
-## Robust Functions
