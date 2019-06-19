@@ -13,6 +13,11 @@ output:
 
 ```{r setup, include=FALSE, cache=FALSE}
 knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+
+
+library(styler)
+# style_dir(".")
+library(lintr)
 ```
 
 # A Quick Refresher
@@ -227,21 +232,113 @@ output:
 
 ## Data Structures
 
-Feel free to use the `knitr` infrastructure with dozens of tunable options in
-your document.
+There are two types of vectors in R: **atomic vectors** and **lists**. 
 
-```{r fig.width=6, fig.height=6, fig.align='center'}
-set.seed(123)
-n <- 1000
-x1 <- matrix(rnorm(n), ncol = 2)
-x2 <- matrix(rnorm(n, mean = 3, sd = 1.5), ncol = 2)
-x <- rbind(x1, x2)
-head(x)
-smoothScatter(x, xlab = "x1", ylab = "x2")
+* Atomic vectors are the most basic types of objects in R. There are six types of atomic vectors: 1. logical; 2. integer; 3. double; 4. character; 5. complex; and 6. raw. 
+
+* Lists a.k.a recursive vectors i.e. because a list can contain other lists. 
+
+* The content of an atomic vector are always of one type whereas lists can contain heterogenous elements or types. 
+
+Every vector has two key properties: 1. type, which we can query using the `typeof()` function and length accessed using the `length()` function. 
+
+```{r typeof_and_length}
+typeof(letters)
+typeof(1:10)
+length(letters)
+x <- list("a", "b", 1:10)
+length(x)
 ```
 
-You can include code snippets of languages other than R, but note that
-the block header has no curly brackets around the language name.
+In R, additional metadata can be added to a vector through attributes. This allows for a definition of what we call **augmented vectors**, which are more complicated data structures. 
+
+```{r null}
+typeof(NULL)
+length(NULL)
+```
+
+### Missing Values
+
+Another important object in R is `NULL`. `NULL` is often used to indicate the absence of a vector and correspondingly the NULL object has zero length. In contrast to the absence of an entire vector, the absence of values inside a vector is represented by `NA` a.k.a missing value. On its own, `NA` is a length(1) logical vector. There are actually many types of NA, one for each atomic vector. Usually, you'll find NA has an element inside a vector indicating that a particular value was unobserved or unobtainable. The `is.na()` function returns a logical vector with `TRUE` at each element which is missing and `FALSE` otherwise. 
+
+```{r missing_values}
+typeof(NA)
+length(NA)
+x <- c(1, 2, 3, NA, 5)
+x
+is.na(x)
+```
+
+> The most important characteristic of missing values is that they are contagious. 
+
+```{r missing_values_contagion}
+NA + 10
+NA / 2
+NA > 5
+10 == NA
+NA == NA
+```
+
+Basic math with a missing value such as addition or multiplication always results in a missing value. Similarly any logical comparison with a missing value returns a missing value. 
+
+### Lists
+
+* Lists are useful because they can contain heterogeneous objects. 
+* This means they are ideal for returning complicated objects like the regression model returned from the `lm()` function. 
+* Lists are created with the `list()` function.
+* Can be subsetted with `[]`, `[[]]`, or `$`
+  * `[]` extracts a sublist
+  * `[[]]` and `$` extract elements and remove a level of hierachy. 
+
+```{r lists}
+head(mtcars)
+lm1 <- lm(mpg ~ cyl + hp, data = mtcars)
+list(lm1)
+
+a <- list(
+  a = 1:3, # a integer vector
+  b = "a string", # a length 1 character vector
+  c = pi, # a length 1 double
+  d = list(-1, -5) # a list itself with two elements each containing a length 1 double 
+)
+
+str(a[4])
+str(a[[4]])
+str(a[[4]][1])
+str(a[[4]][[1]])
+
+tricky_list <- list(
+  nums = c(0.06745791, 0.36954304,  2.51526552,  1.30933924,  1.58325586, -0.41531123, 1.36575524,  0.05463618,  1.28920087, -1.13952230),
+  y = FALSE, FALSE, FALSE, FALSE, FALSE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE,
+  x = list("hello!", "hi!", "goodbye!", "bye!"),
+  model = lm(mpg ~ wt, data = mtcars)
+)
+
+# 2nd element in tricky_list
+typeof(tricky_list[[2]])
+
+# Element called x in tricky_list
+typeof(tricky_list[['x']])
+
+# 2nd element inside the element called x in tricky_list
+typeof(tricky_list[['x']][[2]])
+
+# Guess where the regression model is stored
+names(tricky_list)
+
+# Use names() and str() on the model element
+names(tricky_list[['model']])
+str(tricky_list[['model']])
+
+# Subset the coefficients element
+tricky_list[["model"]][["coefficients"]] 
+coef(tricky_list[["model"]])
+
+# Subset the wt element
+tricky_list[["model"]][["coefficients"]][["wt"]]
+```
+
+Extracting the 4th element with `[]` brackets returns a list with a single element containing a list with two elements i.e. a list containing the `d` element. If instead we use the `[[]]`, we'll remove one level of the hierarchy and simply get a list with two elements i.e. the `d` element itself. 
 
 ```cpp
 // [[Rcpp::export]]
