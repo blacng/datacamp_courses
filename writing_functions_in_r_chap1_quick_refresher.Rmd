@@ -343,4 +343,119 @@ Extracting the 4th element with `[]` brackets returns a list with a single eleme
 
 # For Loops
 
+for loops are used for iteration. 
+
+```{r for_loops_refresh}
+primes_list <- list(2, 3, 5, 7, 11, 13)
+
+for (i in 1:length(primes_list)) { # sequence
+  print(primes_list[[i]])          # body
+}
+```
+
+There are three parts common to all for loops:
+
+1. **Sequence**: The sequence describes two things: 1. The *name* we'll give to the object that defines the iteration (`i` in the example above); 2. The *value* this index should iterate on (the integers 1 up to the length of `primes_list`). 
+2. **Body**: The body is whatever comes between `{}` (curly braces) and describes the operation to iterate back to our index `i` (in this case print the ith element of `primes_list`). 
+3. **Output**: The final part of a for loop is the definition of where to store the result. Our loop here doesn't actually have this part. It prints to the screen rather than saving the output. 
+
+Another example
+
+```{r for_loop_over_df_example}
+df <- data.frame(
+a = rnorm(10),
+b = rnorm(10),
+c = rnorm(10),
+d = rnorm(10)
+)
+
+for (i in 1:ncol(df)) {    # sequence the index i starting from the 1st up to the number of columns
+  print(median(df[[i]]))   # body print the median of the ith column of df
+}
+
+# Trying to do the same thing using dplyr
+# I believe there is a way to do using the map function
+# df %>% summarise(med_a = median(df[["a"]]),
+#                  med_b = median(df[["b"]]),
+#                  med_c = median(df[["c"]]),
+#                  med_d = median(df[["d"]]))
+```
+
+Moving forward you'll learn:
+
+* A safer way to generate the sequence using the `seq_along()` function.
+* Saving output instead of printing it. 
+
+## A Better Way to Sequence
+
+Let's take a look at the sequence component of our `for` loop:
+
+> i in 1:ncol(df)
+
+Each time our `for` loop iterates, `i` takes the next value in `1:ncol(df)`. This is a pretty common model for a sequence: a sequence of consecutive integers designed to index over one dimension of our data.
+
+What might surprise you is that this isn't the best way to generate such a sequence, especially when you are using `for` loops inside your own functions. Let's look at an example where `df` is an empty data frame:
+
+```{r wrong_seq_approach, echo=FALSE}
+df <- data.frame()
+1:ncol(df)
+
+for (i in 1:ncol(df)) {
+  print(median(df[[i]]))
+}
+```
+
+Our sequence is now the somewhat non-sensical: 1, 0. You might think you wouldn't be silly enough to use a `for` loop with an empty data frame, but once you start writing your own functions, there's no telling what the input will be.
+
+A better method is to use the `seq_along()` function. This function generates a sequence along the index of the object passed to it, but handles the empty case much better.
+
+```{r right_seq_approach}
+# Replace the 1:ncol(df) sequence
+for (i in seq_along(df)) {
+  print(median(df[[i]]))
+}
+
+# Create an empty data frame
+empty_df <- data.frame()
+
+# Repeat for loop to verify there is no error
+for (i in seq_along(empty_df)) {
+   print(median(empty_df[[i]]))
+}
+```
+
+
+## Keeping output
+
+Our `for` loop does a good job displaying the column medians, but we might want to store these medians in a vector for future use.
+
+Before you start the loop, you must always allocate sufficient space for the output, let's say an object called `output`. This is very important for efficiency: if you grow the `for` loop at each iteration (e.g. using `c()`), your `for` loop will be very slow.
+
+A general way of creating an empty vector of given length is the `vector()` function. It has two arguments: the type of the vector (`"logical"`, `"integer`"`, "double"`, `"character"`, etc.) and the `length` of the vector.
+
+Then, at each iteration of the loop you must store the output in the corresponding entry of the output vector, i.e. assign the result to `output[[i]]`. (You might ask why we are using double brackets here when `output` is a vector. It's primarily for _generalizability_: this subsetting will work whether output is a vector or a list.)
+
+Let's edit our loop to store the medians, rather than printing them to the console.
+
+```{r keeping_output}
+set.seed(1223)
+df <- data.frame(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+# Create new double vector: output
+output <- vector(mode = "double", length = ncol(df))
+
+# Alter the loop
+for (i in seq_along(df)) {
+  # Change code to store result in output
+  output[[i]] <- median(df[[i]])
+}
+
+# Print output
+print(output) # -0.21955819  0.74141858 -0.05103184 -0.15877850
+```
 
