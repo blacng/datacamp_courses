@@ -1,0 +1,133 @@
+---
+title: "Writing Functions in R"
+subtitle: "When and How You Should Write a Function"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: united
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float: true
+---
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
+
+
+library(styler)
+# style_dir(".")
+library(lintr)
+```
+
+# Why should you write a function?
+
+Take a look at the code below. At a high level it looks as if we are repeating the same operation four times: we are transforming four columns in `df` in the same way. If you look closely, you'll notice that we take a column, substract the smallest value in the column and then divide by the range of that column. The goal of this code is to rescale the range of each column between (0, 1), but the repetition makes it hard to see that intent. It also makes it really hard to see mistakes. 
+
+```{r motivating_a_need_for_fx}
+df$a <- (df$a - min(df$a, na.rm = TRUE)) /
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$b <- (df$b - min(df$b, na.rm = TRUE)) /
+  (max(df$a, na.rm = TRUE) - min(df$b, na.rm = TRUE))
+df$c <- (df$c - min(df$c, na.rm = TRUE)) /
+  (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
+df$d <- (df$d - min(df$d, na.rm = TRUE)) /
+  (max(df$d, na.rm = TRUE) - min(df$d, na.rm = TRUE))
+
+```
+
+## How was this code written?
+
+1. I figured out how to rescale a column.
+2. Then, once I was confident that I had gotten it right, I copied and pasted the code and then replaced each reference to column `a` with the appropriate column name (`b`, `c`, `d`). You can see how this can easily lead to mistakes. 
+
+## How can you prevent this problem from happening?
+
+This is Hadley Wickham's rule of thumb for when to stop copying-and-pasting and writing a function: as soon you've copied-and-pasted twice (so you've now got three copies of the code), it's time to write a function. There are other benefits to writing a function: even though we'll still repeat the same command four times, it's much easier to pick up mistakes since it takes less time to understand the intent of the code, we can spend more effort checking the correctness. Also, if we decide later that we want to do a different sort of operation, it's clear what we need to change. You might notice that there is still a lot of duplication here. Later in the course you'll learn how to do functional programming with the `purrr` package to reduce this even further. 
+
+```{r}
+set.seed(1223)
+df <- data.frame(
+  a = rnorm(10, mean = 5, sd = 1),
+  b = rnorm(10, mean = 5, sd = 1),
+  c = rnorm(10, mean = 5, sd = 1),
+  d = rnorm(10, mean = 5, sd = 1)
+)
+glimpse(df)
+```
+
+## Start with a snippet of code
+
+We have a snippet of code that successfully rescales a column to be between 0 and 1:
+
+>(df$a - min(df$a, na.rm = TRUE)) /  
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+
+Our goal over the next few exercises is to turn this snippet, written to work on the `a` column in the data frame `df`, into a general purpose `rescale01()` function that we can apply to any vector.
+
+The first step of turning a snippet into a function is to examine the snippet and decide how many inputs there are, then rewrite the snippet to refer to these inputs using temporary names. These inputs will become the arguments to our function, so choosing good names for them is important. (We'll talk more about naming arguments in a later exercise.)
+
+In this snippet, there is one input: the numeric vector to be rescaled (currently `df$a`). What would be a good name for this input? It's quite common in R to refer to a vector of data simply as x (like in the [mean](http://www.rdocumentation.org/packages/base/functions/mean) function), so we will follow that convention here.
+
+```{r}
+rescale01 <- function(x) {
+  (x - rng[1]) / 
+    (rng[2] - rng[1])
+}
+df$a <- rescale01(df$a)
+```
+
+```{r}
+# Define example vector x
+x <- c(1:10, NA)
+
+# Rewrite this snippet to refer to x
+(x - min(x, na.rm = TRUE)) /
+  (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+```
+
+## Rewrite for clarity
+
+Our next step is to examine our snippet and see if we can write it more clearly.
+
+Take a close look at our rewritten snippet. Do you see any duplication?
+
+>(x - min(x, na.rm = TRUE)) /
+  (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+One obviously duplicated statement is `min(x, na.rm = TRUE)`. It makes more sense for us just to calculate it once, store the result, and then refer to it when needed. In fact, since we also need the maximum value of `x`, it would be even better to calculate the _range_ once, then refer to the first and second elements when they are needed.
+
+What should we call this intermediate variable? You'll soon get the message that using good names is an important part of writing clear code! I suggest we call it `rng` (for "range").
+
+```{r}
+# Define example vector x
+x <- c(1:10, NA)
+
+# Define rng
+rng <- range(x, na.rm = TRUE)
+
+# Rewrite this snippet to refer to the elements of rng
+(x - rng[1]) / 
+  (rng[2] - rng[1])
+```
+
+## Finally turn it into a function
+
+What do you need to write a function? You need a **name** for the function, you need to know the **arguments** to the function, and you need code that forms the **body** of the function.
+
+We now have all these pieces ready to put together. It's time to write the function!
+
+```{r turn_it_into_fx}
+# Define example vector x
+x <- c(1:10, NA) 
+
+# Use the function template to create the rescale01 function
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+# Test your function, call rescale01 using the vector x as the argument
+rescale01(x)
+```
+
+# How should you write a function?
