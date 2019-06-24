@@ -45,7 +45,7 @@ df$d <- (df$d - min(df$d, na.rm = TRUE)) /
 
 This is Hadley Wickham's rule of thumb for when to stop copying-and-pasting and writing a function: as soon you've copied-and-pasted twice (so you've now got three copies of the code), it's time to write a function. There are other benefits to writing a function: even though we'll still repeat the same command four times, it's much easier to pick up mistakes since it takes less time to understand the intent of the code, we can spend more effort checking the correctness. Also, if we decide later that we want to do a different sort of operation, it's clear what we need to change. You might notice that there is still a lot of duplication here. Later in the course you'll learn how to do functional programming with the `purrr` package to reduce this even further. 
 
-```{r}
+```{r create_a_sample_df}
 set.seed(1223)
 df <- data.frame(
   a = rnorm(10, mean = 5, sd = 1),
@@ -53,7 +53,7 @@ df <- data.frame(
   c = rnorm(10, mean = 5, sd = 1),
   d = rnorm(10, mean = 5, sd = 1)
 )
-glimpse(df)
+# glimpse(df)
 ```
 
 ## Start with a snippet of code
@@ -69,7 +69,7 @@ The first step of turning a snippet into a function is to examine the snippet an
 
 In this snippet, there is one input: the numeric vector to be rescaled (currently `df$a`). What would be a good name for this input? It's quite common in R to refer to a vector of data simply as x (like in the [mean](http://www.rdocumentation.org/packages/base/functions/mean) function), so we will follow that convention here.
 
-```{r}
+```{r wrong_approach_to_fx_def, echo=FALSE}
 rescale01 <- function(x) {
   (x - rng[1]) / 
     (rng[2] - rng[1])
@@ -77,7 +77,7 @@ rescale01 <- function(x) {
 df$a <- rescale01(df$a)
 ```
 
-```{r}
+```{r def_a_sample_vector}
 # Define example vector x
 x <- c(1:10, NA)
 
@@ -99,7 +99,7 @@ One obviously duplicated statement is `min(x, na.rm = TRUE)`. It makes more sens
 
 What should we call this intermediate variable? You'll soon get the message that using good names is an important part of writing clear code! I suggest we call it `rng` (for "range").
 
-```{r}
+```{r rewrite_fx_for_clarity}
 # Define example vector x
 x <- c(1:10, NA)
 
@@ -131,3 +131,121 @@ rescale01(x)
 ```
 
 # How should you write a function?
+
+What we just worked through is a pattern for exactly how we think you should approach writing a function. Perhaps most importantly, we didn't start by trying to fill out the function snippet. Instead we started with a concrete problem to solve. 
+
+Here is a dataframe `df`. We want to scale column `a` to be between 0 and 1. 
+
+```{r create_df}
+set.seed(1223)
+df <- data.frame(
+  a = rnorm(10, mean = 5, sd = 1),
+  b = rnorm(10, mean = 5, sd = 1),
+  c = rnorm(10, mean = 5, sd = 1),
+  d = rnorm(10, mean = 5, sd = 1)
+)
+glimpse(df)
+```
+
+1. Start with a simple problem
+
+Start with a column that wasn't random. That way we know what the answer should be. 
+
+```{r how_to_write_a_fx_1}
+df <- data.frame(
+  a = 1:11,
+  b = rnorm(10, mean = 5, sd = 1),
+  c = rnorm(10, mean = 5, sd = 1),
+  d = rnorm(10, mean = 5, sd = 1)
+)
+
+# Output should be:
+seq(from = 0.0, to = 1.0, by = 0.1)
+```
+
+2. Get a working snippet of code
+
+Get a working snippet of code that solves our simple problem. 
+
+```{r how_to_write_a_fx_2}
+(df$a - min(df$a, na.rm = TRUE)) /  
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+```
+
+3. Rewrite to use temporary variables
+
+To turn a snippet into a function, we examine what the snippet should be then we rewrite the snippet to refer to these inputs using temporary variables. It can be useful at this point to rewrite our problem in terms of these variables to help test our snippet. 
+
+> (x - min(x, na.rm = TRUE)) /
+  (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+4. Rewrite for clarity
+
+We then a take careful look at our snippet and decide if we can write it in a clearer way. In our example we can make our intention clearer by extracting the calculation of the range. 
+
+```{r how_to_write_a_fx_4}
+x <- df$a
+
+rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+```
+
+
+5. Turn it into a function
+
+Only now, once we have a clearly-written snippet do we turn into a function
+
+```{r how_to_write_a_fx_5}
+x <- df$a
+
+# Use the function template to create the rescale01 function
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+# Test your function, call rescale01 using the vector x as the argument
+rescale01(x)
+```
+
+# Practice
+
+1. Start with a simple problem
+
+```{r simple_problem}
+# Define example vectors x and y
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3,  4)
+
+# Count how many elements are missing in both x and y
+sum(is.na(x) & is.na(y)) # or sum(is.na(x && y))
+```
+
+2. Rewrite snippet as function
+
+```{r rewrite_snippet_as_fx}
+# Define example vectors x and y
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3,  4)
+# Turn this snippet into a function: both_na()
+both_na <- function(x, y){
+  sum(is.na(x) & is.na(y))
+}
+```
+
+
+3. Put our function to use
+
+```{r}
+# Define x, y1 and y2
+x <-  c(NA, NA, NA)
+y1 <- c( 1, NA, NA)
+y2 <- c( 1, NA, NA, NA)
+# Call both_na on x, y1
+both_na(x, y1)
+# Call both_na on x, y2
+both_na(x, y2)
+```
+
+Nice! Are the answers what you expected? What should both_na(x, y2) return? You might argue it should return an error. You'll see how to handle this in a later chapter. 
+
+# How to write a good function? 
