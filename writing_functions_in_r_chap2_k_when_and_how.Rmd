@@ -388,3 +388,103 @@ mean_ci <- function(x, level = 0.95) {
 mean_ci(numeric(0))
 ```
 
+5. Rewrite a poorly-written function
+
+```{r poorly_written_function}
+f <- function(x, y) {
+  x[is.na(x)] <- y
+  cat(sum(is.na(x)), y, "\n")
+  x
+}
+```
+
+```{r test_function}
+# Define a numeric vector x with the values 1, 2, NA, 4 and 5
+x <- c(1, 2, NA, 4, 5)
+# Call f() with the arguments x = x and y = 3
+f(x = x, y = 3)
+# Call f() with the arguments x = x and y = 10
+f(x = x, y = 10)
+```
+
+a. Let's make it clear from its name
+
+Did you figure out what `f()` does? `f()` takes a vector `x` and replaces any missing values in it with the value `y`.
+
+Imagine you came across the line `df$z <- f(df$z, 0)` a little further on in the code. What does that line do? Now you know, it replaces any missing values in the column `df$z` with the value 0. But anyone else who comes across that line is going to have to go back and find the definition of `f` and see if they can reason it out.
+
+Let's rename our function and arguments to make it obvious to everyone what we are trying to achieve.
+
+```{r}
+df <- data.frame(
+  z = c(-0.9403678, 1.3296136, 
+        NA, 0.1831795, 
+        0.5811088, 1.7948628, 
+        NA, -1.8137820, 
+        1.4397629, -1.6145781)
+)
+# Rename the function f() to replace_missings()
+replace_missings <- function(x, replacement) {
+  # Change the name of the y argument to replacement
+  x[is.na(x)] <- replacement
+  cat(sum(is.na(x)), replacement, "\n")
+  x
+}
+# Rewrite the call on df$z to match our new names
+df$z <- replace_missings(x = df$z, replacement = 0)
+dplyr::glimpse(df)
+```
+
+b. Make the body more understandable
+
+Great! Now when someone comes across 
+
+> df$z <- replace_missings(df$z, replacement = 0)
+
+in your code, it's pretty obvious what you are trying to achieve. The body of our `replace_missings()` function is still a little messy. There is certainly some unnecessary duplication.
+
+```{r}
+replace_missings <- function(x, replacement) {
+  # Define is_miss
+  is_miss <- is.na(x)
+  
+  # Rewrite rest of function to refer to is_miss
+  x[is_miss] <- replacement
+  cat(sum(is_miss), replacement, "\n")
+  x
+}
+```
+
+c. Much better! But a few more tweaks
+
+Did you notice replace_missings() prints some output to the console? That output isn't exactly self-explanatory. It would be much nicer to say `"2 missing values replaced by the value 0"`. 
+
+It is also bad practice to use `cat()` for anything other than a `print()` method (a function designed just to display output). Having an important message just print to the screen makes it very hard for other people who might be programming with your function to capture the output and handle it appropriately. 
+
+The official R way to supply simple diagnostic information is the `message()` function. The unnamed arguments are pasted together with no separator (and no need for a newline at the end) and by default are printed to the screen.
+
+Let's make our function nicer for users by using `message()` and making the output self-contained.
+
+```{r}
+replace_missings <- function(x, replacement) {
+  is_miss <- is.na(x)
+  x[is_miss] <- replacement
+  
+  # Rewrite to use message()
+  message(sum(is_miss), " missing values replaced by the value ", replacement)
+  x
+}
+
+# Check your new function by running on df$z
+df <- data.frame(
+  z = c(-0.9403678, 1.3296136, 
+        NA, 0.1831795, 
+        0.5811088, 1.7948628, 
+        NA, -1.8137820, 
+        1.4397629, -1.6145781)
+)
+
+df$z <- replace_missings(df$z, replacement = 0)
+dplyr::glimpse(df)
+```
+

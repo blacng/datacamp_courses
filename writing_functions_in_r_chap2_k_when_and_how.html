@@ -11,7 +11,7 @@
 
 <meta name="author" content="Seun Odeyemi" />
 
-<meta name="date" content="2019-06-23" />
+<meta name="date" content="2019-06-24" />
 
 <title>Writing Functions in R</title>
 
@@ -1608,7 +1608,7 @@ div.tocify {
 <h1 class="title toc-ignore">Writing Functions in R</h1>
 <h3 class="subtitle">When and How You Should Write a Function</h3>
 <h4 class="author">Seun Odeyemi</h4>
-<h4 class="date">2019-06-23</h4>
+<h4 class="date">2019-06-24</h4>
 
 </div>
 
@@ -1925,6 +1925,99 @@ div.tocify {
 <a class="sourceLine" id="cb23-11" title="11"><span class="kw">mean_ci</span>(<span class="kw">numeric</span>(<span class="dv">0</span>))</a>
 <a class="sourceLine" id="cb23-12" title="12"><span class="co">#&gt; Warning: x was empty</span></a>
 <a class="sourceLine" id="cb23-13" title="13"><span class="co">#&gt; [1] -Inf  Inf</span></a></code></pre></div>
+<ol start="5" style="list-style-type: decimal">
+<li>Rewrite a poorly-written function</li>
+</ol>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">f &lt;-<span class="st"> </span><span class="cf">function</span>(x, y) {</a>
+<a class="sourceLine" id="cb24-2" title="2">  x[<span class="kw">is.na</span>(x)] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb24-3" title="3">  <span class="kw">cat</span>(<span class="kw">sum</span>(<span class="kw">is.na</span>(x)), y, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb24-4" title="4">  x</a>
+<a class="sourceLine" id="cb24-5" title="5">}</a></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"><span class="co"># Define a numeric vector x with the values 1, 2, NA, 4 and 5</span></a>
+<a class="sourceLine" id="cb25-2" title="2">x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="ot">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb25-3" title="3"><span class="co"># Call f() with the arguments x = x and y = 3</span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="kw">f</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb25-5" title="5"><span class="co">#&gt; 0 3</span></a>
+<a class="sourceLine" id="cb25-6" title="6"><span class="co">#&gt; [1] 1 2 3 4 5</span></a>
+<a class="sourceLine" id="cb25-7" title="7"><span class="co"># Call f() with the arguments x = x and y = 10</span></a>
+<a class="sourceLine" id="cb25-8" title="8"><span class="kw">f</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> <span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb25-9" title="9"><span class="co">#&gt; 0 10</span></a>
+<a class="sourceLine" id="cb25-10" title="10"><span class="co">#&gt; [1]  1  2 10  4  5</span></a></code></pre></div>
+<ol style="list-style-type: lower-alpha">
+<li>Let’s make it clear from its name</li>
+</ol>
+<p>Did you figure out what <code>f()</code> does? <code>f()</code> takes a vector <code>x</code> and replaces any missing values in it with the value <code>y</code>.</p>
+<p>Imagine you came across the line <code>df$z &lt;- f(df$z, 0)</code> a little further on in the code. What does that line do? Now you know, it replaces any missing values in the column <code>df$z</code> with the value 0. But anyone else who comes across that line is going to have to go back and find the definition of <code>f</code> and see if they can reason it out.</p>
+<p>Let’s rename our function and arguments to make it obvious to everyone what we are trying to achieve.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1">df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb26-2" title="2">  <span class="dt">z =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">0.9403678</span>, <span class="fl">1.3296136</span>, </a>
+<a class="sourceLine" id="cb26-3" title="3">        <span class="ot">NA</span>, <span class="fl">0.1831795</span>, </a>
+<a class="sourceLine" id="cb26-4" title="4">        <span class="fl">0.5811088</span>, <span class="fl">1.7948628</span>, </a>
+<a class="sourceLine" id="cb26-5" title="5">        <span class="ot">NA</span>, <span class="fl">-1.8137820</span>, </a>
+<a class="sourceLine" id="cb26-6" title="6">        <span class="fl">1.4397629</span>, <span class="fl">-1.6145781</span>)</a>
+<a class="sourceLine" id="cb26-7" title="7">)</a>
+<a class="sourceLine" id="cb26-8" title="8"><span class="co"># Rename the function f() to replace_missings()</span></a>
+<a class="sourceLine" id="cb26-9" title="9">replace_missings &lt;-<span class="st"> </span><span class="cf">function</span>(x, replacement) {</a>
+<a class="sourceLine" id="cb26-10" title="10">  <span class="co"># Change the name of the y argument to replacement</span></a>
+<a class="sourceLine" id="cb26-11" title="11">  x[<span class="kw">is.na</span>(x)] &lt;-<span class="st"> </span>replacement</a>
+<a class="sourceLine" id="cb26-12" title="12">  <span class="kw">cat</span>(<span class="kw">sum</span>(<span class="kw">is.na</span>(x)), replacement, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb26-13" title="13">  x</a>
+<a class="sourceLine" id="cb26-14" title="14">}</a>
+<a class="sourceLine" id="cb26-15" title="15"><span class="co"># Rewrite the call on df$z to match our new names</span></a>
+<a class="sourceLine" id="cb26-16" title="16">df<span class="op">$</span>z &lt;-<span class="st"> </span><span class="kw">replace_missings</span>(<span class="dt">x =</span> df<span class="op">$</span>z, <span class="dt">replacement =</span> <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb26-17" title="17"><span class="co">#&gt; 0 0</span></a>
+<a class="sourceLine" id="cb26-18" title="18">dplyr<span class="op">::</span><span class="kw">glimpse</span>(df)</a>
+<a class="sourceLine" id="cb26-19" title="19"><span class="co">#&gt; Observations: 10</span></a>
+<a class="sourceLine" id="cb26-20" title="20"><span class="co">#&gt; Variables: 1</span></a>
+<a class="sourceLine" id="cb26-21" title="21"><span class="co">#&gt; $ z &lt;dbl&gt; -0.9403678, 1.3296136, 0.0000000, 0.1831795, 0.5811088, 1.79...</span></a></code></pre></div>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Make the body more understandable</li>
+</ol>
+<p>Great! Now when someone comes across</p>
+<blockquote>
+<p>df<span class="math inline">\(z &lt;- replace_missings(df\)</span>z, replacement = 0)</p>
+</blockquote>
+<p>in your code, it’s pretty obvious what you are trying to achieve. The body of our <code>replace_missings()</code> function is still a little messy. There is certainly some unnecessary duplication.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">replace_missings &lt;-<span class="st"> </span><span class="cf">function</span>(x, replacement) {</a>
+<a class="sourceLine" id="cb27-2" title="2">  <span class="co"># Define is_miss</span></a>
+<a class="sourceLine" id="cb27-3" title="3">  is_miss &lt;-<span class="st"> </span><span class="kw">is.na</span>(x)</a>
+<a class="sourceLine" id="cb27-4" title="4">  </a>
+<a class="sourceLine" id="cb27-5" title="5">  <span class="co"># Rewrite rest of function to refer to is_miss</span></a>
+<a class="sourceLine" id="cb27-6" title="6">  x[is_miss] &lt;-<span class="st"> </span>replacement</a>
+<a class="sourceLine" id="cb27-7" title="7">  <span class="kw">cat</span>(<span class="kw">sum</span>(is_miss), replacement, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb27-8" title="8">  x</a>
+<a class="sourceLine" id="cb27-9" title="9">}</a></code></pre></div>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Much better! But a few more tweaks</li>
+</ol>
+<p>Did you notice replace_missings() prints some output to the console? That output isn’t exactly self-explanatory. It would be much nicer to say <code>&quot;2 missing values replaced by the value 0&quot;</code>.</p>
+<p>It is also bad practice to use <code>cat()</code> for anything other than a <code>print()</code> method (a function designed just to display output). Having an important message just print to the screen makes it very hard for other people who might be programming with your function to capture the output and handle it appropriately.</p>
+<p>The official R way to supply simple diagnostic information is the <code>message()</code> function. The unnamed arguments are pasted together with no separator (and no need for a newline at the end) and by default are printed to the screen.</p>
+<p>Let’s make our function nicer for users by using <code>message()</code> and making the output self-contained.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">replace_missings &lt;-<span class="st"> </span><span class="cf">function</span>(x, replacement) {</a>
+<a class="sourceLine" id="cb28-2" title="2">  is_miss &lt;-<span class="st"> </span><span class="kw">is.na</span>(x)</a>
+<a class="sourceLine" id="cb28-3" title="3">  x[is_miss] &lt;-<span class="st"> </span>replacement</a>
+<a class="sourceLine" id="cb28-4" title="4">  </a>
+<a class="sourceLine" id="cb28-5" title="5">  <span class="co"># Rewrite to use message()</span></a>
+<a class="sourceLine" id="cb28-6" title="6">  <span class="kw">message</span>(<span class="kw">sum</span>(is_miss), <span class="st">&quot; missing values replaced by the value &quot;</span>, replacement)</a>
+<a class="sourceLine" id="cb28-7" title="7">  x</a>
+<a class="sourceLine" id="cb28-8" title="8">}</a>
+<a class="sourceLine" id="cb28-9" title="9"></a>
+<a class="sourceLine" id="cb28-10" title="10"><span class="co"># Check your new function by running on df$z</span></a>
+<a class="sourceLine" id="cb28-11" title="11">df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb28-12" title="12">  <span class="dt">z =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">0.9403678</span>, <span class="fl">1.3296136</span>, </a>
+<a class="sourceLine" id="cb28-13" title="13">        <span class="ot">NA</span>, <span class="fl">0.1831795</span>, </a>
+<a class="sourceLine" id="cb28-14" title="14">        <span class="fl">0.5811088</span>, <span class="fl">1.7948628</span>, </a>
+<a class="sourceLine" id="cb28-15" title="15">        <span class="ot">NA</span>, <span class="fl">-1.8137820</span>, </a>
+<a class="sourceLine" id="cb28-16" title="16">        <span class="fl">1.4397629</span>, <span class="fl">-1.6145781</span>)</a>
+<a class="sourceLine" id="cb28-17" title="17">)</a>
+<a class="sourceLine" id="cb28-18" title="18"></a>
+<a class="sourceLine" id="cb28-19" title="19">df<span class="op">$</span>z &lt;-<span class="st"> </span><span class="kw">replace_missings</span>(df<span class="op">$</span>z, <span class="dt">replacement =</span> <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb28-20" title="20"><span class="co">#&gt; 2 missing values replaced by the value 0</span></a>
+<a class="sourceLine" id="cb28-21" title="21">dplyr<span class="op">::</span><span class="kw">glimpse</span>(df)</a>
+<a class="sourceLine" id="cb28-22" title="22"><span class="co">#&gt; Observations: 10</span></a>
+<a class="sourceLine" id="cb28-23" title="23"><span class="co">#&gt; Variables: 1</span></a>
+<a class="sourceLine" id="cb28-24" title="24"><span class="co">#&gt; $ z &lt;dbl&gt; -0.9403678, 1.3296136, 0.0000000, 0.1831795, 0.5811088, 1.79...</span></a></code></pre></div>
 </div>
 
 
