@@ -12,11 +12,10 @@ output:
     toc_float: true
 ---
 ```{r setup, include=FALSE, cache=FALSE}
-knitr::opts_chunk$set(error = TRUE, collapse = TRUE, comment = "#>")
-
-
+knitr::opts_chunk$set(error = TRUE, 
+                      collapse = TRUE, 
+                      comment = "#>")
 library(styler)
-# style_dir(".")
 library(lintr)
 ```
 
@@ -80,7 +79,6 @@ df$a <- rescale01(df$a)
 ```{r def_a_sample_vector}
 # Define example vector x
 x <- c(1:10, NA)
-
 # Rewrite this snippet to refer to x
 (x - min(x, na.rm = TRUE)) /
   (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
@@ -153,12 +151,11 @@ Start with a column that wasn't random. That way we know what the answer should 
 
 ```{r how_to_write_a_fx_1}
 df <- data.frame(
-  a = 1:11,
+  a = 1:10,
   b = rnorm(10, mean = 5, sd = 1),
   c = rnorm(10, mean = 5, sd = 1),
   d = rnorm(10, mean = 5, sd = 1)
 )
-
 # Output should be:
 seq(from = 0.0, to = 1.0, by = 0.1)
 ```
@@ -235,7 +232,7 @@ both_na <- function(x, y){
 
 3. Put our function to use
 
-```{r}
+```{r put_fx_to_use}
 # Define x, y1 and y2
 x <-  c(NA, NA, NA)
 y1 <- c( 1, NA, NA)
@@ -249,3 +246,81 @@ both_na(x, y2)
 Nice! Are the answers what you expected? What should both_na(x, y2) return? You might argue it should return an error. You'll see how to handle this in a later chapter. 
 
 # How to write a good function? 
+
+What maskes a good function? 
+
+1. Correctness: The first rule in creating a function is that said function solves a problem **correctly**. 
+2. Understandable: A good function must be understandable not only to R but to humans. Note: Functions are for humans and computers. The combination of being correct and understandable is powerful. It leads to obviously correct functions i.e. functions that are easily verifiable to humans to do exactly what they set out to do. 
+
+What does this code do?
+
+```{r guess_what_this_does, eval=FALSE}
+bar <- foo(bar, qux)
+```
+
+You are probably have a hard time figuring it out. What does the function `foo` do? What are the objects `bar` and `qux` doing? In isolation this line of code is meaningless. To figure it out we need to search back to earlier code to understand what these objects are. 
+
+Check out the line of code below
+
+```{r this_is_better, eval=FALSE}
+df2 <- arrange(df, qux)
+```
+
+It is surprisingly similar to the previous code, but some subtle clues help us figure out what might be happening. We can probably guess that we're creating a new dataframe by arranging the dataframe `df` according to something called `qux`. 
+
+> Just using good names helps us understand code with minimal context. 
+
+# Naming principles
+
+Note: This applies to objects, functions, or arguments. 
+
+1. Pick a consistent style for long names. 
+
+It is best to always use lower case and separating words in long names with an `_`. There are other conventions but it doesn't matter which convention you use but stick to it. Don't mix conventions in your code. 
+
+```{r use_good_names, eval=FALSE}
+# Good
+col_mins()
+row_maxes()
+# Bad
+newData <- c(old.data, todays_log)
+```
+
+2. Do not override existing variables or functions. 
+
+  * Don't define capital `T` or `F` because that can be confused with shorthand for `TRUE` or `FALSE`. 
+  * Don't call an object `c` or a new function `mean` since that can be confused for existing functions in R.  
+
+```{r donot_override_variables, eval=FALSE}
+# Bad
+T <- FALSE
+c <- 10
+mean <- function(x) sum(x)
+```
+
+3. When it comes to naming functions you should generally use **verbs** i.e. doing words since functions do things. For example, a function that imputes missing values might be called `impute_missing()` instead of `imputed()`. 
+
+4. Functions: Make sure your name describes what the function does. No matter how awesome your function is, `my_awesome_function()` is a bad name. 
+
+5. Arguments: You should follow the same good naming rules for arguments except arguments should be nouns i.e. naming words instead of verbs. 
+
+  a. Use common short names when appropriate:
+    * vectors can be referred to as `x`, `y`, or `z`.
+    * `df` usually refers to a dataframe.
+    * `i`, `j` are normally reserved for indices (typically rows and columns).
+    * `n`: length or number of rows
+    * `p`: number of columns
+  b. The order of the argument is important too. Arguments generally fall into two types: 1. Data arguments used to supply data to be computed on like `x` in the mean function and `x` and `y` in the `t.test` function below; 2. Detail arguments supply arguments that control the details of the computation. The mean function has an argument `na.rm` for determining how missing values should be treated. The t.test function has a whole host of arguments controlling the alternative hypothesis to be tested, the type of test, and the confidence level. You should always put data arguments first followed by detailed arguments. Detailed arguments should always be given default values.
+
+```{r order_of_arguments, eval=FALSE}
+mean(x, trim = 0, na.rm = FALSE, ...)
+
+t.test(x,
+  y = NULL,
+  alternative = c("two.sided", "less", "greater"),
+  mu = 0, paired = FALSE, var.equal = FALSE,
+  conf.level = 0.95, ...
+)
+```
+
+6. Make it clear what the function returns. 
