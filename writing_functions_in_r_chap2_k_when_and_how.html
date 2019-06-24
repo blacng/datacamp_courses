@@ -1772,8 +1772,8 @@ div.tocify {
 <a class="sourceLine" id="cb11-10" title="10"><span class="co">#&gt;  [1] 0.0000000 0.1111111 0.2222222 0.3333333 0.4444444 0.5555556 0.6666667</span></a>
 <a class="sourceLine" id="cb11-11" title="11"><span class="co">#&gt;  [8] 0.7777778 0.8888889 1.0000000</span></a></code></pre></div>
 </div>
-<div id="practice" class="section level1">
-<h1>Practice</h1>
+<div id="practice-1" class="section level1">
+<h1>Practice 1</h1>
 <ol style="list-style-type: decimal">
 <li>Start with a simple problem</li>
 </ol>
@@ -1871,6 +1871,60 @@ div.tocify {
 <ol start="6" style="list-style-type: decimal">
 <li>Make it clear what the function returns.</li>
 </ol>
+</div>
+<div id="practice-ii" class="section level1">
+<h1>Practice II</h1>
+<ol style="list-style-type: decimal">
+<li>Good function names</li>
+</ol>
+<p>Consider the following function, <code>f2()</code>, which has also been loaded into your workspace:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">f2 &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb20-2" title="2">  <span class="cf">if</span> (<span class="kw">length</span>(x) <span class="op">&lt;=</span><span class="st"> </span><span class="dv">1</span>) <span class="kw">return</span>(<span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb20-3" title="3">  x[<span class="op">-</span><span class="kw">length</span>(x)]</a>
+<a class="sourceLine" id="cb20-4" title="4">}</a></code></pre></div>
+<p><code>f2()</code> isn’t a very good function name! Which of the following would make a good name for this function? Answer: <code>remove_last()</code></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Argument names</li>
+</ol>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="co"># Rewrite mean_ci to take arguments named level and x</span></a>
+<a class="sourceLine" id="cb21-2" title="2">mean_ci &lt;-<span class="st"> </span><span class="cf">function</span>(level, x) {</a>
+<a class="sourceLine" id="cb21-3" title="3">  se &lt;-<span class="st"> </span><span class="kw">sd</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">length</span>(x))</a>
+<a class="sourceLine" id="cb21-4" title="4">  alpha &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>level</a>
+<a class="sourceLine" id="cb21-5" title="5">  half_alpha &lt;-<span class="st"> </span>alpha <span class="op">/</span><span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb21-6" title="6">  <span class="kw">mean</span>(x) <span class="op">+</span><span class="st"> </span>se <span class="op">*</span><span class="st"> </span><span class="kw">qnorm</span>(<span class="kw">c</span>(half_alpha, <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>half_alpha))</a>
+<a class="sourceLine" id="cb21-7" title="7">}</a></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Argument order</li>
+</ol>
+<p>Aside from giving your arguments good names, you should put some thought into what order your arguments are in and if they should have defaults or not.</p>
+<p>Arguments are often one of two types:</p>
+<ul>
+<li>Data arguments supply the data to compute on.</li>
+<li>Detail arguments control the details of how the computation is done.</li>
+</ul>
+<p>Generally, data arguments should come first. Detail arguments should go on the end, and usually should have default values.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="co"># Alter the arguments to mean_ci</span></a>
+<a class="sourceLine" id="cb22-2" title="2">mean_ci &lt;-<span class="st"> </span><span class="cf">function</span>(x, <span class="dt">level =</span> <span class="fl">0.95</span>) {</a>
+<a class="sourceLine" id="cb22-3" title="3">  se &lt;-<span class="st"> </span><span class="kw">sd</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">length</span>(x))</a>
+<a class="sourceLine" id="cb22-4" title="4">  alpha &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>level</a>
+<a class="sourceLine" id="cb22-5" title="5">  <span class="kw">mean</span>(x) <span class="op">+</span><span class="st"> </span>se <span class="op">*</span><span class="st"> </span><span class="kw">qnorm</span>(<span class="kw">c</span>(alpha <span class="op">/</span><span class="st"> </span><span class="dv">2</span>, <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>alpha <span class="op">/</span><span class="st"> </span><span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb22-6" title="6">}</a></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>Return statements One of your colleagues has noticed if you pass <code>mean_ci()</code> an empty vector it returns a confidence interval with missing values at both ends (try it: <code>mean_ci(numeric(0)))</code>. In this case, they decided it would make more sense to produce a warning <code>&quot;x was empty&quot;</code> and return <code>c(-Inf, Inf)</code> and have edited the function to be:</li>
+</ol>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">mean_ci &lt;-<span class="st"> </span><span class="cf">function</span>(x, <span class="dt">level =</span> <span class="fl">0.95</span>) {</a>
+<a class="sourceLine" id="cb23-2" title="2">  <span class="cf">if</span> (<span class="kw">length</span>(x) <span class="op">==</span><span class="st"> </span><span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb23-3" title="3">    <span class="kw">warning</span>(<span class="st">&quot;x was empty&quot;</span>, <span class="dt">call. =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb23-4" title="4">    <span class="kw">return</span>(<span class="kw">c</span>(<span class="op">-</span><span class="ot">Inf</span>, <span class="ot">Inf</span>))</a>
+<a class="sourceLine" id="cb23-5" title="5">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb23-6" title="6">    se &lt;-<span class="st"> </span><span class="kw">sd</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">length</span>(x))</a>
+<a class="sourceLine" id="cb23-7" title="7">    alpha &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>level</a>
+<a class="sourceLine" id="cb23-8" title="8">    <span class="kw">mean</span>(x) <span class="op">+</span><span class="st"> </span>se <span class="op">*</span><span class="st"> </span><span class="kw">qnorm</span>(<span class="kw">c</span>(alpha <span class="op">/</span><span class="st"> </span><span class="dv">2</span>, <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>alpha <span class="op">/</span><span class="st"> </span><span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb23-9" title="9">  }</a>
+<a class="sourceLine" id="cb23-10" title="10">}</a>
+<a class="sourceLine" id="cb23-11" title="11"><span class="kw">mean_ci</span>(<span class="kw">numeric</span>(<span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb23-12" title="12"><span class="co">#&gt; Warning: x was empty</span></a>
+<a class="sourceLine" id="cb23-13" title="13"><span class="co">#&gt; [1] -Inf  Inf</span></a></code></pre></div>
 </div>
 
 

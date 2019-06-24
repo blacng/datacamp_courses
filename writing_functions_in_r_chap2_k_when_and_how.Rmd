@@ -204,7 +204,7 @@ rescale01 <- function(x) {
 rescale01(x)
 ```
 
-# Practice
+# Practice 1
 
 1. Start with a simple problem
 
@@ -324,3 +324,67 @@ t.test(x,
 ```
 
 6. Make it clear what the function returns. 
+
+# Practice II
+
+1. Good function names
+
+Consider the following function, `f2()`, which has also been loaded into your workspace:
+
+```r 
+f2 <- function(x) {
+  if (length(x) <= 1) return(NULL)
+  x[-length(x)]
+}
+```
+`f2()` isn't a very good function name! Which of the following would make a good name for this function? Answer: `remove_last()`
+
+2. Argument names
+
+```{r}
+# Rewrite mean_ci to take arguments named level and x
+mean_ci <- function(level, x) {
+  se <- sd(x) / sqrt(length(x))
+  alpha <- 1 - level
+  half_alpha <- alpha / 2
+  mean(x) + se * qnorm(c(half_alpha, 1 - half_alpha))
+}
+```
+
+3. Argument order
+
+Aside from giving your arguments good names, you should put some thought into what order your arguments are in and if they should have defaults or not.
+
+Arguments are often one of two types:
+
+* Data arguments supply the data to compute on.
+* Detail arguments control the details of how the computation is done.
+
+Generally, data arguments should come first. Detail arguments should go on the end, and usually should have default values. 
+
+```{r}
+# Alter the arguments to mean_ci
+mean_ci <- function(x, level = 0.95) {
+  se <- sd(x) / sqrt(length(x))
+  alpha <- 1 - level
+  mean(x) + se * qnorm(c(alpha / 2, 1 - alpha / 2))
+}
+```
+
+4. Return statements
+One of your colleagues has noticed if you pass `mean_ci()` an empty vector it returns a confidence interval with missing values at both ends (try it: `mean_ci(numeric(0)))`. In this case, they decided it would make more sense to produce a warning `"x was empty"` and return `c(-Inf, Inf)` and have edited the function to be:
+
+```{r}
+mean_ci <- function(x, level = 0.95) {
+  if (length(x) == 0) {
+    warning("x was empty", call. = FALSE)
+    return(c(-Inf, Inf))
+  } else {
+    se <- sd(x) / sqrt(length(x))
+    alpha <- 1 - level
+    mean(x) + se * qnorm(c(alpha / 2, 1 - alpha / 2))
+  }
+}
+mean_ci(numeric(0))
+```
+
