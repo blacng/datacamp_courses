@@ -12,26 +12,362 @@ output:
     toc_float: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(error = TRUE, 
+                      collapse = TRUE, 
+                      comment = "#>")
+library(styler)
+library(lintr)
+library(purrr)
 ```
 
-## R Markdown
+# Why Functional Programming? 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+In this next section you are going to learn some alternatives to the for loop. If you've use R---even for a little while---I'm sure someone has told you that for loops are bad. (That's definitely not true). But there are some tools that make your life easier by writing the for loops for you. You are not going to be able to do anything you couldn't do before, but you'll be able to do it with greater ease. These are the tools of functional programming.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r using_map_in_purrr_package}
+means <- map_dbl(mtcars, mean)
+medians <- map_dbl(mtcars, median)
+means
+medians
 ```
 
-## Including Plots
+# Practice 1
 
-You can also embed plots, for example:
+1. Using a for loop to remove duplication
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Imagine we have a dataframe `df`:
+
+```{r }
+df <- data.frame(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+We want to compute the median of each column. You could do this with copy and paste.
+
+```{r}
+median(df[[1]])
+median(df[[2]])
+median(df[[3]])
+median(df[[4]])
+```
+
+But that's a lot of repetition! Let's start by seeing how we could reduce the duplication by using a for loop.
+
+```{r}
+# Initialize output vector
+output <- numeric(ncol(df))
+
+# Fill in the body of the for loop
+for (i in seq_along(df)) {            
+output[[i]] <- median(df[[i]], na.rm = TRUE)
+}
+
+# View the result
+output
+```
+
+2. Turning the for loop into a function
+
+Now, imagine you need to do this to another data frame `df2`. You copy and paste the `for` loop, and edit every reference to `df` to be `df2` instead.
+
+```{r turning_loop_to_fx}
+output <- numeric(ncol(df)) 
+for (i in seq_along(df2)) {            
+  output[[i]] <- median(df2[[i]])      
+}
+output
+```
+
+And then you realize you have another data frame `df3` for which you also want the column medians. You copy and paste ... and realize you've copied and pasted two times. Time to write a function!
+
+```{r create_col_median_fx}
+# Turn this code into col_median()
+col_median <- function(df) {
+  # initialize the output vector
+  output <- numeric(ncol(df))
+  # create for loop
+  for (i in seq_along(df)) {            
+    output[[i]] <- median(df[[i]])      
+}
+output
+}
+col_median(df)
+```
+
+3. What about column means?
+
+What if instead of medians of every column you actually want means?
+
+Let's write a `col_mean()` function that returns the vector of column means.
+
+```{r create_col_mean_fx}
+# Change col_median() to a col_mean() function to find column means
+col_mean <- function(df) {
+  # initialize the output vector
+  output <- numeric(ncol(df))
+  # create for loop
+  for (i in seq_along(df)) {            
+    output[[i]] <- mean(df[[i]])      
+}
+output
+}
+col_mean(df)
+```
+
+4. What about column standard deviations?
+
+You now have functions for column medians and means, what about one for standard deviations?
+
+```{r create_col_sd_fx}
+# Define col_sd() function
+col_sd <- function(df) {
+  # initialize the output vector
+  output <- numeric(ncol(df))
+  # create for loop
+  for (i in seq_along(df)) {            
+    output[[i]] <- sd(df[[i]])      
+}
+output
+}
+col_sd(df)
+```
+
+5. Uh oh ... time to write a function again
+
+We just copied and pasted the function `col_median` two times. That's a sure sign we need to write a function. How can we write a function that will take column summaries for any summary function we provide?
+
+Let's look at a simpler example first. Consider the functions `f1()`, `f2()` and `f3()` that take a vector `x` and return deviations from the mean value raised to the powers 1, 2, and 3 respectively:
+
+```{r create_f1_f2_f3}
+f1 <- function(x) abs(x - mean(x)) ^ 1
+f2 <- function(x) abs(x - mean(x)) ^ 2
+f3 <- function(x) abs(x - mean(x)) ^ 3
+```
+
+Hopefully, you would suggest writing a single function with two arguments: `x` _and_ `power`. That way, one function reproduces all the functionality of `f1()`, `f2()` and `f3()`, and more.
+
+```{r a_more_generalizable_fx}
+x <- c(1:10)
+# Add a second argument called power
+f <- function(x, power) {
+  # Edit the body to return absolute deviations raised to power
+  abs(x - mean(x)) ^ power
+}
+f(x,4)
+```
+
+# Using a function as an argument
+
+You just saw that we can remove the duplication in our set of summary functions by requiring the function doing the summary as an input. This leads to creating the `col_summary` function:
+
+```{r col_summary} 
+col_summary <- function(df, fun) {
+  output <- numeric(ncol(df))
+  for (i in seq_along(df)) {
+    output[[i]] <- fun(df[[i]])
+  }
+  output
+}
+```
+
+It may be kind of surprising that you can pass a function as an argument to another function, so let's verify first that it worked. We've found the column means and medians using our old `col_mean()` and `col_median()` functions. Your job is to repeat the calculations using `col_summary()` instead and verify that it
+works.
+
+Not only does `col_summary()` remove the duplication in the functions we've already written, it also allows us to apply any summary to the columns of a data frame. Verify this, by finding the column interquartile ranges using the function `IQR()`. (For more info, see ?IQR.)
+
+```{r}
+# Find the column medians using col_median() and col_summary()
+col_median(df)
+col_summary(df, fun = median)
+# Find the column means using col_mean() and col_summary()
+col_mean(df)
+col_summary(df, fun = mean)
+# Find the column IQRs using col_summary()
+col_summary(df, IQR)
+```
+
+# Introducing purrr
+
+Passing functions as arguments is a very powerful idea. An idea you've seen before in the `lapply()` and `sapply()` functions. For example, we could take the column mean of the dataframe, `df` in a similar way using:
+
+```{r compare_with_apply_functions}
+col_summary(df, mean)
+lapply(df, mean) # returns a list
+sapply(df, mean) # returns a vector
+vapply(df, mean, FUN.VALUE = double(1)) # need to vector type for the return value of FUN
+```
+
+With `col_summary()` you've essentially written your own version of `sapply()`. Now, it is time to introduce you to a family of functions that perform this kind of iteration: the `map()` functions in the `purrr` package. For example, one of these functions `map_dbl()` works exactly like `sapply()` and our `col_summary()` function. 
+
+```{r using_map_functions}
+map_dbl(df, mean)
+```
+
+Every map function in the purrr package works the same way. 
+
+```{r eval=FALSE}
+map_dbl(.x, .f, ...)
+```
+
+1. They take a vector `.x` as a first argument.
+2. Do something to each element by applying a function `.f` as a second argument. 
+3. The map function loops over the vector, applies a function, and returns a result. 
+
+While all the map functions work the same way, they do differ in their of objects they return. There is one map function for each type of vector.
+
+* `map()`---without a suffix---returns a list.
+* `map_dbl()` returns a double vector.
+* `map_lgl()` returns a logical vector.
+* `map_int()` returns a integer vector.
+* `map_chr()` returns a character vector. 
+
+The first argument `.x` is always a vector. But it's worth discussing the slight difference in the action of the map() function depending on the type of vector. So far we've been working with dataframes, if you pass a dataframe to a map function:
+
+```{r}
+df_new <- data.frame(a = 1:10, b = 11:20)
+map(df_new, mean)
+```
+
+`map()` iterates over the columns of the dataframe. Then the function in `.f` is applied to each column in `.x`. Here, map applies mean first to `a` column and then to be `b` column and returns the results as a list. If `.x` is a list, the `map()` function iterates over the elements in the list and returns a list. 
+
+```{r}
+l <- list(a = 1:10, b = 11:20)
+map(df, mean)
+```
+
+Similarly, the `map()` function  applies mean first to the `a` element and then to the `b` element and returns the result as a list. If `.x` is an atomic vector, the map function iterates over each element in the vector. Here, `map()` function  applies mean first to the `a` element---in this case the single number 1---and then to the `b` element---the single number 2---and returns the result as a list. 
+
+```{r}
+vec <- c(a = 1, b = 2)
+map(vec, mean)
+```
+
+# Advantages of the map functions in purrr
+
+The internals of the `map()` function are very similar to the `col_summary()` function we wrote. You might be asking why use these functions in the `purrr` package when we can easily write our own? There are few advantages:
+
+1. The map functions in purrr provides some useful shortcuts for specifying `.f` when it isn't as simple as calling a single function with a single argument. 
+2. The purrr functions are also more consistent than the base `sapply()` or `lapply()` functions, which makes them better for programming (Chapter 5). 
+3. Once, you master the functions in purrr since you don't have to write your own iteration functions, you'll find that it takes much less time to solve iteration problems. 
+
+# Practice II
+
+1. The map functions
+
+```{r map_fx_practice}
+# Load the purrr package
+# library(purrr)
+
+# Use map_dbl() to find column means
+map_dbl(df, mean)
+
+# Use map_dbl() to column medians
+map_dbl(df, median)
+
+# Use map_dbl() to find column standard deviations
+map_dbl(df, sd)
+```
+
+2. The argument to the map functions
+
+The map functions use the `...` ("dot dot dot") argument to pass along additional arguments to `.f` each time it’s called. For example, we can pass the `trim` argument to the `mean()` function:
+
+```{r eval=FALSE}
+map_dbl(df, mean, trim = 0.5)
+```
+
+Multiple arguments can be passed along using commas to separate them. For example, we can also pass the `na.rm` argument to `mean()`:
+
+```{r eval=FALSE}
+map_dbl(df, mean, trim = 0.5, na.rm = TRUE)
+```
+
+> You don't have to specify the arguments by name, but it is good practice!
+
+You may be wondering why the arguments to `map()` are `.x` and `.f` and not `x `and `f`? It's because `.x` and `.f` are very unlikely to be argument names you might pass through the ..., thereby preventing confusion about whether an argument belongs to `map()` or to the function being mapped.
+
+Let's get a bit of practice with this. We'll apply our new knowledge to a subset of the planes data frame available in the `nycflights13` package. Use `map_dbl()` to find the average and 5th percentile of each column in `planes`.
+
+```{r load_nycflights13_glimpse_planes_df, message=FALSE}
+library(nycflights13)
+library(dplyr)
+dplyr::glimpse(planes)
+planes <- planes %>% 
+  select(year, engines, seats, speed)
+```
+
+```{r}
+# Find the mean of each column
+map_dbl(planes, mean)
+# Find the mean of each column, excluding missing values
+map_dbl(planes, mean, na.rm = TRUE)
+# Find the 5th percentile of each column, excluding missing values
+map_dbl(planes, quantile, probs = c(0.05), na.rm = TRUE)
+```
+
+Great work! Other nice features of the map functions are that they're implemented in C, which makes them really fast, and that they generally preserve names from their input in the output. 
+
+3. Picking the right map function
+
+Choosing the right map function is important. You can always use map(), which will return a list. However, if you know what type of output you expect, you are better to use the corresponding function. That way, if you expect one thing and get another, you'll know immediately because the map function will return an error.
+
+For example, try running:
+
+```{r eval=FALSE}
+map_lgl(df, mean) 
+# Error: Can't coerce element 1 from a double to a logical
+```
+
+The map functions are what we call `type consistent`. This means you know exactly what type of output to expect regardless of the input. `map_lgl()` either returns either a logical vector or an error. `map_dbl()` returns either a double or an error.
+
+One way to check the output type is to run the corresponding function on the first element. For example, `mean(df[[1]])` returns a single numeric value, suggesting `map_dbl()`.
+
+Let's get some more practice with the map functions. We've created a new data frame, `df3`, in your workspace. Use a map function to find which columns are numeric, the type of each column, and a summary of each column.
+
+```{r picking_the_right_map_fx}
+df3 <- data.frame(
+  A = rnorm(10),
+  B = rep(LETTERS[seq(from = 1, to = 2)], times = 10),
+  C = c(1:10),
+  D = rnorm(10)
+)
+# Find the columns that are numeric
+map_lgl(df3, is.numeric)
+# Find the type of each column
+map_chr(df3, typeof)
+# Find a summary of each column
+map(df3, summary)
+```
+
+# Shortcuts in the map function
+
+1. Shortcuts for specifying .f
+
+```{r}
+# An anonymous function defined on the fly
+map(df, function(x) sum(is.na(x)))
+# An anonymous function defined using the formular shortcut
+map(df, ~ sum(is.na(.)))
+```
+
+2. Shortcuts when .f is [[
+
+```{r}
+list_of_results <- list(
+  list(a = 1, b = "A"),
+  list(a = 2, b = "C"),
+  list(a = 3, b = "D")
+)
+# an anonymous function
+map_dbl(list_of_results, function(x) x[["a"]])
+# string subsetting
+map_dbl(list_of_results, "a")
+# integer subsetting
+map_dbl(list_of_results, 1)
+```
+
