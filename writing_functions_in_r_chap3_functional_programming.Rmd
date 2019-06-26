@@ -1,5 +1,5 @@
 ---
-title: "Writing Functions in R"
+title: "Writing Functions in R (Chapter 3)"
 subtitle: "Functional Programming"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"

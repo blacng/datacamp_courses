@@ -1,5 +1,5 @@
 ---
-title: "Writing Functions in R"
+title: "Writing Functions in R (Chapter 2)"
 subtitle: "When and How You Should Write a Function"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
