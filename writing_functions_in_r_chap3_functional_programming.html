@@ -11,7 +11,7 @@
 
 <meta name="author" content="Seun Odeyemi" />
 
-<meta name="date" content="2019-06-25" />
+<meta name="date" content="2019-06-26" />
 
 <title>Writing Functions in R</title>
 
@@ -1608,7 +1608,7 @@ div.tocify {
 <h1 class="title toc-ignore">Writing Functions in R</h1>
 <h3 class="subtitle">Functional Programming</h3>
 <h4 class="author">Seun Odeyemi</h4>
-<h4 class="date">2019-06-25</h4>
+<h4 class="date">2019-06-26</h4>
 
 </div>
 
@@ -1643,13 +1643,13 @@ div.tocify {
 <a class="sourceLine" id="cb2-6" title="6">)</a></code></pre></div>
 <p>We want to compute the median of each column. You could do this with copy and paste.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">median</span>(df[[<span class="dv">1</span>]])</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; [1] 0.09398337</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; [1] 0.4259823</span></a>
 <a class="sourceLine" id="cb3-3" title="3"><span class="kw">median</span>(df[[<span class="dv">2</span>]])</a>
-<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; [1] -0.07335378</span></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; [1] -0.2469415</span></a>
 <a class="sourceLine" id="cb3-5" title="5"><span class="kw">median</span>(df[[<span class="dv">3</span>]])</a>
-<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; [1] 0.2441453</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; [1] -0.1513178</span></a>
 <a class="sourceLine" id="cb3-7" title="7"><span class="kw">median</span>(df[[<span class="dv">4</span>]])</a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; [1] -0.05061139</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; [1] 0.1187348</span></a></code></pre></div>
 <p>But that’s a lot of repetition! Let’s start by seeing how we could reduce the duplication by using a for loop.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># Initialize output vector</span></a>
 <a class="sourceLine" id="cb4-2" title="2">output &lt;-<span class="st"> </span><span class="kw">numeric</span>(<span class="kw">ncol</span>(df))</a>
@@ -1661,7 +1661,7 @@ div.tocify {
 <a class="sourceLine" id="cb4-8" title="8"></a>
 <a class="sourceLine" id="cb4-9" title="9"><span class="co"># View the result</span></a>
 <a class="sourceLine" id="cb4-10" title="10">output</a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; [1]  0.09398337 -0.07335378  0.24414534 -0.05061139</span></a></code></pre></div>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; [1]  0.4259823 -0.2469415 -0.1513178  0.1187348</span></a></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Turning the for loop into a function</li>
 </ol>
@@ -1685,7 +1685,7 @@ div.tocify {
 <a class="sourceLine" id="cb6-9" title="9">output</a>
 <a class="sourceLine" id="cb6-10" title="10">}</a>
 <a class="sourceLine" id="cb6-11" title="11"><span class="kw">col_median</span>(df)</a>
-<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; [1]  0.09398337 -0.07335378  0.24414534 -0.05061139</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; [1]  0.4259823 -0.2469415 -0.1513178  0.1187348</span></a></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>What about column means?</li>
 </ol>
@@ -1702,7 +1702,7 @@ div.tocify {
 <a class="sourceLine" id="cb7-9" title="9">output</a>
 <a class="sourceLine" id="cb7-10" title="10">}</a>
 <a class="sourceLine" id="cb7-11" title="11"><span class="kw">col_mean</span>(df)</a>
-<a class="sourceLine" id="cb7-12" title="12"><span class="co">#&gt; [1]  0.1903961 -0.3030234  0.5362675  0.1768116</span></a></code></pre></div>
+<a class="sourceLine" id="cb7-12" title="12"><span class="co">#&gt; [1]  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li>What about column standard deviations?</li>
 </ol>
@@ -1718,7 +1718,7 @@ div.tocify {
 <a class="sourceLine" id="cb8-9" title="9">output</a>
 <a class="sourceLine" id="cb8-10" title="10">}</a>
 <a class="sourceLine" id="cb8-11" title="11"><span class="kw">col_sd</span>(df)</a>
-<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; [1] 0.8495880 0.8445587 1.0152242 0.9827403</span></a></code></pre></div>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; [1] 0.7757103 1.1929927 1.1013507 1.2215663</span></a></code></pre></div>
 <ol start="5" style="list-style-type: decimal">
 <li>Uh oh … time to write a function again</li>
 </ol>
@@ -1752,45 +1752,45 @@ div.tocify {
 <p>Not only does <code>col_summary()</code> remove the duplication in the functions we’ve already written, it also allows us to apply any summary to the columns of a data frame. Verify this, by finding the column interquartile ranges using the function <code>IQR()</code>. (For more info, see ?IQR.)</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="co"># Find the column medians using col_median() and col_summary()</span></a>
 <a class="sourceLine" id="cb12-2" title="2"><span class="kw">col_median</span>(df)</a>
-<a class="sourceLine" id="cb12-3" title="3"><span class="co">#&gt; [1]  0.09398337 -0.07335378  0.24414534 -0.05061139</span></a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co">#&gt; [1]  0.4259823 -0.2469415 -0.1513178  0.1187348</span></a>
 <a class="sourceLine" id="cb12-4" title="4"><span class="kw">col_summary</span>(df, <span class="dt">fun =</span> median)</a>
-<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; [1]  0.09398337 -0.07335378  0.24414534 -0.05061139</span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; [1]  0.4259823 -0.2469415 -0.1513178  0.1187348</span></a>
 <a class="sourceLine" id="cb12-6" title="6"><span class="co"># Find the column means using col_mean() and col_summary()</span></a>
 <a class="sourceLine" id="cb12-7" title="7"><span class="kw">col_mean</span>(df)</a>
-<a class="sourceLine" id="cb12-8" title="8"><span class="co">#&gt; [1]  0.1903961 -0.3030234  0.5362675  0.1768116</span></a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="co">#&gt; [1]  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a>
 <a class="sourceLine" id="cb12-9" title="9"><span class="kw">col_summary</span>(df, <span class="dt">fun =</span> mean)</a>
-<a class="sourceLine" id="cb12-10" title="10"><span class="co">#&gt; [1]  0.1903961 -0.3030234  0.5362675  0.1768116</span></a>
+<a class="sourceLine" id="cb12-10" title="10"><span class="co">#&gt; [1]  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a>
 <a class="sourceLine" id="cb12-11" title="11"><span class="co"># Find the column IQRs using col_summary()</span></a>
 <a class="sourceLine" id="cb12-12" title="12"><span class="kw">col_summary</span>(df, IQR)</a>
-<a class="sourceLine" id="cb12-13" title="13"><span class="co">#&gt; [1] 0.9973102 0.9630158 1.4042691 0.8376711</span></a></code></pre></div>
+<a class="sourceLine" id="cb12-13" title="13"><span class="co">#&gt; [1] 1.0738389 1.5729782 1.6558684 0.4529356</span></a></code></pre></div>
 </div>
 <div id="introducing-purrr" class="section level1">
 <h1>Introducing purrr</h1>
 <p>Passing functions as arguments is a very powerful idea. An idea you’ve seen before in the <code>lapply()</code> and <code>sapply()</code> functions. For example, we could take the column mean of the dataframe, <code>df</code> in a similar way using:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">col_summary</span>(df, mean)</a>
-<a class="sourceLine" id="cb13-2" title="2"><span class="co">#&gt; [1]  0.1903961 -0.3030234  0.5362675  0.1768116</span></a>
+<a class="sourceLine" id="cb13-2" title="2"><span class="co">#&gt; [1]  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a>
 <a class="sourceLine" id="cb13-3" title="3"><span class="kw">lapply</span>(df, mean) <span class="co"># returns a list</span></a>
 <a class="sourceLine" id="cb13-4" title="4"><span class="co">#&gt; $a</span></a>
-<a class="sourceLine" id="cb13-5" title="5"><span class="co">#&gt; [1] 0.1903961</span></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">#&gt; [1] 0.5021826</span></a>
 <a class="sourceLine" id="cb13-6" title="6"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb13-7" title="7"><span class="co">#&gt; $b</span></a>
-<a class="sourceLine" id="cb13-8" title="8"><span class="co">#&gt; [1] -0.3030234</span></a>
+<a class="sourceLine" id="cb13-8" title="8"><span class="co">#&gt; [1] -0.01241783</span></a>
 <a class="sourceLine" id="cb13-9" title="9"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb13-10" title="10"><span class="co">#&gt; $c</span></a>
-<a class="sourceLine" id="cb13-11" title="11"><span class="co">#&gt; [1] 0.5362675</span></a>
+<a class="sourceLine" id="cb13-11" title="11"><span class="co">#&gt; [1] -0.4246822</span></a>
 <a class="sourceLine" id="cb13-12" title="12"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb13-13" title="13"><span class="co">#&gt; $d</span></a>
-<a class="sourceLine" id="cb13-14" title="14"><span class="co">#&gt; [1] 0.1768116</span></a>
+<a class="sourceLine" id="cb13-14" title="14"><span class="co">#&gt; [1] 0.1917322</span></a>
 <a class="sourceLine" id="cb13-15" title="15"><span class="kw">sapply</span>(df, mean) <span class="co"># returns a vector</span></a>
-<a class="sourceLine" id="cb13-16" title="16"><span class="co">#&gt;          a          b          c          d </span></a>
-<a class="sourceLine" id="cb13-17" title="17"><span class="co">#&gt;  0.1903961 -0.3030234  0.5362675  0.1768116</span></a>
+<a class="sourceLine" id="cb13-16" title="16"><span class="co">#&gt;           a           b           c           d </span></a>
+<a class="sourceLine" id="cb13-17" title="17"><span class="co">#&gt;  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a>
 <a class="sourceLine" id="cb13-18" title="18"><span class="kw">vapply</span>(df, mean, <span class="dt">FUN.VALUE =</span> <span class="kw">double</span>(<span class="dv">1</span>)) <span class="co"># need to vector type for the return value of FUN</span></a>
-<a class="sourceLine" id="cb13-19" title="19"><span class="co">#&gt;          a          b          c          d </span></a>
-<a class="sourceLine" id="cb13-20" title="20"><span class="co">#&gt;  0.1903961 -0.3030234  0.5362675  0.1768116</span></a></code></pre></div>
+<a class="sourceLine" id="cb13-19" title="19"><span class="co">#&gt;           a           b           c           d </span></a>
+<a class="sourceLine" id="cb13-20" title="20"><span class="co">#&gt;  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a></code></pre></div>
 <p>With <code>col_summary()</code> you’ve essentially written your own version of <code>sapply()</code>. Now, it is time to introduce you to a family of functions that perform this kind of iteration: the <code>map()</code> functions in the <code>purrr</code> package. For example, one of these functions <code>map_dbl()</code> works exactly like <code>sapply()</code> and our <code>col_summary()</code> function.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">map_dbl</span>(df, mean)</a>
-<a class="sourceLine" id="cb14-2" title="2"><span class="co">#&gt;          a          b          c          d </span></a>
-<a class="sourceLine" id="cb14-3" title="3"><span class="co">#&gt;  0.1903961 -0.3030234  0.5362675  0.1768116</span></a></code></pre></div>
+<a class="sourceLine" id="cb14-2" title="2"><span class="co">#&gt;           a           b           c           d </span></a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#&gt;  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a></code></pre></div>
 <p>Every map function in the purrr package works the same way.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">map_dbl</span>(.x, .f, ...)</a></code></pre></div>
 <ol style="list-style-type: decimal">
@@ -1818,16 +1818,16 @@ div.tocify {
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">l &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="dt">b =</span> <span class="dv">11</span><span class="op">:</span><span class="dv">20</span>)</a>
 <a class="sourceLine" id="cb17-2" title="2"><span class="kw">map</span>(df, mean)</a>
 <a class="sourceLine" id="cb17-3" title="3"><span class="co">#&gt; $a</span></a>
-<a class="sourceLine" id="cb17-4" title="4"><span class="co">#&gt; [1] 0.1903961</span></a>
+<a class="sourceLine" id="cb17-4" title="4"><span class="co">#&gt; [1] 0.5021826</span></a>
 <a class="sourceLine" id="cb17-5" title="5"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb17-6" title="6"><span class="co">#&gt; $b</span></a>
-<a class="sourceLine" id="cb17-7" title="7"><span class="co">#&gt; [1] -0.3030234</span></a>
+<a class="sourceLine" id="cb17-7" title="7"><span class="co">#&gt; [1] -0.01241783</span></a>
 <a class="sourceLine" id="cb17-8" title="8"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb17-9" title="9"><span class="co">#&gt; $c</span></a>
-<a class="sourceLine" id="cb17-10" title="10"><span class="co">#&gt; [1] 0.5362675</span></a>
+<a class="sourceLine" id="cb17-10" title="10"><span class="co">#&gt; [1] -0.4246822</span></a>
 <a class="sourceLine" id="cb17-11" title="11"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb17-12" title="12"><span class="co">#&gt; $d</span></a>
-<a class="sourceLine" id="cb17-13" title="13"><span class="co">#&gt; [1] 0.1768116</span></a></code></pre></div>
+<a class="sourceLine" id="cb17-13" title="13"><span class="co">#&gt; [1] 0.1917322</span></a></code></pre></div>
 <p>Similarly, the <code>map()</code> function applies mean first to the <code>a</code> element and then to the <code>b</code> element and returns the result as a list. If <code>.x</code> is an atomic vector, the map function iterates over each element in the vector. Here, <code>map()</code> function applies mean first to the <code>a</code> element—in this case the single number 1—and then to the <code>b</code> element—the single number 2—and returns the result as a list.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">vec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>)</a>
 <a class="sourceLine" id="cb18-2" title="2"><span class="kw">map</span>(vec, mean)</a>
@@ -1856,18 +1856,18 @@ div.tocify {
 <a class="sourceLine" id="cb19-3" title="3"></a>
 <a class="sourceLine" id="cb19-4" title="4"><span class="co"># Use map_dbl() to find column means</span></a>
 <a class="sourceLine" id="cb19-5" title="5"><span class="kw">map_dbl</span>(df, mean)</a>
-<a class="sourceLine" id="cb19-6" title="6"><span class="co">#&gt;          a          b          c          d </span></a>
-<a class="sourceLine" id="cb19-7" title="7"><span class="co">#&gt;  0.1903961 -0.3030234  0.5362675  0.1768116</span></a>
+<a class="sourceLine" id="cb19-6" title="6"><span class="co">#&gt;           a           b           c           d </span></a>
+<a class="sourceLine" id="cb19-7" title="7"><span class="co">#&gt;  0.50218257 -0.01241783 -0.42468225  0.19173215</span></a>
 <a class="sourceLine" id="cb19-8" title="8"></a>
 <a class="sourceLine" id="cb19-9" title="9"><span class="co"># Use map_dbl() to column medians</span></a>
 <a class="sourceLine" id="cb19-10" title="10"><span class="kw">map_dbl</span>(df, median)</a>
-<a class="sourceLine" id="cb19-11" title="11"><span class="co">#&gt;           a           b           c           d </span></a>
-<a class="sourceLine" id="cb19-12" title="12"><span class="co">#&gt;  0.09398337 -0.07335378  0.24414534 -0.05061139</span></a>
+<a class="sourceLine" id="cb19-11" title="11"><span class="co">#&gt;          a          b          c          d </span></a>
+<a class="sourceLine" id="cb19-12" title="12"><span class="co">#&gt;  0.4259823 -0.2469415 -0.1513178  0.1187348</span></a>
 <a class="sourceLine" id="cb19-13" title="13"></a>
 <a class="sourceLine" id="cb19-14" title="14"><span class="co"># Use map_dbl() to find column standard deviations</span></a>
 <a class="sourceLine" id="cb19-15" title="15"><span class="kw">map_dbl</span>(df, sd)</a>
 <a class="sourceLine" id="cb19-16" title="16"><span class="co">#&gt;         a         b         c         d </span></a>
-<a class="sourceLine" id="cb19-17" title="17"><span class="co">#&gt; 0.8495880 0.8445587 1.0152242 0.9827403</span></a></code></pre></div>
+<a class="sourceLine" id="cb19-17" title="17"><span class="co">#&gt; 0.7757103 1.1929927 1.1013507 1.2215663</span></a></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>The argument to the map functions</li>
 </ol>
@@ -1936,8 +1936,8 @@ div.tocify {
 <a class="sourceLine" id="cb25-15" title="15"><span class="co"># Find a summary of each column</span></a>
 <a class="sourceLine" id="cb25-16" title="16"><span class="kw">map</span>(df3, summary)</a>
 <a class="sourceLine" id="cb25-17" title="17"><span class="co">#&gt; $A</span></a>
-<a class="sourceLine" id="cb25-18" title="18"><span class="co">#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span></a>
-<a class="sourceLine" id="cb25-19" title="19"><span class="co">#&gt; -0.55653 -0.02704  0.32508  0.32804  0.39549  1.66556 </span></a>
+<a class="sourceLine" id="cb25-18" title="18"><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></a>
+<a class="sourceLine" id="cb25-19" title="19"><span class="co">#&gt; -1.9351 -1.4166 -0.6208 -0.5580 -0.3752  1.5035 </span></a>
 <a class="sourceLine" id="cb25-20" title="20"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb25-21" title="21"><span class="co">#&gt; $B</span></a>
 <a class="sourceLine" id="cb25-22" title="22"><span class="co">#&gt;  A  B </span></a>
@@ -1949,7 +1949,7 @@ div.tocify {
 <a class="sourceLine" id="cb25-28" title="28"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb25-29" title="29"><span class="co">#&gt; $D</span></a>
 <a class="sourceLine" id="cb25-30" title="30"><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></a>
-<a class="sourceLine" id="cb25-31" title="31"><span class="co">#&gt; -1.6447 -0.6808  0.2393  0.4997  1.5659  2.9420</span></a></code></pre></div>
+<a class="sourceLine" id="cb25-31" title="31"><span class="co">#&gt; -0.6326 -0.1335  0.2684  0.6463  1.4394  2.6743</span></a></code></pre></div>
 </div>
 <div id="shortcuts-in-the-map-function" class="section level1">
 <h1>Shortcuts in the map function</h1>
@@ -1985,6 +1985,7 @@ div.tocify {
 <ol start="2" style="list-style-type: decimal">
 <li>Shortcuts when .f is [[</li>
 </ol>
+<p>Imagine we have this list of results where each element in the list contains both an <code>a</code> and <code>b</code> element. Nowe, we want to extract all the <code>a</code> elements. One wayw will be to write our own anonymous function that takes a single argument <code>x</code> and then subsets out the <code>a</code> element. Since, this is such a common operation, map provides two shortcuts to achieve the same result. If <code>.f</code> is just a string then the element with that name is extracted from each element in <code>.x</code>. Similarly, if you provide just an integer to <code>.f</code> then the element at that index is extracted from each element of <code>.x</code></p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">list_of_results &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
 <a class="sourceLine" id="cb27-2" title="2">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="st">&quot;A&quot;</span>),</a>
 <a class="sourceLine" id="cb27-3" title="3">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">2</span>, <span class="dt">b =</span> <span class="st">&quot;C&quot;</span>),</a>
@@ -1999,6 +2000,315 @@ div.tocify {
 <a class="sourceLine" id="cb27-12" title="12"><span class="co"># integer subsetting</span></a>
 <a class="sourceLine" id="cb27-13" title="13"><span class="kw">map_dbl</span>(list_of_results, <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb27-14" title="14"><span class="co">#&gt; [1] 1 2 3</span></a></code></pre></div>
+<p>Practice III</p>
+<ol style="list-style-type: decimal">
+<li>Solive a simple problem first</li>
+</ol>
+<p>Our goal is to fit a separate linear regression of miles per gallon (<code>mpg</code>) against weight (<code>wt</code>) for each group of cars in our list of data frames, where each data frame in our list represents a different group. How should we get started?</p>
+<p>First, let’s confirm the structure of this list of data frames. Then, we’ll solve a simpler problem first: fit the regression to the first group of cars.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">cyl &lt;-<span class="st"> </span><span class="kw">split</span>(mtcars, mtcars<span class="op">$</span>cyl)</a>
+<a class="sourceLine" id="cb28-2" title="2"><span class="co"># Examine the structure of cyl</span></a>
+<a class="sourceLine" id="cb28-3" title="3"><span class="kw">str</span>(cyl)</a>
+<a class="sourceLine" id="cb28-4" title="4"><span class="co">#&gt; List of 3</span></a>
+<a class="sourceLine" id="cb28-5" title="5"><span class="co">#&gt;  $ 4:&#39;data.frame&#39;:   11 obs. of  11 variables:</span></a>
+<a class="sourceLine" id="cb28-6" title="6"><span class="co">#&gt;   ..$ mpg : num [1:11] 22.8 24.4 22.8 32.4 30.4 33.9 21.5 27.3 26 30.4 ...</span></a>
+<a class="sourceLine" id="cb28-7" title="7"><span class="co">#&gt;   ..$ cyl : num [1:11] 4 4 4 4 4 4 4 4 4 4 ...</span></a>
+<a class="sourceLine" id="cb28-8" title="8"><span class="co">#&gt;   ..$ disp: num [1:11] 108 146.7 140.8 78.7 75.7 ...</span></a>
+<a class="sourceLine" id="cb28-9" title="9"><span class="co">#&gt;   ..$ hp  : num [1:11] 93 62 95 66 52 65 97 66 91 113 ...</span></a>
+<a class="sourceLine" id="cb28-10" title="10"><span class="co">#&gt;   ..$ drat: num [1:11] 3.85 3.69 3.92 4.08 4.93 4.22 3.7 4.08 4.43 3.77 ...</span></a>
+<a class="sourceLine" id="cb28-11" title="11"><span class="co">#&gt;   ..$ wt  : num [1:11] 2.32 3.19 3.15 2.2 1.61 ...</span></a>
+<a class="sourceLine" id="cb28-12" title="12"><span class="co">#&gt;   ..$ qsec: num [1:11] 18.6 20 22.9 19.5 18.5 ...</span></a>
+<a class="sourceLine" id="cb28-13" title="13"><span class="co">#&gt;   ..$ vs  : num [1:11] 1 1 1 1 1 1 1 1 0 1 ...</span></a>
+<a class="sourceLine" id="cb28-14" title="14"><span class="co">#&gt;   ..$ am  : num [1:11] 1 0 0 1 1 1 0 1 1 1 ...</span></a>
+<a class="sourceLine" id="cb28-15" title="15"><span class="co">#&gt;   ..$ gear: num [1:11] 4 4 4 4 4 4 3 4 5 5 ...</span></a>
+<a class="sourceLine" id="cb28-16" title="16"><span class="co">#&gt;   ..$ carb: num [1:11] 1 2 2 1 2 1 1 1 2 2 ...</span></a>
+<a class="sourceLine" id="cb28-17" title="17"><span class="co">#&gt;  $ 6:&#39;data.frame&#39;:   7 obs. of  11 variables:</span></a>
+<a class="sourceLine" id="cb28-18" title="18"><span class="co">#&gt;   ..$ mpg : num [1:7] 21 21 21.4 18.1 19.2 17.8 19.7</span></a>
+<a class="sourceLine" id="cb28-19" title="19"><span class="co">#&gt;   ..$ cyl : num [1:7] 6 6 6 6 6 6 6</span></a>
+<a class="sourceLine" id="cb28-20" title="20"><span class="co">#&gt;   ..$ disp: num [1:7] 160 160 258 225 168 ...</span></a>
+<a class="sourceLine" id="cb28-21" title="21"><span class="co">#&gt;   ..$ hp  : num [1:7] 110 110 110 105 123 123 175</span></a>
+<a class="sourceLine" id="cb28-22" title="22"><span class="co">#&gt;   ..$ drat: num [1:7] 3.9 3.9 3.08 2.76 3.92 3.92 3.62</span></a>
+<a class="sourceLine" id="cb28-23" title="23"><span class="co">#&gt;   ..$ wt  : num [1:7] 2.62 2.88 3.21 3.46 3.44 ...</span></a>
+<a class="sourceLine" id="cb28-24" title="24"><span class="co">#&gt;   ..$ qsec: num [1:7] 16.5 17 19.4 20.2 18.3 ...</span></a>
+<a class="sourceLine" id="cb28-25" title="25"><span class="co">#&gt;   ..$ vs  : num [1:7] 0 0 1 1 1 1 0</span></a>
+<a class="sourceLine" id="cb28-26" title="26"><span class="co">#&gt;   ..$ am  : num [1:7] 1 1 0 0 0 0 1</span></a>
+<a class="sourceLine" id="cb28-27" title="27"><span class="co">#&gt;   ..$ gear: num [1:7] 4 4 3 3 4 4 5</span></a>
+<a class="sourceLine" id="cb28-28" title="28"><span class="co">#&gt;   ..$ carb: num [1:7] 4 4 1 1 4 4 6</span></a>
+<a class="sourceLine" id="cb28-29" title="29"><span class="co">#&gt;  $ 8:&#39;data.frame&#39;:   14 obs. of  11 variables:</span></a>
+<a class="sourceLine" id="cb28-30" title="30"><span class="co">#&gt;   ..$ mpg : num [1:14] 18.7 14.3 16.4 17.3 15.2 10.4 10.4 14.7 15.5 15.2 ...</span></a>
+<a class="sourceLine" id="cb28-31" title="31"><span class="co">#&gt;   ..$ cyl : num [1:14] 8 8 8 8 8 8 8 8 8 8 ...</span></a>
+<a class="sourceLine" id="cb28-32" title="32"><span class="co">#&gt;   ..$ disp: num [1:14] 360 360 276 276 276 ...</span></a>
+<a class="sourceLine" id="cb28-33" title="33"><span class="co">#&gt;   ..$ hp  : num [1:14] 175 245 180 180 180 205 215 230 150 150 ...</span></a>
+<a class="sourceLine" id="cb28-34" title="34"><span class="co">#&gt;   ..$ drat: num [1:14] 3.15 3.21 3.07 3.07 3.07 2.93 3 3.23 2.76 3.15 ...</span></a>
+<a class="sourceLine" id="cb28-35" title="35"><span class="co">#&gt;   ..$ wt  : num [1:14] 3.44 3.57 4.07 3.73 3.78 ...</span></a>
+<a class="sourceLine" id="cb28-36" title="36"><span class="co">#&gt;   ..$ qsec: num [1:14] 17 15.8 17.4 17.6 18 ...</span></a>
+<a class="sourceLine" id="cb28-37" title="37"><span class="co">#&gt;   ..$ vs  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...</span></a>
+<a class="sourceLine" id="cb28-38" title="38"><span class="co">#&gt;   ..$ am  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...</span></a>
+<a class="sourceLine" id="cb28-39" title="39"><span class="co">#&gt;   ..$ gear: num [1:14] 3 3 3 3 3 3 3 3 3 3 ...</span></a>
+<a class="sourceLine" id="cb28-40" title="40"><span class="co">#&gt;   ..$ carb: num [1:14] 2 4 3 3 3 4 4 4 2 2 ...</span></a>
+<a class="sourceLine" id="cb28-41" title="41"><span class="co"># Extract the first element into four_cyls</span></a>
+<a class="sourceLine" id="cb28-42" title="42">four_cyls &lt;-<span class="st"> </span>cyl[[<span class="dv">1</span>]]</a>
+<a class="sourceLine" id="cb28-43" title="43"><span class="co"># Fit a linear regression of mpg on wt using four_cyls</span></a>
+<a class="sourceLine" id="cb28-44" title="44"><span class="kw">lm</span>(<span class="dt">formula =</span> mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> four_cyls)</a>
+<a class="sourceLine" id="cb28-45" title="45"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb28-46" title="46"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb28-47" title="47"><span class="co">#&gt; lm(formula = mpg ~ wt, data = four_cyls)</span></a>
+<a class="sourceLine" id="cb28-48" title="48"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb28-49" title="49"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb28-50" title="50"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb28-51" title="51"><span class="co">#&gt;      39.571       -5.647</span></a></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Using an anonymous function</li>
+</ol>
+<p>Great! We now have a snippet of code that performs the operation we want on one data frame. One option would be to turn this into a function, for example:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">fit_reg &lt;-<span class="st"> </span><span class="cf">function</span>(df) {</a>
+<a class="sourceLine" id="cb29-2" title="2">  <span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> df)</a>
+<a class="sourceLine" id="cb29-3" title="3">}</a></code></pre></div>
+<p>Then pass this function into map():</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="kw">map</span>(cyl, fit_reg)</a>
+<a class="sourceLine" id="cb30-2" title="2"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb30-3" title="3"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-4" title="4"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb30-5" title="5"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb30-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-7" title="7"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb30-8" title="8"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb30-9" title="9"><span class="co">#&gt;      39.571       -5.647  </span></a>
+<a class="sourceLine" id="cb30-10" title="10"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-12" title="12"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb30-13" title="13"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-14" title="14"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb30-15" title="15"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb30-16" title="16"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-17" title="17"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb30-18" title="18"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb30-19" title="19"><span class="co">#&gt;       28.41        -2.78  </span></a>
+<a class="sourceLine" id="cb30-20" title="20"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-22" title="22"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb30-23" title="23"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-24" title="24"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb30-25" title="25"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb30-26" title="26"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb30-27" title="27"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb30-28" title="28"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb30-29" title="29"><span class="co">#&gt;      23.868       -2.192</span></a></code></pre></div>
+<p>But it seems a bit much to define a function for such a specific model when we only want to do this once. Instead of defining the function in the global environment, we will just use the function anonymously inside our call to <code>map()</code>.</p>
+<p>What does this mean? Instead of referring to our function by name in <code>map()</code>, we define it on the fly in the .f argument to <code>map()</code>.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1"><span class="co"># Rewrite to call an anonymous function</span></a>
+<a class="sourceLine" id="cb31-2" title="2"><span class="kw">map</span>(cyl, <span class="cf">function</span>(df) <span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> df))</a>
+<a class="sourceLine" id="cb31-3" title="3"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb31-4" title="4"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-5" title="5"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb31-6" title="6"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb31-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-8" title="8"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb31-9" title="9"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb31-10" title="10"><span class="co">#&gt;      39.571       -5.647  </span></a>
+<a class="sourceLine" id="cb31-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-13" title="13"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb31-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-15" title="15"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb31-16" title="16"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb31-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-18" title="18"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb31-19" title="19"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb31-20" title="20"><span class="co">#&gt;       28.41        -2.78  </span></a>
+<a class="sourceLine" id="cb31-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-23" title="23"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb31-24" title="24"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-25" title="25"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb31-26" title="26"><span class="co">#&gt; lm(formula = mpg ~ wt, data = df)</span></a>
+<a class="sourceLine" id="cb31-27" title="27"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb31-28" title="28"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb31-29" title="29"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb31-30" title="30"><span class="co">#&gt;      23.868       -2.192</span></a></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Using a formula</li>
+</ol>
+<p>Writing anonymous functions takes a lot of extra key strokes, so <code>purrr</code> provides a shortcut that allows you to write an anonymous function as a one-sided formula instead.</p>
+<p>In R, a one-sided formula starts with a <code>~</code>, followed by an R expression. In purrr’s map functions, the R expression can refer to an element of the <code>.x</code> argument using the <code>.</code> character.</p>
+<p>Let’s take a look at an example. Imagine, instead of a regression on each data frame in <code>cyl</code>, we wanted to know the mean displacement for each data frame. One way to do this would be to use an anonymous function:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" title="1"><span class="kw">map_dbl</span>(cyl, <span class="cf">function</span>(df) <span class="kw">mean</span>(df<span class="op">$</span>disp))</a>
+<a class="sourceLine" id="cb32-2" title="2"><span class="co">#&gt;        4        6        8 </span></a>
+<a class="sourceLine" id="cb32-3" title="3"><span class="co">#&gt; 105.1364 183.3143 353.1000</span></a></code></pre></div>
+<p>To perform the same operation using the formula shortcut, we replace the function definition (<code>function(df)</code>) with the <code>~</code>, then when we need to refer to the element of <code>cyl</code> the function operates on (in this case <code>df</code>), we use a <code>.</code>.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">map_dbl</span>(cyl, <span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.<span class="op">$</span>disp))</a>
+<a class="sourceLine" id="cb33-2" title="2"><span class="co">#&gt;        4        6        8 </span></a>
+<a class="sourceLine" id="cb33-3" title="3"><span class="co">#&gt; 105.1364 183.3143 353.1000</span></a></code></pre></div>
+<p>See how much less typing it involves! It also saves you from coming up with an argument name. Can you rewrite our previous anonymous function using this formula shortcut instead?</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1"><span class="co"># Rewrite to use the formula shortcut instead</span></a>
+<a class="sourceLine" id="cb34-2" title="2"><span class="kw">map</span>(cyl, <span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .))</a>
+<a class="sourceLine" id="cb34-3" title="3"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb34-4" title="4"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-5" title="5"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb34-6" title="6"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb34-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-8" title="8"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb34-9" title="9"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb34-10" title="10"><span class="co">#&gt;      39.571       -5.647  </span></a>
+<a class="sourceLine" id="cb34-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-13" title="13"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb34-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-15" title="15"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb34-16" title="16"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb34-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-18" title="18"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb34-19" title="19"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb34-20" title="20"><span class="co">#&gt;       28.41        -2.78  </span></a>
+<a class="sourceLine" id="cb34-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-23" title="23"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb34-24" title="24"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-25" title="25"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb34-26" title="26"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb34-27" title="27"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb34-28" title="28"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb34-29" title="29"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb34-30" title="30"><span class="co">#&gt;      23.868       -2.192</span></a></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>Using a string</li>
+</ol>
+<p>There are also some useful shortcuts that come in handy when you want to subset each element of the <code>.x</code> argument. If the <code>.f</code> argument to a map function is set equal to a string, let’s say <code>&quot;name&quot;</code>, then purrr extracts the <code>&quot;name&quot;</code> element from every element of <code>.x</code>.</p>
+<p>This is a really common situation you find yourself in when you work with nested lists. For example, if we have a list of where every element contains an <code>a</code> and <code>b</code> element:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">list_of_results &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb35-2" title="2">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="st">&quot;A&quot;</span>), </a>
+<a class="sourceLine" id="cb35-3" title="3">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">2</span>, <span class="dt">b =</span> <span class="st">&quot;C&quot;</span>), </a>
+<a class="sourceLine" id="cb35-4" title="4">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">3</span>, <span class="dt">b =</span> <span class="st">&quot;D&quot;</span>)</a>
+<a class="sourceLine" id="cb35-5" title="5">)</a></code></pre></div>
+<p>We might want to pull out the a element from every entry. We could do it with the string shortcut like this:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">map</span>(list_of_results, <span class="st">&quot;a&quot;</span>)</a></code></pre></div>
+<p>Now take our list of regression models</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">map</span>(cyl, <span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .))</a></code></pre></div>
+<p>It might be nice to extract the slope coefficient from each model. You’ll do this in a few steps: first fit the models, then get the coefficients from each model using the <code>coef()</code> function, then pull out the <code>wt</code> estimate using the string shortcut.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" title="1"><span class="co"># Save the result from the previous exercise to the variable models</span></a>
+<a class="sourceLine" id="cb38-2" title="2">models &lt;-<span class="st"> </span><span class="kw">map</span>(cyl, <span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .))</a>
+<a class="sourceLine" id="cb38-3" title="3"><span class="co"># Use map and coef to get the coefficients for each model: coefs</span></a>
+<a class="sourceLine" id="cb38-4" title="4">coefs &lt;-<span class="st"> </span><span class="kw">map</span>(models, <span class="op">~</span><span class="st"> </span><span class="kw">coef</span>(.))</a>
+<a class="sourceLine" id="cb38-5" title="5"><span class="co"># Use string shortcut to extract the wt coefficient </span></a>
+<a class="sourceLine" id="cb38-6" title="6"><span class="kw">map</span>(coefs, <span class="st">&quot;wt&quot;</span>)</a>
+<a class="sourceLine" id="cb38-7" title="7"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb38-8" title="8"><span class="co">#&gt; [1] -5.647025</span></a>
+<a class="sourceLine" id="cb38-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb38-10" title="10"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb38-11" title="11"><span class="co">#&gt; [1] -2.780106</span></a>
+<a class="sourceLine" id="cb38-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb38-13" title="13"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb38-14" title="14"><span class="co">#&gt; [1] -2.192438</span></a></code></pre></div>
+<ol start="5" style="list-style-type: decimal">
+<li>Using a numeric vector</li>
+</ol>
+<p>Another useful shortcut for subsetting is to pass a numeric vector as the .f argument. This works just like passing a string but subsets by index rather than name. For example, with your previous <code>list_of_results</code>:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1">list_of_results &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb39-2" title="2">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="st">&quot;A&quot;</span>), </a>
+<a class="sourceLine" id="cb39-3" title="3">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">2</span>, <span class="dt">b =</span> <span class="st">&quot;C&quot;</span>), </a>
+<a class="sourceLine" id="cb39-4" title="4">  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">3</span>, <span class="dt">b =</span> <span class="st">&quot;D&quot;</span>)</a>
+<a class="sourceLine" id="cb39-5" title="5">)</a></code></pre></div>
+<p>Another way to pull out the <code>a</code> element from each list, is to pull out the first element:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="kw">map</span>(list_of_results, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb40-2" title="2"><span class="co">#&gt; [[1]]</span></a>
+<a class="sourceLine" id="cb40-3" title="3"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb40-4" title="4"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb40-5" title="5"><span class="co">#&gt; [[2]]</span></a>
+<a class="sourceLine" id="cb40-6" title="6"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb40-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb40-8" title="8"><span class="co">#&gt; [[3]]</span></a>
+<a class="sourceLine" id="cb40-9" title="9"><span class="co">#&gt; [1] 3</span></a></code></pre></div>
+<p>Let’s pull out the slopes from our models again, but this time using numeric subsetting. Also, since we are pulling out a single numeric value from each element, let’s use <code>map_dbl()</code>.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="co"># use map_dbl with the numeric shortcut to pull out the second element</span></a>
+<a class="sourceLine" id="cb41-2" title="2"><span class="kw">map_dbl</span>(coefs, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb41-3" title="3"><span class="co">#&gt;         4         6         8 </span></a>
+<a class="sourceLine" id="cb41-4" title="4"><span class="co">#&gt; -5.647025 -2.780106 -2.192438</span></a></code></pre></div>
+<ol start="6" style="list-style-type: decimal">
+<li>Putting it together with pipes</li>
+</ol>
+<p><code>purrr</code> also includes a pipe operator: <code>%&gt;%</code>. The pipe operator is another shortcut that saves typing, but also increases readability. The explanation of the pipe operator is quite simple: <code>x %&gt;% f(y)</code> is another way of writing <code>f(x, y)</code>. That is, the left hand side of the pipe, <code>x</code>, becomes the first argument to the function, <code>f()</code>, on the right hand side of the pipe.</p>
+<p>Take a look at our code to get our list of models:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">cyl &lt;-<span class="st"> </span><span class="kw">split</span>(mtcars, mtcars<span class="op">$</span>cyl) </a>
+<a class="sourceLine" id="cb42-2" title="2"><span class="kw">map</span>(cyl, <span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .))</a>
+<a class="sourceLine" id="cb42-3" title="3"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb42-4" title="4"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-5" title="5"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb42-6" title="6"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb42-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-8" title="8"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb42-9" title="9"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb42-10" title="10"><span class="co">#&gt;      39.571       -5.647  </span></a>
+<a class="sourceLine" id="cb42-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-13" title="13"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb42-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-15" title="15"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb42-16" title="16"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb42-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-18" title="18"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb42-19" title="19"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb42-20" title="20"><span class="co">#&gt;       28.41        -2.78  </span></a>
+<a class="sourceLine" id="cb42-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-23" title="23"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb42-24" title="24"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-25" title="25"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb42-26" title="26"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb42-27" title="27"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb42-28" title="28"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb42-29" title="29"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb42-30" title="30"><span class="co">#&gt;      23.868       -2.192</span></a></code></pre></div>
+<p>We split the data frame <code>mtcars</code> and save it as the variable <code>cyl</code>. We then pass <code>cyl</code> as the first argument to map to fit the models. We could rewrite this using the pipe operator as:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw">split</span>(mtcars, mtcars<span class="op">$</span>cyl) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb43-2" title="2"><span class="st">  </span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .))</a>
+<a class="sourceLine" id="cb43-3" title="3"><span class="co">#&gt; $`4`</span></a>
+<a class="sourceLine" id="cb43-4" title="4"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-5" title="5"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb43-6" title="6"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb43-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-8" title="8"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb43-9" title="9"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb43-10" title="10"><span class="co">#&gt;      39.571       -5.647  </span></a>
+<a class="sourceLine" id="cb43-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-13" title="13"><span class="co">#&gt; $`6`</span></a>
+<a class="sourceLine" id="cb43-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-15" title="15"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb43-16" title="16"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb43-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-18" title="18"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb43-19" title="19"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb43-20" title="20"><span class="co">#&gt;       28.41        -2.78  </span></a>
+<a class="sourceLine" id="cb43-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-23" title="23"><span class="co">#&gt; $`8`</span></a>
+<a class="sourceLine" id="cb43-24" title="24"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-25" title="25"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb43-26" title="26"><span class="co">#&gt; lm(formula = mpg ~ wt, data = .)</span></a>
+<a class="sourceLine" id="cb43-27" title="27"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb43-28" title="28"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb43-29" title="29"><span class="co">#&gt; (Intercept)           wt  </span></a>
+<a class="sourceLine" id="cb43-30" title="30"><span class="co">#&gt;      23.868       -2.192</span></a></code></pre></div>
+<p>We read this as “split the data frame <code>mtcars</code> on <code>cyl</code>, then use <code>map()</code> on the result.”</p>
+<p>One of the powerful things about the pipe is we can chain together many operations. Here is our complete code, written with pipes, instead assigning each step to a variable and using it in the next step:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1">mtcars <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb44-2" title="2"><span class="st">  </span><span class="kw">split</span>(mtcars<span class="op">$</span>cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb44-3" title="3"><span class="st">  </span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb44-4" title="4"><span class="st">  </span><span class="kw">map</span>(coef) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb44-5" title="5"><span class="st">  </span><span class="kw">map_dbl</span>(<span class="st">&quot;wt&quot;</span>)</a>
+<a class="sourceLine" id="cb44-6" title="6"><span class="co">#&gt;         4         6         8 </span></a>
+<a class="sourceLine" id="cb44-7" title="7"><span class="co">#&gt; -5.647025 -2.780106 -2.192438</span></a></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="co"># Define models (don&#39;t change)</span></a>
+<a class="sourceLine" id="cb45-2" title="2">models &lt;-<span class="st"> </span>mtcars <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb45-3" title="3"><span class="st">  </span><span class="kw">split</span>(mtcars<span class="op">$</span>cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-4" title="4"><span class="st">  </span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt, <span class="dt">data =</span> .)) </a>
+<a class="sourceLine" id="cb45-5" title="5"></a>
+<a class="sourceLine" id="cb45-6" title="6"><span class="co"># Rewrite to be a single command using pipes </span></a>
+<a class="sourceLine" id="cb45-7" title="7">models <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb45-8" title="8"><span class="st">  </span><span class="kw">map</span>(summary) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb45-9" title="9"><span class="st">  </span><span class="kw">map_dbl</span>(<span class="st">&quot;r.squared&quot;</span>)</a>
+<a class="sourceLine" id="cb45-10" title="10"><span class="co">#&gt;         4         6         8 </span></a>
+<a class="sourceLine" id="cb45-11" title="11"><span class="co">#&gt; 0.5086326 0.4645102 0.4229655</span></a></code></pre></div>
 </div>
 
 
