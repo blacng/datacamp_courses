@@ -100,7 +100,221 @@ html$example[["result"]]
 html$asdf[["error"]]
 ```
 
-```{r}
+3. Working with safe output
 
+We now have output that contains the HTML for each of the two URLs on which readLines() was successful and the error for the other. But the output isn't that easy to work with, since the results and errors are buried in the inner-most level of the list.
+
+`purrr` provides a function `transpose()` that reshapes a list so the inner-most level becomes the outer-most level. In otherwords, it turns a list-of-lists "inside-out". Consider the following list:
+
+```{r learning_transpose}
+nested_list <- list(
+   x1 = list(a = 1, b = 2),
+   x2 = list(a = 3, b = 4)
+)
+nested_list[["x1"]][["a"]]
+transpose(nested_list)[["a"]][["x1"]]
 ```
 
+If I need to extract the a element in x1, I could do `nested_list[["x1"]][["a"]]`. However, if I transpose the list first, the order of subsetting reverses. That is, to extract the same element I could also do `transpose(nested_list)[["a"]][["x1"]]`.
+
+This is really handy for safe output, since we can grab all the results or all the errors really easily.
+
+```{r practicising_transpose}
+# Examine the structure of transpose(html)
+str(transpose(html))
+# Extract the results: res
+res <- transpose(html)[["result"]]
+# Extract the errors: errs
+errs <- transpose(html)[["error"]]
+```
+
+4. Working with errors and results
+
+What you do with the errors and results is up to you. But, commonly you'll want to collect all the results for the elements that were successful and examine the inputs for all those that weren't.
+
+```{r subsetting_using_transpose_object}
+# Create a logical vector is_ok
+is_ok <- map_lgl(.x = errs, .f = is.null)
+
+# Extract the successful results
+res[is_ok]
+
+# Find the URLs that were unsuccessful
+urls[!is_ok]
+```
+
+# Maps over multiple arguments
+
+So far we've iterated over only one argument per function. Over the next set of exercises, we'll learn functions in purrr that allow us to iterate over more than one argument. A running example throughout the following section is generating random samples from known statistical distributions. For example, the `rnorm()` function draws a random sample from a normal distribution:
+
+```{r}
+rnorm(n, mean = 0, sd = 1)
+```
+
+* The first argument `n` specifies the size of the sample. 
+* `mean` and `sd` specifies the `mean` and `sd` of the normal distribution.
+
+Imagine, we want to take three samples of size 5, 10, and 20. We could write three calls to rnorm. Or, we can use our new `map` skills to write one call.
+
+```{r}
+# Three calls to rnorm
+rnorm(5)
+rnorm(10)
+rnorm(20)
+# One call to rnorm
+map(list(5, 10, 20), rnorm)
+```
+
+We map over a list of sample sizes 5, 10, 20 each time applying the function, `rnorm`. What if we wanted to vary the mean of the normal distribution for each sample. For example, the sample of size 5 should come from a mean 1; sample of size 10 from mean 5; and sample of size 20 from mean 10. The `purrr` function, `map2()` is designed exactly for this iteration problem. map2 has an additional argument, `.y` that allows us to specify another object to iterate over. The function, `.f` is applied over the first element of both `.x` and `.y `then `.f` is applied over the second element of both `.x` and `.y`, and so on until it has iterated through the list. 
+
+```{r}
+map2(.x = list(5, 10, 20), .y = list(1, 5, 10), .f = rnorm)
+```
+
+For this example, we supplied the samples sizes as `.x`, the means as `.y`, and then we applied the rnorm function in `.f`. Let's take it a step further: what if the `sd` argument should also vary across the sample sizes? Now, we have three arguments to iterate over. Rather, than having map3 and map4, and so on, purrr provides the `pmap()` function, which handles iterating over many arguments. 
+
+The first argument to pmap is a list .l, that should contain all the lists to iterate over. For example, if you need to iterate over two arguments, there should be two lists inside .l. For our current example, .l needs to be a list with three arguments: a list of the sample sizes; means; and standard deviations. Using names for these lists ensures that the values are matched up to the right argument in the function we are iteratively applying. 
+
+```{r}
+pmap(list(n = list(5, 10, 20),
+          mean = list(1, 5, 10),
+          sd = list(0.1, 0.5, 0.1)), rnorm)
+```
+
+Finally, you might want to iterate not over a vector of values, but over functions themselves. For example, we might be interested in simulating over different distributions: normal, uniform, and exponential. This is handled in purrr by the `invoke_map()` function. Since, we now want to iterate over functions, the order of the argument in invoke_map() is reversed: .f comes first and should be a list of functions, .x is second as a list where we can specify arguments for each function in .f. In our example, all the functions take the same argument, n = 5, so we can pass that through the . . .  argument. Here, each of rnorm, runif, and rexp are been called with the sample size of 5. 
+
+```{r}
+invoke_map(list(rnorm, runif, rexp), n = 5)
+```
+
+In summary, purrr provides:
+
+* `map2()` for iterating over two arguments.
+* `pmap()` for iterating over two or more arguments
+* `invoke_map()` for iterating over functions and arguments. 
+* Like `map()`, each has a whole family of functions: `map2_dbl()`, `map2_lgl()`, `pmap_dbl()`, etc.
+
+# Practice II
+
+1. Getting started
+
+```{r}
+# Create a list n containing the values: 5, 10, and 20
+n <- list(5, 10, 20)
+# Call map() on n with rnorm() to simulate three samples
+map(.x = n, .f = rnorm)
+```
+
+2. Mapping over two arguments
+
+Ok, but now imagine we don't just want to vary the sample size, we also want to vary the mean. The mean can be specified in `rnorm()` by the argument `mean`. Now there are two arguments to `rnorm()` we want to vary: `n` and `mean`.
+
+The `map2()` function is designed exactly for this purpose; it allows iteration over two objects. The first two arguments to map2() are the objects to iterate over and the third argument .f is the function to apply.
+
+Let's use `map2()` to simulate three samples with different sample sizes and different means.
+
+```{r iterating_over_two_arguments}
+# Initialize n
+n <- list(5, 10, 20)
+
+# Create a list mu containing the values: 1, 5, and 10
+mu <- list(1, 5, 10)
+
+# Edit to call map2() on n and mu with rnorm() to simulate three samples
+map2(.x = n, .y = mu, .f = rnorm)
+```
+
+3. Mapping over more than two arguments
+
+But wait, there's another argument to `rnorm()` we might want to vary: `sd`, the standard deviation of the Normal distribution. You might think there is a `map3()` function, but there isn't. Instead `purrr` provides a `pmap()` function that iterates over 2 or more arguments.
+
+First, let's take a look at `pmap()` for the situation we just solved: iterating over two arguments. Instead of providing each item to iterate over as arguments, pmap() takes a list of arguments as its input. For example, we could replicate our previous example, iterating over both n and mu with the following:
+
+```{r iter_more_than_two_arguments_1}
+n <- list(5, 10, 20)
+mu <- list(1, 5, 10)
+
+pmap(list(n, mu), rnorm)
+```
+
+Notice how we had to put our two items to iterate over (n and mu) into a list.
+
+Let's expand this code to iterate over varying standard deviations too.
+
+```{r iter_more_than_two_arguments_2}
+# Initialize n and mu
+n <- list(5, 10, 20)
+mu <- list(1, 5, 10)
+
+# Create a sd list with the values: 0.1, 1 and 0.1
+sd <- list(0.1, 1, 0.1)
+
+# Edit this call to pmap() to iterate over the sd list as well
+pmap(.l = list(n, mu, sd), .f = rnorm)
+```
+
+4. Argument matching
+
+Compare the following two calls to `pmap()` (run them in the console and compare their output too!):
+
+```{r argument_matching_1}
+pmap(list(n, mu, sd), rnorm)
+pmap(list(mu, n, sd), rnorm)
+```
+
+What's the difference? By default `pmap()` matches the elements of the list to the arguments in the function by position. In the first case, `n` to the `n` argument of `rnorm()`, `mu` to the `mean` argument of `rnorm()`, and `sd` to the `sd` argument of `rnorm()`. In the second case `mu` gets matched to the `n` argument of `rnorm()`, which is clearly not what we intended!
+
+Instead of relying on this positional matching, a safer alternative is to provide names in our list. The name of each element should be the argument name we want to match it to.
+
+Let's fix up that second call.
+
+```{r argument_matching_2}
+# Name the elements of the argument list
+pmap(.l = list(mean = mu, n = n, sd = sd), .f = rnorm)
+```
+
+5. Mapping over functions and their arguments
+
+Sometimes it's not the arguments to a function you want to iterate over, but a set of functions themselves. Imagine that instead of varying the parameters to `rnorm()` we want to simulate from different distributions, say, using `rnorm()`, `runif()`, and `rexp()`. How do we iterate over calling these functions?
+
+In `purrr`, this is handled by the `invoke_map()` function. The first argument is a list of functions. In our example, something like:
+
+```{r iter_over_fx_and_arguments}
+funs <- list("rnorm", "runif", "rexp")
+```
+
+The second argument specifies the arguments to the functions. In the simplest case, all the functions take the same argument, and we can specify it directly, relying on `...` to pass it to each function. In this case, call each function with the argument `n = 5`:
+
+```{r}
+invoke_map(funs, n = 5)
+```
+
+In more complicated cases, the functions may take different arguments, or we may want to pass different values to each function. In this case, we need to supply `invoke_map()` with a list, where each element specifies the arguments to the corresponding function.
+
+Let's use this approach to simulate three samples from the following three distributions: `Normal(10, 1)`, `Uniform(0, 5)`, and `Exponential(5)`.
+
+```{r}
+# Define list of functions
+funs <- list("rnorm", "runif", "rexp")
+
+# Parameter list for rnorm()
+rnorm_params <- list(mean = 10)
+
+# Add a min element with value 0 and max element with value 5
+runif_params <- list(min = 0, max = 5)
+
+# Add a rate element with value 5
+rexp_params <- list(rate = 5)
+
+# Define params for each function
+params <- list(
+  rnorm_params,
+  runif_params,
+  rexp_params
+)
+
+# Call invoke_map() on funs supplying params and setting n to 5
+invoke_map(funs, params, n = 5)
+```
+
+# Maps with side effects
