@@ -318,3 +318,161 @@ invoke_map(funs, params, n = 5)
 ```
 
 # Maps with side effects
+
+Some functions in R aren't called for their return value, but are called for their side effects instead. In this video we'll introduce the walk functions: the functions in purrr designed to be used for their side effects. What are side effects? A side effect describes anything that happens that isn't in the return value of the function. Examples include: printing output, plotting, and saving files. In purrr, the `walk()` function is just like `map()` except it is designed for iterating functions called for their side effects. The usage is identical: .x contains the object to be iterated over and .f is the function to be applied to each element.  
+
+```{r}
+# walk(.x, .f)
+x <- list(1, "a", 3)
+x %>% walk(print)
+```
+
+In the above example, we created a list `x` containing a mix of numeric and character elements. We then piped (%>%) x into the `walk()` function using `print` as the argument. Remember, this is equivalent to calling `walk(x, print)`. The result is the side effect iterated over every element of `.x`. In this case, each element of .x is printed to the screen. Walking more interesting when you iterate over two or more arguments. Just like map, there are `walk2()` and `pwalk()` functions designed for this purpose. 
+
+Let's take a look at a more interesting example. Here we use the `ggplot2` package to create a list of plots. We also create a list of path names---file names we might to use for the pdf versions of these plots. Then, we can use walk2 to iterate over our list of plots and list of paths each time applying the function `ggsave`: another ggplot2 function that takes the description of a plot and saves it to disk. 
+
+```{r}
+library(ggplot2)
+plots <- cyl %>%
+  map(~ ggplot(., aes(mpg, wt)) + geom_point())
+paths <- paste0(names(plots), ".pdf")
+walk2(paths, plots, ggsave)
+```
+
+What have we done? We have saved all these plots to separate pdf files on disk in one go. 
+
+Since the return value of the functions called for their side effects isn't generally of interest. There are no variance like walk_dbl or walk_lgl for different return types instead always returns the original input of .x unchanged. This makes `walk()` usable in pipelines. In this example below, we first _walk_ x using print to see the object inside each element, then we map x using `length()` to the find the length of each object. In one line, we've found the length and taking a peek at the contents 
+
+```{r}
+lengths <- x %>% walk(print) %>% map_dbl(length)
+
+lengths
+```
+
+# Practice III
+
+1. Walk
+
+`walk()` operates just like `map()` except it's designed for functions that don't return anything. You use `walk()` for functions with side effects like printing, plotting or saving.
+
+Let's check that our simulated samples are in fact what we think they are by plotting a histogram for each one.
+
+```{r}
+# Define list of functions
+funs <- list(Normal = "rnorm", Uniform = "runif", Exp = "rexp")
+
+# Define params
+params <- list(
+  Normal = list(mean = 10),
+  Uniform = list(min = 0, max = 5),
+  Exp = list(rate = 5)
+)
+
+# Assign the simulated samples to sims
+sims <- invoke_map(.f = funs, .x = params, n = 50)
+
+# Use walk() to make a histogram of each element in sims
+sims %>% walk(hist)
+```
+
+Great work! Take a quick look through the three histograms, do they have any problems? 
+
+2. Walking over two or more arguments
+
+Those histograms were pretty good, but they really needed better breaks for the bins on the x-axis. That means we need to vary two arguments to `hist()`: `x` and `breaks`. Remember `map2()`? That allowed us to iterate over two arguments. Guess what? There is a `walk2()`, too!
+
+Let's use `walk2()` to improve those histograms with better breaks.
+
+```{r}
+# Replace "Sturges" with reasonable breaks for each sample
+breaks_list <- list(
+  Normal = seq(6, 16, 0.5),
+  Uniform = seq(0, 5, 0.25),
+  Exp = seq(0, 1.5, 0.1)
+)
+
+# Use walk2() to make histograms with the right breaks
+sims %>% walk2(breaks_list, hist)
+```
+
+Awesome job! Don't worry about those ugly labels. We'll fix them later. 
+
+3. Putting together writing functions and walk
+
+In the previous exercise, we hard-coded the breaks, but that was a little lazy. Those breaks probably won't be great if we change the parameters of our simulation.
+
+A better idea would be to generate reasonable breaks based on the actual values in our simulated samples. This is a great chance to review our function writing skills and combine our own function with purrr.
+
+Let's start by writing our own function find_breaks(), which copies the default breaks in the ggplot2 package: break the range of the data in 30 bins.
+
+How do we start? Simple, of course! Here's a snippet of code that works for the first sample:
+
+```{r}
+rng <- range(sims[[1]], na.rm = TRUE)
+seq(rng[1], rng[2], length.out = 30)
+```
+
+Your job in this exercise is to turn that snippet into a function.
+
+In the next exercise, we'll combine `find_breaks()` with `map()` and `walk2()` to create histograms with sensible breaks.
+
+```{r}
+# Turn this snippet into find_breaks()
+find_breaks <- function(x){
+  rng <- range(x, na.rm = TRUE)
+  seq(rng[1], rng[2], length.out = 30)
+}
+
+# Call find_breaks() on sims[[1]]
+find_breaks(sims[[1]])
+```
+
+4. Nice breaks for all
+
+Now that we have `find_breaks()`, we can find nice breaks for all the samples using `map()`. Then, pass the result into `walk2()` to get nice (but custom breaks) for our samples.
+
+```{r}
+# Use map() to iterate find_breaks() over sims: nice_breaks
+nice_breaks <- sims %>% map(find_breaks) 
+
+# Use nice_breaks as the second argument to walk2()
+sims %>% walk2(nice_breaks, hist)
+```
+
+5. Walking with many arguments: pwalk
+
+Ugh! Nice breaks but those plots had UUUUGLY labels and titles. The x-axis labels are easy to fix if we don't mind every plot having its x-axis labeled the same way. We can use the `...` argument to any of the `map()` or `walk()` functions to pass in further arguments to the function `.f`. In this case, we might decide we don't want any labels on the x-axis, in which case we need to pass an empty string to the `xlab` argument of `hist()`:
+
+```{r}
+walk2(sims, nice_breaks, hist, xlab = "")
+```
+
+But, what about the titles? We don't want them to be the same for each plot. How can we iterate over the arguments `x`, `breaks` and `main`? You guessed it, there is a `pwalk()` function that works just like pmap().
+
+Let's use `pwalk()` to tidy up these plots. Also, let's increase our sample size to 1000.
+
+```{r}
+# Increase sample size to 1000
+sims <- invoke_map(funs, params, n = 100)
+
+# Compute nice_breaks (don't change this)
+nice_breaks <- map(sims, find_breaks)
+
+# Create a vector nice_titles
+nice_titles <- c("Normal(10, 1)", "Uniform(0, 5)", "Exp(5)")
+
+# Use pwalk() instead of walk2()
+pwalk(list(x = sims, breaks = nice_breaks, main = nice_titles), hist, xlab = "")
+```
+
+6. Walking with pipes
+
+One of the nice things about the walk() functions is that they return the object you passed to them. This means they can easily be used in pipelines (a pipeline is just a short way of saying "a statement with lots of pipes").
+
+```{r}
+# Pipe this along to map(), using summary() as .f
+sims %>%
+  walk(hist) %>%
+  map(summary)
+```
+
