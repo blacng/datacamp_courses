@@ -236,3 +236,77 @@ var(rbinom(10000, 25, 0.3))
 # Laws of probability
 
 ## Probability of event A and event B
+
+So far we've been using coin flips as a simple example of random phenomena, but let's step back from that and talk about what a coin flip represents: a random variable that is either yes or no. For example we can say:
+
+* A represents a coin is heads. A either happens (A = 1) or it doesn't (A = 0)
+* B represents a coin is tails
+
+Note: Throughout this chapter we'll use events and coin flips interchangeably. We could say A is an event with a probability of 20% or A is a coin with 20% probability of being heads. 
+
+In reality these events could represent a probability that it snowing outside or a probability someone will click an advertisement on a website. In this chapter we'll learn some of the mathematical laws that govern these kinds of random events and let us make predictions about them. 
+
+Now, let's consider if you've two events: A and B. 
+
+* Event A is the result of one flip (either 1 for heads and 0 for tails each with some probability). 
+* Event B is the result of a second flip. 
+
+Now, suppose you want to know the probability of A and B i.e. the probability that both flips are heads. ![Probability of Events A and B](image-lib/probability_of_A_and_B.png) 
+
+Consider this in terms of nested branching. First, you flip coin A with some probability that it results in heads and some probability that it results in tails. This branches into two possibilities: A = 1 or A = 0. Second, you flip coin B, this causes both events to branch again separately. Only that one branch where A and B resulted in 1 (or heads) counts as A and B. We represent that by multiplying those two probabilities to represent the probability of using one branch after the other. 
+
+> The probability of A and B is the probability of A times the probability of B. 
+
+Note that this is true only if events A and B appear independent i.e. if the result of A doesn't affect the probability of B. This is generally true of two different coin flips and of all the cases we'll examine in this chapter. 
+
+Two events A and B are independent if
+
+$$\textrm{P(A and B)} = P(A) \cdot P(B)$$
+
+and we write $A \amalg B$. A set of events $A_i : i \in I$ is independent if
+
+$$P\Bigg(\displaystyle\bigcap_{i \in J}A_i\Bigg) = \prod_{i \in J}P(A_i)$$  
+
+for every finite subset J of _I_. if A and B are not independent, we write
+
+$$A \not\!\perp\!\!\!\perp B$$
+
+## Simulating two coins
+
+To confirm this, let's try a simulation of many coin flips. 
+
+```{r}
+A <- rbinom(100000, 1, 0.5)
+```
+
+Notice that we've set the parameters so that each draw has only one flip and each flip has a 50% chance of been heads. We can then simulate a 100000 flips of coin B seperately.
+
+```{r}
+B <- rbinom(100000, 1, 0.5)
+```
+
+Once, we have all the flips we can then compare all the pairs of them. `R` let's us compare them with the `&` operator and results in `TRUE` *if and only if* both A and B are 1. We thus get a sequence of TRUEs and FALSEs for each of the 100000 pairs. Once, we have this we can take the mean to find out the percentage that are TRUE just as we did in the simulations in the last chapter. 
+
+```{r}
+mean(A & B)
+```
+
+In this case, we see that A and B were both TRUE in about 25% of the simulations. This is the probability that two fair coins will bth result in heads. This confirms our rule:
+
+$$\textrm{P(A and B)} = P(A) \cdot P(B)$$
+
+OR
+
+$$\textrm{P(A and B)} = 0.5 \cdot 0.5 = 0.25$$
+
+We could the same simulation approach if the coin weren't fair i.e. if A and B do not have the same probability. For example, we can set event A to have a 10% probability and event B to have a 70% probability by setting the third argument of `rbinom()` to 0.1 and 0.7 respectively. When we then combine A and B, we see that about 7% of the pairs are both TRUE. 
+
+```{r}
+A <- rbinom(100000, 1, 0.1)
+B <- rbinom(100000, 1, 0.7)
+mean(A & B)
+```
+
+This again matches what we'll expect: The probability of 
+
+$$\textrm{P(A and B)} = 0.1 \cdot 0.7 = 0.07$$
