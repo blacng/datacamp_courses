@@ -1,15 +1,15 @@
 ---
-  title: "Probability and Distributions in R"
+title: "Probability and Distributions in R"
 subtitle: "Foundations of Probability in R"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
   html_document:
-  theme: united
-highlight: tango
-toc: true
-toc_depth: 4
-toc_float: true
+    theme: united
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float: true
 ---
   
 ```{r setup}
@@ -159,3 +159,80 @@ mean(rbinom(100000, 10, .3) >= 5)
 ```
 
 # Expected value and variance
+
+## Expected value
+
+When we talk about a probability distribution we are often interested in summarizing it into a few descriptive statistics. Two of the most interesting properties of a distribution are where the distribution is centered and how widely spread out it is. We describe this with the *expected value* and the *variance*. The expected value is the mean of the distribution. If you imagine we drew an infinite number of values in the distribution, the expected value is what the average of all those will be. This puts it right in the center of the distribution. 
+
+Let's try to find the expected value of the binomial distribution with `size` (10) and `p` (0.5). We can't draw an infinite number of values, but we can draw a lot of them. We can use `rbinom()` to simulate 100000 draws with size (10) and p (0.5). Then use the `mean()` function to take the average of those draws. We see the average as very close to 5. That's the center of the distribution. 
+
+```{r}
+mean(flips)
+```
+
+$$X  \sim \textrm{Binomial(size, p)} $$ 
+
+If we try to sample with a size of 100 and p of 0.2, we find that the mean is very close to 20. As you might noticed from these examples, there is a general rule. You can get the expected value of a binomial distribution by multiplying size i.e. the number of flips with p i.e. the probability each is heads:
+
+$$\textrm{E[X] = size . p} $$ 
+
+```{r}
+mean(rbinom(100000, 100, 0.2))
+```
+
+## Variance
+
+The expected value measures the center of the distribution, but we also want to measure how spread out the results are. Statisticians use the *variance* to measure this. Variance is the average^2^ distance of each value from the mean of the sample. The variance isn't quite as intutive as the mean, but it has useful mathematical properties that will become clear in this course. `R` provides the `var()` function to calculate variance froma particular sample. So we can simulate a 100000 draws of a binomial distribution with size (10) and p (0.5). Then use `var()` to find the variance of that distribution. We that the variance is very close to 2.5. Note: that the mean of this distribution is 5. That means 2.5 is the average^2^ distance between 5 and 1 random draw. 
+
+```{r}
+var(rbinom(100000, 10, 0.5))
+```
+
+The variance of a binomial distribution follows a particular general rule:
+
+$$Var(X) = \textrm{size . }  p(1 - p) $$ 
+
+So, for example the variance with the binomial parameters of 10 and 0.5 is:
+
+$$Var(X) = \textrm{10 . }  0.5(1 - 0.5) = 2.5$$ 
+
+This is exactly what we saw in the simulation. We could try this with another binomial distribution with size (100) and p(0.2). 
+
+$$Var(X) = \textrm{100 . }  0.2(1 - 0.2) = 16$$ 
+
+```{r}
+var(rbinom(100000, 100, 0.2))
+```
+
+Just like the expected value, simulation gives us a way to estimate properties of a distribution by drawing many values while mathematical rules can also give you an exact answer. 
+
+We thus have two rules for the properties of a binomial distribution:
+
+1. The expected value of a binomial distribution is $\textrm{E[X] = size . p} $
+2. The variance of the binomial distribution is $\textrm{Var(X) = size . p(1 - p)} $
+
+## Calculating the expected value
+
+What is the expected value of a binomial distribution where 25 coins are flipped, each having a 30% chance of heads?
+
+```{r}
+# Calculate the expected value using the exact formula
+25 * 0.3
+
+# Confirm with a simulation using rbinom
+mean(rbinom(10000, 25, 0.3))
+```
+
+## Calculating the variance
+
+```{r}
+# Calculate the variance using the exact formula
+25 * 0.3 * (1 - 0.3)
+
+# Confirm with a simulation using rbinom
+var(rbinom(10000, 25, 0.3))
+```
+
+# Laws of probability
+
+## Probability of event A and event B
