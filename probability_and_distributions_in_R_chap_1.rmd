@@ -310,3 +310,182 @@ mean(A & B)
 This again matches what we'll expect: The probability of 
 
 $$\textrm{P(A and B)} = 0.1 \cdot 0.7 = 0.07$$
+
+## Simulating the probability of A and B
+
+```{r}
+# Simulate 100,000 flips of a coin with a 40% chance of heads
+A <- rbinom(100000, 1, 0.4)
+
+# Simulate 100,000 flips of a coin with a 20% chance of heads
+B <- rbinom(100000, 1, 0.2)
+
+# Estimate the probability both A and B are heads
+mean(A & B)
+```
+
+## Simulating the probability of A, B, and C
+
+```{r}
+# You've already simulated 100,000 flips of coins A and B
+A <- rbinom(100000, 1, .4)
+B <- rbinom(100000, 1, .2)
+
+# Simulate 100,000 flips of coin C (70% chance of heads)
+C <- rbinom(100000, 1, .7)
+
+# Estimate the probability A, B, and C are all heads
+mean(A & B & C)
+```
+
+## Probability of A or B
+
+Suppose we flip a coin twice, what is the probability that *at least one* of the flips is heads? You can imagine this as two overlapping circles in a venn diagram? One circle represents whether event A happened such as the first flip being heads and one whether B happens such as the second flip being heads. The probability that either happens is the total region. ![probability of A or B](image-lib/probability_of_A_or_B.png)
+
+To find that overall probability you could start by adding up the areas of the two circles but then you'll be double the region they overlap so you have to substract that as well. This means:
+
+$$P\textrm{(A or B)} = P(A) + P(B) - P\textrm{(A and B)}$$
+
+In the last lesson you learned that as long as the event are independent 
+
+$$P\textrm{(A or B)} = P(A) + P(B) - P(A) \cdot P(B)$$
+
+So, if A and B are independent flips of a fair coin we can take the probability of the first being heads (50%) plus the probability of the second being heads (50%) and then substract that from the probability they both are heads. 
+
+$$P\textrm{(A or B)} = .5 + .5 - .5 \cdot .5 = .75$$
+
+Let's try this in a simulation
+
+```{r}
+A <- rbinom(100000, 1, .5)
+B <- rbinom(100000, 1, .5)
+mean(A | B)
+```
+
+Here you can see the number is about 75%; this matches the number we earlier got from our rule. This also works if our coins are biased. 
+
+```{r}
+A <- rbinom(100000, 1, .2)
+B <- rbinom(100000, 1, .6)
+mean(A | B)
+```
+
+We can get the same answer using the rule:
+
+$$P\textrm{(A or B)} = .2 + .6 - .2 \cdot .6 = .68$$
+
+One advantage of simulation approach is that it extends the cases where mathematical solutions will get cumbersome. For example, what if we have three coins, A, B, and C and we want to know the probability that any of the three of them is heads i.e. $P\textrm{(A or B or C}$. The formular for three events is a bit complicated and you don't need to memorize it. 
+
+$$P\textrm{(A or B or C)} = P(A) + P(B) + P(C) - P\textrm{(A and B)} \\ - P\textrm{(A and C)} - P\textrm{(B and C)} \\+ P\textrm{(A and B and C)} $$
+
+But if you simulate the events A, B, and C, you can simply combine all of them using the `mean()` function with the `|` (logical OR) operator. You can do this even with 4 or 5 events. 
+
+## Solving for probability of A or B
+
+$$P\textrm{(A or B)} = .6 + .1 - .6 \cdot .1 = .64$$
+
+## Simulating probability of A or B
+
+```{r}
+# Simulate 100,000 flips of a coin with a 60% chance of heads
+A <- rbinom(100000, 1, .6)
+
+# Simulate 100,000 flips of a coin with a 10% chance of heads
+B <- rbinom(100000, 1, .1)
+
+# Estimate the probability either A or B is heads
+mean(A | B)
+```
+
+## Probability either variable is less than or equal to 4
+
+Suppose X is a random Binom(10, .6) variable (10 flips of a coin with 60% chance of heads) and Y is a random Binom(10, .7) variable (10 flips of a coin with a 70% chance of heads), and they are independent.
+
+What is the probability that either of the variables is less than or equal to 4?
+
+```{r}
+# Use rbinom to simulate 100,000 draws from each of X and Y
+X <- rbinom(100000, 10, .6)
+Y <- rbinom(100000, 10, .7)
+
+# Estimate the probability either X or Y is <= to 4
+mean(X <= 4 | Y <= 4)
+
+# Use pbinom to calculate the probabilities separately
+prob_X_less <- pbinom(4, 10, .6)
+prob_Y_less <- pbinom(4, 10, .7)
+
+# Combine these to calculate the exact probability either <= 4
+prob_X_less + prob_Y_less - prob_X_less * prob_Y_less
+```
+
+## Multiplying random variables
+
+Imagine I flip this fair coin 10 times and count the number of heads, then I take that number and triple it. What could you tell me about the resulting number? You don't exactly what it is but could you tell me its mean or its variance? Just like there are laws of probability for combining events. There are laws for manipulating random variables. In these next lessons, we'll learn to multiply random variables with a constant or combine them together. 
+
+Suppose X is a random variable containing the result of flipping a fair coin 10 times, we could take draws from X. One draw could be 5 another could be 7 and yet another could be 4---each representing 10 flips of a coin. In probability it is important to get into the habit of manipulating random variables kind of if they are like algebraic symbols. 
+
+$$X \sim \texttt{Binomial}(10, .5)$$
+
+So, we could imagine defining a new random variable Y, which is 3 times X. If X were 5, Y will be 15, and if X were 7, Y will be 21. 
+
+$$ Y \sim 3 \cdot X$$
+
+Now, we want to know the properties of Y such as its expected value and variance. To do that imagine a histogram of X and compare it to a histogram of X * 3 = Y. Notice that the shape of Y is the same, but it is larger and more spread out. So, we'll expect both the expected value and variance to increase. 
+
+Let's see what the exact effect of multiplying by 3 is through simulation. Try taking 100000 draws from X---a binomial with 10 flips of a fair coin. We can take the mean and check that the expect value is about 5 i.e. 10 flips multiplied by the probability of 0.5. 
+
+```{r}
+X <- rbinom(100000, 10, 0.5)
+mean(X)
+```
+
+To get a sample from Y, we multiply our sample of X by 3. Note: 3 * X will multiply every individual value by 3. So we went from a 100000 draws from X to a 100000 draws from Y. We can find the expected value of Y by taking the `mean()` and we see that it is about 15. Thus, when we multiply a random variable by 3 we also multiply the expected value by 3. This makes sense because we can see that the distribution has roughly the same shape, it's just three times larger. This is a general rule. When you multiply a random variable by a constant _k_, you also multiply the expected value by _k_. 
+
+```{r}
+Y <- 3 * X
+mean(Y)
+```
+
+We can also examine what happens to the variance. The variance of X is about 2.5. Recall that variance is size * p * 1 - p. Now, when we multiply it by 3 to get Y, the variance is about 22.5. It increase by a factor of 9. Why is it 9 because that's 3^2^.
+
+```{r}
+var(X)
+var(Y)
+```
+
+Variance is the average square distance of values from the mean. So, when the distribution became three times wider, the variance increases by 9. This gives two general rules for the properties of random variables when they are multiplied by a constant. 
+
+$$E[k \cdot Y] = k \cdot E[X] \\ \textrm{Var}[k \cdot X] = k^2 \cdot \textrm{Var}[X]$$ 
+
+You are learning about the application of these rules with respect to a binomial distribution, but these holds regardless of what the distribution the random variables follows. So, they are useful in many applications of probability.  
+
+## Simulating multiplying a random variable
+
+```{r}
+# Simulate 100,000 draws of a binomial with size 20 and p = .1
+X <- rbinom(100000, 20, .1)
+
+# Estimate the expected value of X
+mean(X)
+
+# Estimate the expected value of 5 * X
+mean (5 * X)
+```
+
+## Variance of a multiplied random variable
+
+In the last exercise you simulated X from a binomial with size 20 and p = .1 and now you'll use this same simulation to explore the variance.
+
+```{r}
+# X is simulated from 100,000 draws of a binomial with size 20 and p = .1
+X <- rbinom(100000, 20, .1)
+
+# Estimate the variance of X
+var(X)
+
+# Estimate the variance of 5 * X
+var(5 * X)
+```
+
+## Adding two random variables together
