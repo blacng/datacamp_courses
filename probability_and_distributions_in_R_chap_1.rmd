@@ -648,3 +648,75 @@ fair_16 / (fair_16 + biased_16)
 ```
 
 ## Prior probability
+
+In these exercises, we've been determining whether a coin we got from Nick is fair or biased. We've treated as if before we saw any flips there is a 50% chance the coin is fair and a 50% chance the coin is biased towards heads. But let's say I generally trust Nick when he gave me a coin, I figured he wasn't really trying to trick me, I am just testing the coin to be completely safe. Let's say that when Nick gave me the coin I thought there was only a 10% chance it is biased and a 90% chance it is fair. This is called the **prior probability** and it is an important part of Bayesian statistics. 
+
+Let's go back to the two piles of coins from the last lesson. One of the piles is fair and one them is biased and we flip everyone of them 20 times. We know that Nick got his coins from one of these two piles and by comparing the sizes of these red bars---the cases where the coin resulted in exactly 14 heads---we were able to find the conditiona probability. However, this time instead of having two equally size piles, let's start with 90,000 coins in the fair pile and only 10,000 biased coins in the biased pile. This represents our prior probability given the fair coins an advantage. Notice that in the resulting histograms the relative height of the red bars i.e. those with heads has changed. In fact even though each of the fair coin individually was less likely to result in 14 heads than a biased coin was there were more fair coins that ended up with 14 heads than biased ones. 
+
+![differently sized piles](image-lib/differently_sized_piles.png)
+
+We can simulate these piles to find the conditional probability that a coin with 14 heads given our prior probability of 10%. We first simulate 90,000 draws from a binomial distribution where the coins are fair. Notice that we changed the first argument (the number of draws to 90,000). We see that 3,645 of these draws resulted in 14 heads. 
+
+```{r}
+fair <- rbinom(90000, 20, .5)
+sum(fair == 14)
+```
+
+We then simulate only 10,000 draws from the biased coins each with a 75% chance of heads. We see that 1,703 of these resulted in 14 heads. 
+
+```{r}
+biased <- rbinom(10000, 20, .75)
+sum(biased == 14)
+```
+
+Now, we can find out conditional probability given that we are using one of those coins that resulted in 14 heads, what fraction of those were biased? 33% of them were biased. We originally thought there was a 10% chance the coin was biased but after seeing 14 heads out of 20 flips, our probability has updated to 33%.  
+
+```{r}
+1703 / (3465 + 1703)
+```
+
+This simulation approach works even if there are more than two possibilities for the probability of heads. For example, you can start with three piles of coins---one that has a 25% chance; one that has a 50% chance; and another with 75% chance. 
+
+## Updating with priors
+
+We see 14 out of 20 flips are heads, and start with a 80% chance the coin is fair and a 20% chance it is biased to 75%.
+
+You'll solve this case with simulation, by starting with a "bucket" of 10,000 coins, where 8,000 are fair and 2,000 are biased, and flipping each of them 20 times.
+
+```{r}
+# Simulate 8000 cases of flipping a fair coin, and 2000 of a biased coin
+fair_flips <- rbinom(8000, 20, .5)
+biased_flips <- rbinom(2000, 20, .75)
+
+# Find the number of cases from each coin that resulted in 14/20
+fair_14 <- sum(fair_flips == 14)
+biased_14 <- sum(biased_flips == 14)
+
+# Use these to estimate the posterior probability
+fair_14 / (fair_14 + biased_14)
+```
+
+Awesome! How did adding a prior into the mix change your outcome? 
+
+## Updating with three coins
+
+Suppose instead of a coin being either fair or biased, there are three possibilities: that the coin is fair (50% heads), low (25% heads), and high (75% heads). There is a 80% chance it is fair, a 10% chance it is biased low, and a 10% chance it is biased high.
+
+```{r}
+# Simulate 80,000 draws from fair coin, 10,000 from each of high and low coins
+flips_fair <- rbinom(80000, 20, .5)
+flips_high <- rbinom(10000, 20, .75)
+flips_low <- rbinom(10000, 20, .25)
+
+# Compute the number of coins that resulted in 14 heads from each of these piles
+fair_14 <- sum(flips_fair == 14)
+high_14 <- sum(flips_high == 14)
+low_14 <- sum(flips_low == 14)
+
+# Compute the posterior probability that the coin was fair
+fair_14 / (fair_14 + high_14 + low_14)
+```
+
+Wow! Great work! Adding another coin doesn't make things too much harder, does it? 
+
+## Bayes' Theorem
