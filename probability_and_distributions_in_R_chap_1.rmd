@@ -555,3 +555,96 @@ var(3 * X + Y)
 > Great simulating! Remember this rule only works when X and Y are independent.
 
 # Bayesian Statistics
+
+Throughout this course we've been talking about biased coins---coins that have a probability of heads that isn't 50%. That knowledge is going to come in handy because I'm worried I could have a biased coin here. My friend Nick and I made a bet on this coin: heads I pay him; tails he pays me. It's Nick's coin though and I am not sure I trust him, because I think he might have given me a trick coin that comes up heads 75% of the the time. How can we tell whether this coin is fair or biased? Well, we can run an experiment. Suppose, we flipped a coin 20 times and we see 14 heads and 6 tails. Now, that we've seen that. Do we believe the coin is fair or biased and could we give a probability. We are describing the process of *updating our beliefs after seeing evidence*, which is that heart of **Bayesian statistics**. 
+
+In this chapter we'll talk about Bayesian statistics in terms of determining whether the coin is fair or biased based on evidence. Let's imagine that before we ran the experiment we think that there is a chance this coin is fair and 50% it's biased. Picture that as two piles of coins---one of 50,000 fair coins and one of 50,000 biased coins. Imagine that you took every coin from each of the two piles flipped it 20 times and recorded the results. You would get two histograms like this ![a distribution of fair and biased coins](image-lib/a_distribution_of_fair_and_biased_coins.png) 
+
+One for the fair coins and one for the biased coins.
+
+Here is the trick of Bayesian statistics: When we see 14 heads out of 20 and we know whether it's either a fair or biased coin, we know that we are in one of those red bars in the histogram, all we need to know is which. Let's run this as a simulation.  
+
+1. Go to every coin in the 50,000 fair coin flips it 20 times and record the number of heads. Then, we find out how many were 14s. There were nearly 2000 coins that resulted in 14 heads so it is possible to get that from a fair coin.
+
+```{r}
+fair <- rbinom(50000, 20, .5)
+sum(fair == 14)
+```
+
+```{r}
+# gf_histogram( ~ fair) + stat_identity(aes(sum(fair == 14)), position = "identity")
+```
+
+
+2. We do the same to see how many biased coins produce 14 heads. Notice that this time we changed the probability to `.75`. The original were of equal size but a lot more of the biased coin is ending up resulting in 14 heads. Notice that the red box is a lot taller in the biased histogram than the fair histogram and we can add them to see that between the two piles there were a total of 10,334 that resulted in 14 heads i.e. the total of the two red bars. 
+
+```{r}
+biased <- rbinom(50000, 20, .75)
+sum(biased == 14)
+```
+
+```{r}
+1898 + 8436
+
+8436 / 10334
+```
+
+Now, we can get the conditional probability using the formular below: 
+
+$$
+\text{P(Biased | 14 Heads)} =\\ \frac{\texttt{# biased w/ 14 heads}}{\texttt{# total w/ 14 heads}} \\ = \frac{\texttt{8436}}{\texttt{1898 + 8436}} = \texttt{82%}
+$$
+
+We previously thought that there was a 50% chance that the coin was biased i.e. the piles were of equal size, but conditional on seeing 14 heads that probability has been updated to 82%. If we had seen 9 heads out of 20, which is more likely to come from a fair coin than a biased coin, the probability would have been updated in the opposite direction.
+
+## Updating
+
+Suppose you have a coin that is equally likely to be fair (50% heads) or biased (75% heads). You then flip the coin 20 times and see 11 heads.
+
+Without doing any math, which do you now think is more likely- that the coin is fair, or that the coin is biased?
+
+* Answer: More likely that the coin is fair
+
+## Updating with simulation
+
+We see 11 out of 20 flips from a coin that is either fair (50% chance of heads) or biased (75% chance of heads). How likely is it that the coin is fair? Answer this by simulating 50,000 fair coins and 50,000 biased coins.
+
+```{r}
+# Simulate 50000 cases of flipping 20 coins from fair and from biased
+fair <- rbinom(50000, 20, .5)
+biased <- rbinom(50000, 20, .75)
+
+# How many fair cases, and how many biased, led to exactly 11 heads?
+fair_11 <- sum(fair == 11)
+biased_11 <- sum(biased == 11)
+
+# Find the fraction of fair coins that are 11 out of all coins that were 11
+fair_11 / (fair_11 + biased_11)
+```
+
+## Updating after 16 heads
+
+Suppose that when you flip a different coin (that could either be fair or biased) 20 times, you see 16 heads.
+
+Without doing any math, which do you now think is more likely- that this coin is fair, or that it's biased?
+
+* Answer: More likely that the coin is biased.
+
+## Updating with simulation after 16 heads
+
+We see 16 out of 20 flips from a coin that is either fair (50% chance of heads) or biased (75% chance of heads). How likely is it that the coin is fair?
+
+```{r}
+# Simulate 50000 cases of flipping 20 coins from fair and from biased
+fair <- rbinom(50000, 20, .5)
+biased <- rbinom(50000, 20, .75)
+
+# How many fair cases, and how many biased, led to exactly 16 heads?
+fair_16 <- sum(fair == 16)
+biased_16 <- sum(biased == 16)
+
+# Find the fraction of fair coins that are 16 out of all coins that were 16
+fair_16 / (fair_16 + biased_16)
+```
+
+## Prior probability
