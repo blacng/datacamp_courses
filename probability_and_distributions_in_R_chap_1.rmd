@@ -16,6 +16,7 @@ output:
 knitr::opts_chunk$set(error = TRUE, 
                       collapse = TRUE, 
                       comment = "#>")
+set.seed(10^7*4)
 library(styler)
 library(lintr)
 library(purrr)
@@ -720,3 +721,121 @@ fair_14 / (fair_14 + high_14 + low_14)
 Wow! Great work! Adding another coin doesn't make things too much harder, does it? 
 
 ## Bayes' Theorem
+
+We've used simulation to estimate a conditional probability that a coin is fair or biased. For example, we looked at the distribution of 90,000 fair coins and 10,000 biased coins and saw how many coins from each pile resulted in 14 heads. We saw about 3000 resulting in heads amongst the fair coins and about 1500 among the biased coins. But what we are really working with in these simulations is *probability densities*. Consider the histogram in terms of the probability a coin out of the 100,000 we are flipping ends up with that outcome. In this lesson, rather that simulating many coins to determine whether a coin is biased we'll use a probability density specifically the `dbinom()` function to find an exact answer. In the process we'll introduce one of the most important equations in probability, **Bayes' Theorem**.  
+
+Recall that we use simulation to find the number of fair coins resulting in 14 heads out of the 90,000 in the original pile. Now, rather than simulating it with `rbinom()`, let's find the exact probability of 14 heads with the `dbinom()` function. But notice we also multiply it with the prior probability the coin is fair i.e. **0.9**. That's the equivalent of the 90,000 in the `rbinom()`. It calculates the probability that the coin is both fair and results in 14 heads. 
+
+```{r}
+fair <- rbinom(90000, 20, 0.5)
+sum(fair == 14)
+```
+
+```{r}
+dbinom(14, 20, .5) * .9
+```
+
+$$\texttt{P(14 heads | Fair)} \cdot \texttt{P(Fair)}$$
+
+We also simulated 10,000 biased coins and found the number of times there were 14 heads out of 20 flips. We can replace that with `dbinom()` using a .75 probability then multiplying it by the 0.1 prior probability that a coin was biased. These gets the exact probability shown in red in the histograms. 
+
+![probability density of fair and biased coins](image-lib/prob_densities_of_fair_and_biased_coins.png) 
+
+```{r}
+biased <- rbinom(10000, 20, .75)
+sum(biased == 14)
+```
+
+
+```{r}
+dbinom(14, 20, .75) * .1
+```
+
+$$\texttt{P(14 heads | Biased)} \cdot \texttt{P(Biased)}$$
+
+Now, that we have these probabilities, we can combine them in the same way we did the coins. To find the probability a coin is biased conditional on resulting in 14 heads out of 20, we look at the probability it is both 14 and biased out of the total probability that it resulted in 14 heads. This is the equivalent at looking at both of the red bars and asking which red bar the coin is in. As we did in the last slide, we can can compute each of this probabilities by multiplying the probabililty density by the prior propability. 
+
+$$\texttt{P(Biased | 14 Heads)} \\ = 
+\frac{\texttt{P(14 Heads and Biased)}}{\texttt{P(14 Heads and Biased)} + \texttt{P(14 Heads and Fair)}} \\ = 
+\frac{\texttt{P(14 Heads | Biased)P(Biased)}}{\texttt{P(14 Heads | Biased)P(Biased) + P(14 Heads | Fair)P(Fair)}} $$
+
+In the numerator, we are multiplying the probability of biased coins will result in 14 heads with the prior probability that the coin is biased. You are now able to calculate this in `R` by using `dbinom()` to calculate each of the densities multiplying each by the prior probabilities and then putting them into a fraction.    
+
+```{r}
+prob_14_fair <- dbinom(14, 20, .5) * .9
+prob_14_biased <- dbinom(14, 20, .5) * .1
+
+prob_14_biased / (prob_14_fair + prob_14_biased)
+```
+
+This exact solution is an application of Bayes' Theorem:
+
+$$\texttt{P(A | B)} \\ = 
+\frac{\texttt{P(B | A)(P(A)}}{\texttt{P(B | A)P(A)} + \texttt{P(B | not A)P(not A)}} \\ A = \texttt{Biased} \\ B = \texttt{14 Heads}$$
+
+Bayes' Theorem is usually written in terms of finding the probability of in terms of finding the probability of event A given B when you know the probability of event B given event A. In the problem we explored in this chapter event A is the set of biased coins and event B is that it resulted in 14 heads out of 20. This is why Bayes' Theorem was useful. We knew the probability of getting 14 heads given that the coin is biased, but we needed to convert it to the probability that the coin is biased given that it resulted in 14 heads. We could have just started the chapter with this equation, but our simulation showed with the numerator and denominator really represents by imagining what fraction of all coins resulting in 14 heads were biased. This will help you to understand and apply the theorem to calculate conditional probabilities in the future. 
+
+## Updating with Bayes Theorem
+
+In this chapter, you used simulation to estimate the posterior probability that a coin that resulted in 11 heads out of 20 is fair. Now you'll calculate it again, this time using the exact probabilities from `dbinom()`. There is a 50% chance the coin is fair and a 50% chance the coin is biased.
+
+```{r}
+# Use dbinom to calculate the probability of 11/20 heads with fair or biased coin
+probability_fair <- dbinom(11, 20, 0.5)
+probability_biased <- dbinom(11, 20, 0.75)
+
+# Calculate the posterior probability that the coin is fair
+probability_fair / (probability_fair + probability_biased)
+```
+
+Awesome job! Do you think calculating or simulating the answer is easier? Which makes more sense? I like the idea of simulating the experiment so as to get to the answer. 
+
+## Updating for other outcomes
+
+In the last exercise, you solved for the probability that the coin is fair if it results in 11 heads out of 20 flips, assuming that beforehand there was an equal chance of it being a fair coin or a biased coin. Recall that the code looked something like:
+
+```{r eval=FALSE}
+probability_fair <- dbinom(11, 20, .5)
+probability_biased <- dbinom(11, 20, .75)
+probability_fair / (probability_fair + probability_biased)
+```
+
+Now you'll find, using the `dbinom()` approach, the posterior probability if there were two other outcomes.
+
+```{r}
+# Find the probability that a coin resulting in 14/20 is fair
+probability_fair_14 <- dbinom(14, 20, 0.5)
+probability_biased_14 <- dbinom(14, 20, 0.75)
+
+probability_fair_14 / (probability_fair_14 + probability_biased_14)
+
+# Find the probability that a coin resulting in 18/20 is fair
+probability_fair_18 <- dbinom(18, 20, 0.5)
+probability_biased_18 <- dbinom(18, 20, 0.75)
+
+probability_fair_18 / (probability_fair_18 + probability_biased_18)
+```
+
+## More updating with priors
+
+Suppose we see 16 heads out of 20 flips, which would normally be strong evidence that the coin is biased. However, suppose we had set a prior probability of a 99% chance that the coin is fair (50% chance of heads), and only a 1% chance that the coin is biased (75% chance of heads).
+
+You'll solve this exercise by finding the exact answer with dbinom() and Bayes' theorem. Recall that Bayes' theorem looks like:
+
+$$\texttt{P(fair | A)} \\ = 
+\frac{\texttt{P(A | fair)(P(fair)}}{\texttt{P(A | fair)P(fair)} + \texttt{P(A | Biased)P(Biased)}}$$
+
+```{r}
+# Use dbinom to find the probability of 16/20 from a fair or biased coin
+probability_16_fair <- dbinom(16, 20, 0.5) 
+probability_16_biased <- dbinom(16, 20, 0.75) 
+
+# Use Bayes' theorem to find the posterior probability that the coin is fair
+(probability_16_fair * 0.99) / (probability_16_fair * 0.99 + probability_16_biased * 0.01)
+```
+
+Amazing! It seems like your choice of prior can have a pretty big effect on the final answer. 
+
+# Related distributions 
+
+We will introduce three more probability distributions related to the binomial: the normal, the Poisson, and the geometric. 
