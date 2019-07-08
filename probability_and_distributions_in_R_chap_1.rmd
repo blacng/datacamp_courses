@@ -489,3 +489,69 @@ var(5 * X)
 ```
 
 ## Adding two random variables together
+
+In the last lesson you learned how to multiply a variable by a constant. Now, you will learn how to add multiple random variables together. Suppose we define two random variables, X and Y. X is the result of flipping 10 coins with each having a probability of heads of .5. Y is the result of flipping 100 coins with each coin having a probability of heads of .2. Assume these are two independent random variables i.e. you flip the coins separately. Now suppose we add those two random variables together to get a random variable Z. If we get 6 heads in X and 22 in Y then Z will be equal to 28. 
+
+$$X \sim \texttt{Binomial}(10, .5) \\ Y \sim \textrm{Binomial}(100, .2) \\ Z \sim X + Y$$
+
+```{r}
+X <- rbinom(100000, 10, .5); mean(X)
+Y <- rbinom(100000, 100, .2); mean(Y)
+Z <- X + Y; mean(Z)
+
+gf_histogram( ~ X, bins = 10, 
+              color = "orange", 
+              fill = "navy blue", 
+              xlab = "X")
+gf_histogram( ~ Y, bins = 20, 
+              color = "orange", 
+              fill = "navy blue", 
+              xlab = "Y")
+gf_histogram( ~ Z, bins = 40, 
+              color = "orange", 
+              fill = "navy blue", 
+              xlab = "Z = X + Y")
+```
+
+Notice that Z is larger and more spread out than X and Y. While the distribution looks somewhat similar to X and Y, Z doesn't follow a binomial distribution, but we can stll make some predictions about its properties. We can simulate Z to find out its properties. Notice that the expected value of X, Y, and Z is about 5, 20, and 25. This is a general rule: The expected value of X + Y is the expected value of X plus the expected value of Y. 
+
+$$E[X + Y] = E[X] + E[Y] $$
+
+What about the variance of Z? We see in the histogram that it is more spread out that either X or Y. 
+
+```{r}
+X <- rbinom(100000, 10, .5); var(X)
+Y <- rbinom(100000, 100, .2); var(Y)
+Z <- X + Y; var(Z)
+```
+
+Notice that the variance of X, Y, and Z is about 2.5, 16, and 18.5 respectively. This also follows a general rule: the variance of the sum of two independent random variables is the sum of their variances. 
+
+$$Var[X + Y] = Var[X] + Var[Y] $$
+
+The rule for the addition of the expected values of two random events still holds even if the events are not independent i.e. even if the outcome of one influences the outcome of the probabilities of the other. However, the rule for adding the variances is true _if only if_ the probability of each events are independent of each other.
+
+```{r}
+# Simulate 100,000 draws of X (size 20, p = .3) and Y (size 40, p = .1)
+X <- rbinom(100000, 20, .3)
+Y <- rbinom(100000, 40, .1)
+
+# Estimate the expected value of X + Y
+mean(X + Y)
+```
+
+```{r}
+# Simulation from last exercise of 100,000 draws from X and Y
+X <- rbinom(100000, 20, .3) 
+Y <- rbinom(100000, 40, .1)
+
+# Find the variance of X + Y
+var(X + Y)
+
+# Find the variance of 3 * X + Y
+var(3 * X + Y)
+```
+
+> Great simulating! Remember this rule only works when X and Y are independent.
+
+# Bayesian Statistics
