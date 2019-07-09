@@ -836,6 +836,150 @@ probability_16_biased <- dbinom(16, 20, 0.75)
 
 Amazing! It seems like your choice of prior can have a pretty big effect on the final answer. 
 
-# Related distributions 
+# Related Distributions
 
-We will introduce three more probability distributions related to the binomial: the normal, the Poisson, and the geometric. 
+## The Normal Distribution
+
+We've been exploring the binomial distribution, the result of flipping multiple coins multiple times and calculating the number of heads. In this chapter, we're going to introduce three other important probability distributions and see how they each connect to the theme of flipping coins. You will not only add these distributions to your statistical tool box, but also see how the principles we've learned about working with random variables and simulation are important far beyond the binomial. 
+
+So far, you've often looked at a binomial where each draws made up of 10 flips of a coin has a 50% chance of heads. That will look like this distribution: a histogram where the most common value is 5.
+
+```{r}
+gf_histogram( ~ rbinom(100000, 10, .5), xlab = "flips")
+```
+
+Now imagine instead of flipping 10 or 20 fair coins in each draw we flipped 1000. Now the distribution of the number of heads is centered around 500. Notice the distribution is now taking on a sort of symmetrical, bell curve shape. This is because when you draw from the binomial with a very large size i.e. many coin flips, the results approximates a **normal distribution**. Approximations from one distribution to another are important in probability since they let you make connections between statistical tools.  
+
+```{r}
+gf_histogram( ~ rbinom(100000, 1000, .5), xlab = "flips")
+```
+
+You'll sometimes hear a normal distribution referred to as a **gaussian distribution** or a **bell curve**. It's famous because many distributions in nature take this shape such as measurement errors in scientific experiments and because its mathematical properties are well-understood. Many of the courses on the datacamp platform show how the normal distribution can be used in statistical inference. While the binomial is defined in terms of parameters $size$ i.e. number of flips and $p$, the probability of heads, the normal distribution is defined based on two other parameters: the mean ($\mu$) and the standard deviation ($\sigma$).
+
+Mathematically, we usually represent the mean as the Greek letter ($\mu$) and standard deviation as the Greek letter ($\sigma$).
+
+$$X \sim Normal(\mu, \sigma)$$
+
+In chapters 1 and 2, we introduced the concept of variance i.e. the average square distance from the mean. The standard deviation is square root of the variance.
+
+$$\sigma = \sqrt{Var(X)}$$
+
+While `R` defines the normal distribution using the standard deviation, some statisticians choose to define it using the variance. It's not that important what you choose because if you know one you know the other. You can square the standard deviation to get the variance or take square root of the varianc to get the standard deviation. Because the normal is defined in terms of the mean and standard deviation, it's easy to find the normal approximation to a particular binomial distribution. For example, we could a sample of a 100,000 draws in a binomial distribution with size 1000 and probability 0.5. 
+
+```{r}
+binomial_flips <- rbinom(100000, 1000, 0.5)
+```
+
+$$\mu = size \cdot p$$
+
+$$\sigma = \sqrt{size \cdot p \cdot (1 - p)}$$
+
+```{r}
+expected_value <- 1000 * 0.5
+variance <- 1000 * 0.5 * (1 - 0.5)
+stdev <- sqrt(variance)
+```
+
+We can then simulate from the normal using this parameters. We do this with the `rnorm()` function rather than `rbinom()`. The first argument is the number of draws, the second is the mean i.e. the same as the expected value of the binomial, and the third is the standard deviation. 
+
+```{r}
+normal <- rnorm(100000, expected_value, stdev)
+```
+
+Now, that we've simulated 100,000 draws from the binomial and from the corresponding normal distribution, we'll like to compare them to see if the normal really is a good approximation. Both of the plots look similar confirming that the normal distribution is a good approximation of the the binomial. 
+
+```{r}
+binomial_draws <- data.frame(draws = rbinom(100000, 1000, 0.5))
+normal_draws <- data.frame(draws = rnorm(100000, expected_value, stdev))   
+
+binomial_draws$type <- 'binomial'
+normal_draws$type <- 'normal'
+
+prob_dist <- rbind(binomial_draws, normal_draws)
+
+head(prob_dist)
+
+gf_histogram( ~ draws, data = prob_dist, size = 0.5, color = "orange", fill = "navy blue") %>% gf_facet_wrap(~ type)
+```
+
+## Simulating from the binomial and the normal
+
+In this exercise you'll see for yourself whether the normal is a reasonable approximation to the binomial by simulating large samples from the binomial distribution and its normal approximation and comparing their histograms.
+
+```{r compare_histograms_ggplot2, eval=FALSE}
+# compare_histogram <- function(variable1, variable2) {
+#   x <- data.frame(value = variable1, variable = "Variable 1")
+#   y <- data.frame(value = variable2, variable = "Variable 2")
+#   ggplot(rbind(x, y), aes(value)) +
+#     geom_histogram() +
+#     facet_wrap(~ variable, nrow = 2)
+# }
+```
+
+```{r compare_histograms_ggformular}
+compare_histograms <- function(variable1, variable2) {
+  x <- data.frame(value = variable1, variable = "Variable 1")
+  y <- data.frame(value = variable2, variable = "Variable 2")
+    rbind(x, y) %>% 
+    ggformula::gf_histogram(~ value) %>% 
+    gf_facet_wrap(~ variable, nrow = 2)
+}
+```
+
+```{r}
+# Draw a random sample of 100,000 from the Binomial(1000, .2) distribution
+binom_sample <- rbinom(100000, 1000, 0.2)
+
+# Draw a random sample of 100,000 from the normal approximation
+normal_sample <- rnorm(100000, 200, sqrt(var(binom_sample)))
+
+# Compare the two distributions with the compare_histograms function
+compare_histograms(binom_sample, normal_sample)
+```
+
+## Comparing the cumulative density of the binomial
+
+If you flip 1000 coins that each have a 20% chance of being heads, what is the probability you would get 190 heads or fewer?
+
+You'll get similar answers if you solve this with the binomial or its normal approximation. In this exercise, you'll solve it both ways, using both simulation and exact calculation.
+
+```{r}
+# Simulations from the normal and binomial distributions
+binom_sample <- rbinom(100000, 1000, .2)
+normal_sample <- rnorm(100000, 200, sqrt(160))
+
+# Use binom_sample to estimate the probability of <= 190 heads
+mean(binom_sample <= 190)
+
+# Use normal_sample to estimate the probability of <= 190 heads
+mean(normal_sample <= 190)
+
+# Calculate the probability of <= 190 heads with pbinom
+pbinom(190, 1000, 0.2)
+
+# Calculate the probability of <= 190 heads with pnorm
+pnorm(190, 200, sqrt(160))
+```
+
+Great job! There are a lot of different ways to go about getting similar answers. 
+
+## Comparing the distributions of the normal and binomial for low n
+
+When we flip a lot of coins, it looks like the normal distribution is a pretty close approximation. What about when we flip only 10 coins, each still having a 20% chance of coming up heads? Is the normal still a good approximation?
+
+```{r}
+# Draw a random sample of 100,000 from the Binomial(10, .2) distribution
+binom_sample <- rbinom(100000, 10, 0.2)
+
+# Draw a random sample of 100,000 from the normal approximation
+normal_sample <- rnorm(100000, 2, sqrt(1.6))
+
+# Compare the two distributions with the compare_histograms function
+compare_histograms(binom_sample, normal_sample)
+```
+
+Good work! How do the sample size and the probability of success effect the accuracy of the normal approximation? 
+
+* Answer: We need a larger sample size in order for the normal distribution to approximate the binomial distribution. 
+
+## The Poisson Distribution
