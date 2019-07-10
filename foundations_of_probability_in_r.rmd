@@ -1087,3 +1087,135 @@ compare_histograms(Z, rpois(100000, 3))
 
 ## The Geometric Distribution
 
+Suppose this coin I'm holding has a 10% chance of coming up heads. Now, instead of flipping it a fix number of times I keep flipping it until the first time I see heads. How many tails do you think I'll get before the first time I get heads? I could heads in the first try so it could be zero or I could be standing here flipping a coin all day. What can I expect? This random variable when you are waiting for a particular event with some probability is called the geometric distribution and it's the last one we'll explore in this course.  
+
+## Simulating waiting for heads
+
+One way to simulate waiting for a result of heads is to flip a large number of coins and see what the first of heads is. For example with `rbinom(100, 1, .1)` we can simulate flipping 100 coins each with a 10% probability of heads in sequence. In this case we are only showing the first 30 and we can see that 5 of the first 30 results in heads and the results were tails.  
+
+```{r}
+flips <- rbinom(100, 1, 0.1)
+flips[1:30]
+```
+
+If we don;t want to count the coins manually we can use the `which()` function. `which()` returns the indices that fit a particular condition. For example, with `which(flips == 1)` we can find out which coin sequence were heads. In this case, we see that the first heads was the 2^nd^ flip. 
+
+```{r}
+which(flips == 1)
+```
+
+Since, we are only interested in the first heads let's use `which(flips == 1)[1]` to extract the first item. This code therefore gave us one draw from this random variable. 
+
+```{r}
+which(flips == 1)[1]
+```
+
+## Replicating simulations
+
+We can repeat this code to perform more draws from these distribution and get a sense of their possible values. In one draw, the first heads may be the 14^th^ flips, in another it could be the 10^th^, and in another case the 20^th^. 
+
+```{r}
+# set.seed(43)
+which(rbinom(100, 1, 0.1) == 1)[1]
+which(rbinom(100, 1, 0.1) == 1)[1]
+which(rbinom(100, 1, 0.1) == 1)[1]
+```
+
+It's a hassle to keep writing the same line of code to perform the same draws so `R` makes it easy with a `replicate()` function. `replicate()` takes two arguments: 
+
+1. `n` = the number of replications to perform
+2. `expr` = the expression containing the line of code (you can just paste it directly in). 
+
+The result below is a set of 10 outcomes 2, 6, 9, and so on each one representing one draw where we kept flipping the coin until we got an head. 
+
+```{r}
+replicate(10, which(rbinom(100, 1, 0.1) == 1)[1])
+```
+
+This is the **geometric** distribution. It's useful for modeling situations where for example a machine has a 10% chance of breaking each day and you want to know how long it will last before it breaks. As you see such a machine might last for weeks or it might break in just the first day. 
+
+## Simulating with the `rgeom()` function
+
+It's worth understanding of how you can generate a distribution like this with the `replicate()` function since been flexible with simulations is important in probability, but in this case `R` does provide a shortcut: the `rgeom()` function. You give it the number of draws and the probability of the event you are waiting for in this case, 0.1. Notice that the distribution is steadily decreasing in density: every possible value is less likely than the previous one. The most likely value is therefore 0, meaning that, in this case, there were no tails before the first heads. 
+
+```{r, fig.cap="simulating a geometric distribution"}
+gf_histogram( ~ rgeom(100000, 0.1), xlab = "geom", binwidth = 1) 
+```
+
+What's the expected value or the mean of this distribution? We can estimate it with `mean()` and see that it is about 9 i.e. when each coin has a 10% chance of heads, the first heads will, on average, be the 10^th^.   
+
+```{r}
+mean(rgeom(100000, 0.1))
+```
+
+The general rule of the expected value is 1 divided by the probability minus 1. The minus 1 comes from the fact that `R` defines the geometric distribution has the number of tails before the first heads. If we define it just as the first heads, it will be simply 1 / p. This means for example if each coin has a 50% chance of resulting in heads, the expected value will be 1. On average, you will see 1 tails before the first heads.  
+
+$$X \sim \textrm{Geom}(p)\\ E[X] = \frac{1}{p} - 1 $$
+
+## Waiting for the first coin flip
+
+```{r}
+# Simulate 100 instances of flipping a 20% coin
+flips <- rbinom(100, 1, 0.2)
+
+# Use which to find the first case of 1 ("heads")
+which(flips == 1)[1]
+```
+
+Wow! What situations can you think of that are good examples of a geometric distribution? 
+
+* If a machine has a 10% chance of failure a day, how long will it before we experience the first failure?
+
+```{r}
+# Existing code for finding the first instance of heads
+which(rbinom(100, 1, 0.2) == 1)[1]
+
+# Replicate this 100,000 times using replicate()
+replication_draws <- replicate(100000, which(rbinom(100, 1, 0.2) == 1)[1])
+
+# Histogram the replications with qplot
+qplot(replication_draws)
+```
+
+## Simulating from the geometric distribution
+
+```{r}
+# Replications from the last exercise
+replication_draws <- replicate(100000, which(rbinom(100, 1, .2) == 1)[1])
+
+# Generate 100,000 draws from the corresponding geometric distribution
+geom_sample <- rgeom(100000, 0.2)
+
+# Compare the two distributions with compare_histograms
+compare_histograms(replication_draws, geom_sample)
+```
+
+Fantastic simulating! And the rgeom() function is definitely easier to type than using rbinom() to simulate a geometric distribution. 
+
+## Probability of machine lasting X days
+
+A new machine arrives in a factory. This type of machine is very unreliable: every day, it has a 10% chance of breaking permanently. How long would you expect it to last?
+
+Notice that this is described by the cumulative distribution of the geometric distribution, and therefore the `pgeom()` function. `pgeom(X, .1)` would describe the probability that there are X working days before the day it breaks (that is, that it breaks on day X + 1).
+
+```{r}
+# Find the probability the machine breaks on 5th day or earlier
+pgeom(4, 0.1)
+
+# Find the probability the machine is still working on 20th day
+1 - pgeom(19, 0.1)
+```
+
+## Graphing the probability that a machine still works
+
+If you were a supervisor at the factory with the unreliable machine, you might want to understand how likely the machine is to keep working over time. In this exercise, you'll plot the probability that the machine is still working across the first 30 days.
+
+```{r}
+# Calculate the probability of machine working on day 1-30
+still_working <- 1 - pgeom(0:29, 0.1)
+
+# Plot the probability for days 1 to 30
+qplot(1:30, still_working)
+```
+
+Great work! You've learned all the basics you need to start understanding the distributions underlying statistical models! 
