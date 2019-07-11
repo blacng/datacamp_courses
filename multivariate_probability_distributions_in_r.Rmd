@@ -47,9 +47,9 @@ iris_raw <- read_csv(here("datasets", "iris.txt"))
 head(iris_raw)
 ```
 
-## Assigning column names with `colnames<-`
+## Assigning column names
 
-```{r}
+```{r assign_column_names}
 iris_raw <- iris_raw %>% 
   `colnames<-`(c("Sepal.Length", 
              "Sepal.Width", 
@@ -59,15 +59,15 @@ iris_raw <- iris_raw %>%
 head(iris_raw)
 
 # Alternatively
-iris_raw2 <- read_csv(here("datasets", "iris.txt"))
-library(magrittr)
-iris_raw2 <- iris_raw2 %>%
-  set_colnames(c("Sepal.Length", 
-             "Sepal.Width", 
-             "Petal.Length", 
-             "Petal.Width",  
-             "Species" ))
-head(iris_raw2)
+# iris_raw2 <- read_csv(here("datasets", "iris.txt"))
+# library(magrittr)
+# iris_raw2 <- iris_raw2 %>%
+#   set_colnames(c("Sepal.Length", 
+#              "Sepal.Width", 
+#              "Petal.Length", 
+#              "Petal.Width",  
+#              "Species" ))
+# head(iris_raw2)
 
 # OR
 # colnames(iris_raw) <- c("Sepal.Length", 
