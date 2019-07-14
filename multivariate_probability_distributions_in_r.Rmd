@@ -44,7 +44,7 @@ Multivariate data is mostly rectangular in shape i.e. data is organized by rows 
 
 ```{r iris_dataset}
 iris_raw <- read_csv(here("datasets", "iris.txt"))
-head(iris_raw)
+str(iris_raw)
 ```
 
 ## Assigning column names
@@ -77,11 +77,118 @@ head(iris_raw)
 #                         "Species" )
 ```
 
+We need to change the last variable of the `iris` dataset, `Species`, to a categorical variable, which `R` calls a factor. Notice that `Species` is now a factor variable. 
+
+```{r}
+library(dplyr)
+iris_raw <- iris_raw %>% mutate(Species = as.factor(Species))
+glimpse(iris_raw)
+```
+
+We need to remove the unnecessary prefix "Iris-" in the Species column.
+
+```{r}
+iris_raw <- iris_raw %>% mutate(Species = gsub("Iris-", "", Species))
+head(iris_raw)
+```
+
+# Practice 1
+
+## 1: Reading multivariate data using read.table
+
+Reading multivariate data from a file or an external URL can generally be done using the `read.table()` or `read.csv()` commands, depending on the type of data source. In this exercise you will read the wine dataset from the UCI machine learning website. A full description of the dataset can be found here.
+
+```{r}
+# Read in the wine dataset
+wine <- read.table("http://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data", sep = ",")
+
+# Print the first four entries
+head(wine)
+
+# Find the dimensions of the data
+dim(wine)
+
+# Check the names of the wine dataset 
+names(wine)
+```
+
+### Reading multivariate data in the tidyverse
+
+```{r}
+# Read in the wine dataset
+wine_data <- read_delim("http://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data", delim = ",")
+
+# Print the first four entries
+head(wine)
+
+# Find the dimensions of the data
+dim(wine)
+
+# Check the names of the wine dataset 
+names(wine)
+```
+
+## 2: Specifying datatypes for columns
+
+When you read data from a text or CSV file, you should specify the names and data types for each column. The read() function will try to determine if the first entry of the dataset contains the column names. R is clever at figuring out some datatypes, but if you are reading a categorical variable coded as 0, 1, and 2, it will read it as a numeric variable, and you will need to specify the data type for that column after reading the data.
+
+```{r}
+# Assign new names
+colnames(wine) <- c('Type', 'Alcohol', 'Malic', 'Ash', 'Alcalinity', 'Magnesium', 'Phenols', 'Flavanoids', 'Nonflavanoids','Proanthocyanins', 'Color', 'Hue', 'Dilution', 'Proline')
+                      
+# Check the new column names
+names(wine)
+
+# Check data type/structure of each variable
+str(wine)
+
+# Change the Type variable data type
+wine$Type <- as.factor(wine$Type)
+
+# Check data type/structure again 
+str(wine)
+```
+
+### Specifying datatypes for columns in the tidyverse
+
+```{r}
+wine_data <- wine %>% `colnames<-`(c('Type', 'Alcohol', 'Malic', 
+                            'Ash', 'Alcalinity', 'Magnesium', 
+                            'Phenols', 'Flavanoids', 'Nonflavanoids',
+                            'Proanthocyanins', 'Color', 'Hue', 'Dilution', 'Proline')) 
+                      
+# Check the new column names
+names(wine)
+
+# Check data type/structure of each variable
+str(wine)
+
+# Change the Type variable data type
+library(forcats)
+wine %>% mutate(Type = as_factor(Type))
+
+# Check data type/structure again 
+str(wine)
+```
+
+```{r}
+library(skimr)
+funs <- list(
+  iqr = IQR,
+  quantile = purrr::partial(quantile, probs = .99)
+)
+
+skim_with(numeric = funs, append = FALSE)
+skim(iris, Sepal.Length)
+```
+
 
 ```{r birthweight_dataset}
 birthweight <- read_csv(here("datasets", "birthweight.csv"))
 str(birthweight)
 head(birthweight)
+
+birthweight <- birthweight %>% select(-X1)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

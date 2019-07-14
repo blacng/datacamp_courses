@@ -10,6 +10,8 @@ output:
     toc: true
     toc_depth: 4
     toc_float: true
+  # pdf_document:
+  #   df_print: kable
 ---
   
 ```{r setup}
@@ -593,7 +595,7 @@ sum(biased == 14)
 Now, we can get the conditional probability using the formular below: 
 
 $$
-\text{P(Biased | 14 Heads)} =\\ \frac{\texttt{# biased w/ 14 heads}}{\texttt{# total w/ 14 heads}} \\ = \frac{\texttt{8436}}{\texttt{1898 + 8436}} = \texttt{82%}
+\text{P(Biased | 14 Heads)} =\\ \frac{\text{No. biased w/ 14 heads}}{\text{No. total w/ 14 heads}} \\ = \frac{\text{8436}}{\texttt{1898 + 8436}} = \text{82%}
 $$
 
 We previously thought that there was a 50% chance that the coin was biased i.e. the piles were of equal size, but conditional on seeing 14 heads that probability has been updated to 82%. If we had seen 9 heads out of 20, which is more likely to come from a fair coin than a biased coin, the probability would have been updated in the opposite direction.

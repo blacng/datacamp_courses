@@ -1,0 +1,120 @@
+---
+title: "Network Analysis in R"
+subtitle: "Network Analysis in R (Skill Track)"
+author: "Seun Odeyemi"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: united
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float: true
+  # pdf_document:
+  #   df_print: kable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = TRUE, 
+                      collapse = TRUE, 
+                      comment = "#>")
+set.seed(10^7*4)
+library(styler)
+library(lintr)
+library(purrr)
+```
+
+# What are social networks?
+
+A network graph depicts interconnections betweeen individuals. The presence or absence of each interconnection indicate whether there exists some form of relationship between each pair of individuals. Many different patterns of relationships may be illustrated as a social network. For instance, the graph you are looking at may represent friendship between individuals, flight routes between cities, even neural connections between brain regions. The term social network may refer to the visualization of the network graph or the underlying data that makes up the graph. 
+
+In this course we will use **vertex** to refer to individuals. Although they are also referred to as **nodes** by many people. The interconnection between individuals or vertices are called **edges**. 
+
+The network visualization, based on underlying data, can be represented in two structures: 
+
+1. Adjacency matrix: Here, we have a network with our vertices in rows and columns. Where there is a 1 in a cell indicates that an edge exists between those two vertices. A 0 indicates that there is no edge present between those two vertices. From these adjacency matrices, we can mathematically derive many insights into the structure of the network and the importance of key vertices. 
+2. Edgelist: A second key data structure that our network can be organized as is what is called an **edgelist**. This is a 2-column matrix or dataframe. Each row represents an edge between individual vertices in each column. This type of raw data is the most common form people collect before starting social network analysis.  
+
+There are several packages for working with network data and visualizing networks in `R`. In this course, you will be using the `igraph` package. The first step is to create an igraph object. This can be done directly from raw data. Say you have the edgelist on the left using the `graph.edgelist()` function supply the raw data as 2-column matrix as the first argument. The second argument specifies that the data is _undirected_. 
+
+```{r loadpackages}
+library(igraph)
+```
+
+When you inspect the graph object `g`, it provides several pieces of information. Of note are the two numbers on the first line. The first number indicates there are seven(7) vertices in the network. The second number indicates there are seven(7) edges. Also useful is the final row, which shows all the edges in the network. It is possible to get lots of information directly from the igraph object. The function, `V()` will return all vertices in the network. The function, `E()` will return all the edges in the network. To find the total number of vertices or edges in the network, you can use the functions `gorder()` and `gsize()` respectively. 
+
+```{r}
+c1 <- c("A", "A", "A", "A", "A", "E", "F")
+c2 <- c("B", "C", "D", "E", "F", "F", "G")
+df <- cbind(c1, c2)
+
+g <- graph.edgelist(as.matrix(df),
+                    directed = FALSE)
+g
+```
+
+```{r}
+V(g)
+E(g)
+gorder(g)
+gsize(g)
+```
+
+To generate a quick and simple visualization of the network, supply the graph object to the function, `plot()`
+
+```{r}
+plot(g)
+```
+
+# Practice 1
+
+## Creating an igraph object
+
+Here you will learn how to create an igraph 'object' from data stored in an edgelist. The data are friendships in a group of students. You will also learn how to make a basic visualization of the network.
+
+Each row of the friends dataframe represents an edge in the network.
+
+```{r reading_friends_data}
+library(here)
+friends <- read.csv(here("datasets", "friends.csv"), sep = ",")
+```
+
+```{r creating_basic_graph_plot}
+# Load igraph
+# library(igraph)
+
+# Inspect the first few rows of the dataframe 'friends'
+head(friends)
+
+# Convert friends dataframe to a matrix
+friends.mat <- as.matrix(friends)
+
+# Convert friends matrix to an igraph object
+g <- graph.edgelist(friends.mat, directed = FALSE)
+
+# Make a very basic plot of the network
+plot(g)
+```
+
+## Counting vertices and edges
+
+A lot of basic information about a network can be extracted from an igraph object. In this exercise you will learn how to count the vertices and edges from a network by applying several functions to the graph object `g`.
+
+Each row of the friends dataframe represents an edge in the network.
+
+```{r counting_vertices_edges}
+# Load igraph
+# library(igraph)
+
+# Subset vertices and edges
+V(g)
+E(g)
+
+# Count number of edges
+gsize(g)
+
+# Count number of vertices
+gorder(g)
+```
+
+
