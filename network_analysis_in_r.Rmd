@@ -85,6 +85,7 @@ friends <- read.csv(here("datasets", "friends.csv"), sep = ",")
 
 # Inspect the first few rows of the dataframe 'friends'
 head(friends)
+dim(friends)
 
 # Convert friends dataframe to a matrix
 friends.mat <- as.matrix(friends)
@@ -117,4 +118,230 @@ gsize(g)
 gorder(g)
 ```
 
+# Network Attributes
 
+Within any social network we generally have more information about vertices and edges than whether they exist or not. This information may be important when we analyze or visualize the network. In the example network from the previous video we already have one vertex attribute. Each vertex has a label or a name. We can see this in the igraph object where it says `attr: name`. Vertex attributes may be categorical or numerical. In friendship or coworker network other vertex attributes may include the age, gender, or political affiliation of the individual. In a network of flight routes within cities, a vertex attribute may be the population of the city or the country that the vertex is in. 
+
+Edges may also have attributes. This may refer to the type of individual relationships the vertices have. For instance, it could be whether an interconnection is romantic or platonic in a friendship network or whether the flight route within cities is scheduled daily or weekly. The most common edge attribute is the _weight_ of the edge. The weight of a edge is visualized by adjusting the relative thickness of edges. The thicker the edge the higher the weight of the edge. In a friendship network, the weight of the edge may refer to how many times a week friends call each other. In a flight route network, it may refer to how many flights per week go between cities. 
+
+To add these attributes directly to the network that already exist as igraph objects, you can use the functions `set_vertex_attr()` and `set_edge_attr()` for vertex and edge attributes respectively. The first argument is the graph object (`g` in the example below). The second argument is what you which to call the attribute. The final argument are the values to include. Here, we are adding the vertex attributes called _age_ and the edge attribute called _frequency_. You can view vertex and edge attributes by using the functions `vertex_attr()` and `edge_attr()` respectively.  
+
+```{r}
+g_1 <- graph.edgelist(as.matrix(df),
+                    directed = FALSE)
+g_1 <- set_vertex_attr(g_1, "age", value = c(20, 25, 21, 23, 24, 23, 22))
+
+g_1 <- set_edge_attr(g_1, "frequency", value = c(2, 1, 1, 1, 3, 2, 4))
+
+vertex_attr(g_1)
+
+edge_attr(g_1)
+```
+
+Alternatively, if you already have all your attributes in a dataframe, then you can create an igraph object that automatically contains all attributes by using `graph_from_data_frame()`. 
+
+```{r eval=FALSE}
+vertices.df <- tibble::tribble(
+  ~name, ~age,
+  #----|----
+  "A",  20,
+  "B",  25,
+  "C", 21,
+  "D", 23,
+  "E", 24,
+  "F", 23,
+  "G", 22
+)
+
+edges.df <- tibble::tribble(
+  ~from, ~to, ~frequency,
+  #----|----|----------
+  "A",  "B", 2,
+  "A",  "C", 1,
+  "A",  "D", 1,
+  "A",  "E", 1,
+  "A",  "F", 3,
+  "E",  "F", 2,
+  "F",  "G", 4
+)
+
+graph_from_data_frame(d = edges.df, vertices = vertices.df, directed = FALSE)
+```
+
+Often you may which to inspect the igraph object to identify certain vertices or find edges that have some attribute. This is possible by subsetting the edges of the igraph object. In the first example, we are looking for all edges that include the vertex `E` using `inc()`. The name of the vertex needs to be in quotes. In the second example, we subset all edges that have a frequency of `>=` 3. This can be very useful in large network to identify any interesting relationships. 
+
+```{r}
+E(g_1)[[inc('E')]]
+E(g_1)[[frequency >= 3]]
+```
+
+Finally, in this section you are going to further develop your igraph network visualization skills. It is possible to adjust basic igraph plots by adding parameters to the plot function. For instance, here we create a vertex attribute called color that igraph will use to plot vertex colors. We'll make all vertices over the age of 22 red and make the remainder white. We also specify to add black labels to each vertex using the `vertex.label.color` argument. 
+
+```{r}
+V(g_1)$color <- ifelse(
+  V(g_1)$age > 22, "red", "white"
+  )
+plot(g_1, vertex.label.color = "black")
+```
+
+# Practice II
+
+## Node attributes and subsetting
+
+In this exercise you will learn how to add attributes to vertices in the network and view them.
+
+```{r}
+genders <- c("M", "F", "F", "M", "M", "M", "F", "M", "M", "F", "M", "F", "M", "F", "M", "M")
+ages <- c(18, 19, 21, 20, 22, 18, 23, 21, 22, 20, 20, 22, 21, 18, 19, 20)
+```
+
+```{r}
+# Inspect the objects 'genders' and 'ages'
+genders
+ages
+
+# Create new vertex attribute called 'gender'
+g <- set_vertex_attr(g, "gender", value = genders)
+
+# Create new vertex attribute called 'age'
+g <- set_vertex_attr(g, "age", value = ages)
+
+# View all vertex attributes in a list
+vertex_attr(g)
+
+# View attributes of first five vertices in a dataframe
+V(g)[[1:5]] 
+```
+
+## Edge attributes and subsetting
+
+In this exercise you will learn how to add attributes to edges in the network and view them. For instance, we will add the attribute 'hours' that represents how many hours per week each pair of friends spend with each other.
+
+```{r}
+hours <- c(1, 2, 2, 1, 2, 5, 5, 1, 1, 3, 2, 1, 1, 5, 1, 2, 4, 1, 3, 1, 1, 1, 4, 1, 3, 3, 4)
+```
+
+```{r}
+# View hours
+hours
+
+# Create new edge attribute called 'hours'
+g <- set_edge_attr(g, "hours", value = hours)
+
+# View edge attributes of graph object
+edge_attr(g)
+
+# Find all edges that include "Britt"
+E(g)[[inc('Britt')]]  
+
+# Find all pairs that spend 4 or more hours together per week
+E(g)[[hours>=4]] 
+```
+
+## Visualizing attributes
+
+In this exercise we will learn how to create igraph objects with attributes directly from dataframes and how to visualize attributes in plots. We will use a second network of friendship connections between students.
+
+```{r}
+friends1_edges <- read.csv(here("datasets", "friends1_edges.csv"), sep = ",")
+friends1_nodes <- read.csv(here("datasets", "friends1_nodes.csv"), sep = ",")
+
+```
+
+```{r}
+# Create an igraph object with attributes directly from dataframes
+g1 <- graph_from_data_frame(d = friends1_edges, vertices = friends1_nodes, directed = FALSE)
+
+# Subset edges greater than or equal to 5 hours
+E(g1)[[hours >= 5]]  
+
+# Set vertex color by gender
+V(g1)$color <- ifelse(V(g1)$gender == "F", "orange", "dodgerblue")
+
+# Plot the graph
+plot(g1, vertex.label.color = "black")
+```
+
+# Network visualization principles
+
+There are many ways of visualizing social networks. There are many things one can change about network vertices and edges such as their size and color or by adding text. There are also many different layouts that can be used to arrange vertices and edges. Many of these look very attractive whilst others particularly if there are large number of vertices and edges look incredibly bad. The most effective network visualizations should immediately provide insight and understanding to the viewer. There are a number of simple dos and donts that will help you to think about how best to depict your network visualizations. 
+
+The most commonly adjusted features of vertices in network visualization are _size_, _labels_, _color_, and _shape_. You have already investigated how to change some of these in igraph in the previous exercises. Adjusting size is excellent for highlighting key or influential vertices. For instance, larger vertices may be those that are more central with a higher number of interconnections. Adding labels can also help identify key vertices. Although too much text on a network visualization can render it hard to read. 
+
+Color and shape are particularly useful for communicating differences in categorical vertex attributes. For edges in addition to altering the thickness of lines representing edge weights, you can also change the color or linetype to indicate the type of interconnectivity in between vertices. These styles can be done separately or in conjunction with each other. The most important consideration is to ensure that they highlight those key pieces of information that you wish to communicate to the audience. 
+
+Many different layout algorithms have been generated that assist with how best to layout vertices when creating network visualizations. The `igraph` package contains all of the most common ones and they can be selected using the layout argument when plotting. These algorithms will attempt to follow these general rules when visualizing network graphs:
+
+1. Edges should not cross each other. Vertices should not overlap with each other as much as it is possible. 
+2. Edges should ideally be as equal in length to each other as its feasible. Most algorithms also attempt to increase the symmetry of vertices in the layout and position key nodes toward the center. 
+
+Here the same network graph is depicted using some of the layout options provided by igraph. 
+
+```{r}
+plot(g_1, layout = layout.fruchterman.reingold(g_1))
+```
+
+In igraph you can change the layout by adding the layout argument to the `plot()` function. When creating your own network it is worth trying different layouts to identify which allows key network information to be communicated most efficiently. 
+
+# Practice III
+
+## igraph network layouts
+
+The igraph package provides several built in layout algorithms for network visualization. Depending upon the size of a given network different layouts may be more effective in communicating the structure of the network. Ideally the best layout is the one that minimizes the number of edges that cross each other in the network. In this exercise you will explore just a few of the many default layout algorithms. Re-executing the code for each plot will lead to a slightly different version of the same layout type. Doing this a few times can help to find the best looking visualization for your network.
+
+```{r}
+library(gridExtra)
+library(grid)
+```
+
+```{r, out.width=0.5}
+# Plot the graph object g1 in a circle layout
+plot(g1, vertex.label.color = "black", layout = layout_in_circle(g1))
+
+# Plot the graph object g1 in a Fruchterman-Reingold layout 
+plot(g1, vertex.label.color = "black", layout = layout_with_fr(g1))
+
+# Plot the graph object g1 in a Tree layout 
+m <- layout_as_tree(g1)
+plot(g1, vertex.label.color = "black", layout = m)
+
+# Plot the graph object g1 using igraph's chosen layout 
+m1 <- layout_nicely(g1)
+plot(g1, vertex.label.color = "black", layout = m1)
+
+# grid.arrange(p1, p2, p3, p4, ncol = 2)
+# knitr::include_graphics(c(p1, p2))
+```
+
+## Visualizing edges
+
+In this exercise you will learn how to change the size of edges in a network based on their weight, as well as how to remove edges from a network which can sometimes be helpful in more effectively visualizing large and highly clustered networks. In this introductory chapter, we have just scratched the surface of what's possible in visualizing `igraph` networks. You will continue to develop these skills in future chapters.
+
+```{r}
+# Create a vector of weights based on the number of hours each pair spend together
+w1 <- E(g1)$hours
+
+# Plot the network varying edges by weights
+m1 <- layout_nicely(g1)
+plot(g1, 
+        vertex.label.color = "black", 
+        edge.color = 'black',
+        edge.width = w1,
+        layout = m1)
+
+
+# Create a new igraph object by deleting edges that are less than 2 hours long 
+g2 <- delete_edges(g1, E(g1)[hours < 2])
+
+# Plot the new graph 
+w2 <- E(g2)$hours
+m2 <- layout_nicely(g2)
+
+plot(g2, 
+     vertex.label.color = "black", 
+     edge.color = 'black',
+     edge.width = w2,
+     layout = m2)
+```
+
+# Directed Networks
