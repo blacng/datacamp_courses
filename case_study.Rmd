@@ -4,15 +4,15 @@ subtitle: "Case Study: California Health Interview Survey Dataset"
 author: "Seun Odeyemi"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    df_print: tibble
-    toc: yes
-    toc_depth: 4
-  # prettydoc::html_pretty:
-  #   theme: cayman
-  #   highlight: github
+  # pdf_document:
+  #   df_print: tibble
   #   toc: yes
   #   toc_depth: 4
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: yes
+    toc_depth: 4
 bibliography: dataviz.bib
 ---
 
@@ -59,11 +59,11 @@ The variables are listed in the table below:
 |AB51|Type 1 or Type II Diabetes |
 |POVLL|Poverty Level |
 
-Table 1: A table showing the variables and their descriptions of the CHIS dataset. For more information visit UCLA's Health Policy Institute [website](h!p://healthpolicy.ucla.edu/).
+Table 1: A table showing the variables and their descriptions of the CHIS dataset. For more information visit UCLA's Health Policy Institute [website](http://healthpolicy.ucla.edu/).
 
 ## Import CHIS Dataset from Stata Data File
 
-```{r read_stata_data_file, warning=FALSE}
+```{r read_stata_data_file, warning=FALSE, message=FALSE}
 
 # Load the foreign library to access the read.dta function 
 # read.dta allows us to import Stata data files into R
