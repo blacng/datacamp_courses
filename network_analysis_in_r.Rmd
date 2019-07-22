@@ -66,7 +66,7 @@ To generate a quick and simple visualization of the network, supply the graph ob
 plot(g)
 ```
 
-# Practice 1
+# Practice I
 
 ## Creating an igraph object
 
@@ -345,3 +345,72 @@ plot(g2,
 ```
 
 # Directed Networks
+
+So far in this course we have been considering networks that are undirected. This means edges between vertices do not have a direction associated with them. The edges in undirected network simply indicate that a relationship of some kind exists between two vertices. However in many networks, edges do have directionality. In such directed networks, an arrow represents an _edge_ going from one vertex to another vertex. An example of a directed graph is a network of email exchanges. Each edge will represent one individual sending an email to a recipient. In the example here, A receives four edges and one outgoing edge to E. 
+
+<center>
+![directionality](image-lib/directionality.png) 
+</center>
+
+Using `igraph` it is relatively straightforward to determine if our network is directed or undirected. When calling the graph object, the first digit after igraph in the output will be a `U`, if it is undirected or a `D` if it is directed. Also, in directed network there are edges listed at the end of the object will have arrows indicating their directionality. It is also possible to test if a network is directed using the function `is.directed()` on the igraph object. This will return either true or false. Similarly, it is possible to determine if the network is weighted using the function `is.weighted()` on the igraph object. 
+
+One reason for using network analysis is to identify which vertices are more important or influential to the overall network. The simplest measure of vertex influence is _degree_. In undirected networks, the total degree of a vertex is simply how many edges that vertex has. In directed networks, vertices have _out- degree_ and _in-degree_. The out-degree of a network represents how many out-going edges a vertex has. The in-degree of a network represents how many in-coming edges each vertex has. In our example network of email exchanges, `A` has an in-degree of 4 as it receives emails from 4 other vertices. `F` has an out-degree of 3 as they send emails to 3 other vertices. 
+
+In igraph, there are several methods for determining if edges exist between vertices, and if they do, what direction they are. You can test if there is an edge exists between any two vertices using `[]` notation. A 1 is returned if a direct edge is present. You can show all edges to or from a vertex using `incident()` naming the vertex of interest with the second argument. The third argument `mode = "all"` indicates you want to see all edges--both incoming and outgoing. You can also find the vertices that edges originate from using `head_of()`. In this example, the second argument is `E(g)`, which indicates finding the origin of all edges that's in the network. 
+
+The example network you will use is of a severe measles outbreak that spread through the town of Hagelloch, Germany in 1861 affecting 188 children. Each edge represents the transmission of measles from one individual to another. Visit this [link](https://rdrr.io/cran/outbreaks/man/measles_hagelloch_1861.html) to learn more about this dataset. 
+
+# Practice I
+
+## Directed igraph objects
+
+In this exercise you will learn how to create a directed graph from a dataframe, how to inspect whether a graph object is directed and/or weighted and how to extract those vertices at the beginning and end of directed edges.
+
+```{r directed_igraph_object}
+library(readr)
+library(dplyr)
+
+# Get the graph object
+measles <- read_csv(here("datasets", "measles.csv"))
+glimpse(measles)
+
+g <- graph_from_data_frame(measles, directed = TRUE)
+
+# is the graph directed?
+is.directed(g) # or is_directed()
+
+# Is the graph weighted?
+is.weighted(g) # or is_weighted()
+
+# Where does each edge originate from?
+table(head_of(g, E(g)))
+```
+
+## Identifying edges for each vertex
+
+In this exercise you will learn how to identify particular edges. You will learn how to determine if an edge exists between two vertices as well as finding all vertices connected in either direction to a given vertex.
+
+```{r}
+# Make a basic plot
+plot(g, 
+     vertex.label.color = "black", 
+     edge.color = 'gray77',
+     vertex.size = 0,
+     edge.arrow.size = 0.1,
+     layout = layout_nicely(g))
+
+# Is there an edge going from vertex 184 to vertex 178?
+g['184', '178']
+
+# Is there an edge going from vertex 178 to vertex 184?
+g['178', '184']
+
+# Show all edges going to or from vertex 184
+incident(g, '184', mode = c("all"))
+
+# Show all edges going out from vertex 184
+incident(g, '184', mode = c("out"))
+```
+
+# Relationships between vertices
+
