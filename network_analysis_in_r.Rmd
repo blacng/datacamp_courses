@@ -664,3 +664,130 @@ plot(g184,
 ```
 
 # Network Structure
+
+In this chapter you are going to work with the forest gump network dataset. You will use this learn various methods for describing a structure and substructure of social networks. Each edge of the forest gump social network indicate that those two characters were, in at least, one scene of the movie together. Therefore, this network is undirected. 
+
+## Eigenvector Centrality
+
+To familiarize yourself with the network, you will first identify key vertices using eigenvector centrality and plot the network. 
+
+> Eigenvector centrality is a measure of how well connected a vertex is. 
+
+Vertices with the highest eigenvector centrality are those that are connected to many others, but especially to other vertices who themselves are highly connected to others. In `igraph` you calculate eigenvector centrality by applying the `eigen_centrality()` function to the graph object. The returned object is a list containing many things but the actual centrality scores for each vertex can be found in the named element `vector`. As you can see in this example undirected network, the vertices F, A, E, and H are particularly high in eigenvector centrality. 
+
+```{r}
+sort(eigen_centrality(g_example)$vector, decreasing = TRUE)
+```
+
+## Density
+
+Up till now you have largely been calculating measures of vertices such as degree, betweenness, and eigenvector centrality. However, there are also family of measures that tell us something about the overall pattern or structure of networks. The simplest measure of the overall structure of a network is its **_density_**. This is equivalent to the proportion of edges that **_actually do exist_** in a network out of all those that **_potentially could exist_** in a network. In this network of 13 vertices, there could potentially be 78 edges if all the vertices were connected. 
+
+<center>
+![density](image-lib/density.png)
+</center>
+
+In this network on the left there are 15 edges so the density is 0.19, equal to 19% of potential edges being present. The network on the right has 30 edges, which is a density of 0.38 i.e. 38% of all potential ties exist.  
+
+> Density is therefore a measure of how interconnected a network is. 
+
+It can simply be calculated in `igraph` using `edge_density()`. 
+
+```{r}
+edge_density(g_example)
+```
+
+## Average path length
+
+Another measure of the interconnectivity of a network is **_average path length_**. This is calculated by determining the mean distance of the length of the shortest between all pairs of the vertices in the network. In `igraph`, this is calculated by applying the function `mean_distance()` to the graph and instructing the function whether the graph is undirected or directed. 
+
+The network on the left has an average path length of 2.47 whereas the network on the right has a average path length of 1.81. This is because the average shortest path between vertices is reduced with an increase in the number of vertices. For instance, the shortest path between G and K on the left is 4 steps (G -> F -> A -> C -> K). On the right it is 2 steps (G -> J -> K). This suggest that the network on the right is more interconnected and facilitates flow between vertices more readily. 
+
+# Practice I
+
+## Forest Gump Network
+
+In this chapter you will use a social network based on the movie Forrest Gump. Each edge of the network indicates that those two characters were in at least one scene of the movie together. Therefore this network is undirected. To familiarize yourself with the network, you will first create the network object from the raw dataset. Then, you will identify key vertices using a measure called eigenvector centrality. Individuals with high eigenvector centrality are those that are highly connected to other highly connected individuals. You will then make an exploratory visualization of the network.
+
+```{r forest_gump_network}
+gump <- read_delim(here("datasets", "gump.csv"), delim = ",")
+
+# Inspect Forrest Gump Movie dataset
+head(gump)
+
+# Make an undirected network
+g <- graph_from_data_frame(gump, directed = FALSE)
+
+# Identify key nodes using eigenvector centrality
+g.ec <- eigen_centrality(g)
+which.max(g.ec$vector)
+
+# Plot Forrest Gump Network
+plot(g,
+vertex.label.color = "black", 
+vertex.label.cex = 0.6,
+vertex.size = 25*(g.ec$vector),
+edge.color = 'gray88',
+main = "Forrest Gump Network"
+)
+```
+
+## Network density and average path length
+
+The first graph level metric you will explore is the density of a graph. This is essentially the proportion of all potential edges between vertices that actually exist in the network graph. It is an indicator of how well connected the vertices of the graph are.
+
+Another measure of how interconnected a network is average path length. This is calculated by determining the mean of the lengths of the shortest paths between all pairs of vertices in the network. The longest path length between any pair of vertices is called the diameter of the network graph. You will calculate the diameter and average path length of the original graph `g`
+
+```{r network_density_path_length}
+# Get density of a graph
+gd <- edge_density(g)
+
+# Get the diameter of the graph g
+diameter(g, directed = FALSE)
+
+# Get the average path length of the graph g
+g.apl <- mean_distance(g, directed = FALSE)
+g.apl
+```
+
+# Random graphs
+
+Generating random graphs is an important method for investigating how likely or unlikely other network metrics are likely to occur given certain properties of the original graph. The simplest random graph is one that has the same number of vertices as your original graph and approximately the same density as the original graph. Here you will create one random graph that is based on the original Forrest Gump Network.
+
+```{r random_graphs}
+# Create one random graph with the same number of nodes and edges as g
+g.random <- erdos.renyi.game(n = gorder(g), p.or.m = gd, type = "gnp")
+
+g.random
+
+plot(g.random)
+
+edge_density(g.random)
+
+mean_distance(g.random, directed = FALSE)
+```
+
+## Network Randomizations
+
+In the previous exercise you may have noticed that the average path length of the Forrest Gump network was smaller than the average path length of the random network. If you ran the code a few times you will have noticed that it is nearly always lower in the Forrest Gump network than the random network. What this suggests is that the Forrest Gump network is more highly interconnected than each random network even though the random networks have the same number of vertices and approximately identical graph densities. Rather than re-running this code many times, you can more formally address this by creating 1000 random graphs based on the number of vertices and density of the original Forrest Gump graph. Then, you can see how many times the average path length of the random graphs is less than the original Forrest Gump network. This is called a randomization test.
+
+```{r}
+# Generate 1000 random graphs
+gl <- vector('list',1000)
+  
+for(i in 1:1000){
+  gl[[i]] <- erdos.renyi.game(n = gorder(g), p.or.m = gd, type = "gnp")
+}
+
+# Calculate average path length of 1000 random graphs
+gl.apls <- unlist(lapply(gl, mean_distance, directed = FALSE))
+
+# Plot the distribution of average path lengths
+hist(gl.apls, xlim = range(c(1.5, 6)))
+abline(v = g.apl, col = "red", lty = 3, lwd = 2)
+
+# Calculate the proportion of graphs with an average path length lower than our observed
+mean(gl.apls < g.apl)
+```
+
+Great work! As you can see, the Forrest Gump network is far more interconnected than we would expect by chance as zero random networks have an average path length smaller than the Forrest Gump network's average path length.
