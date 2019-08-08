@@ -791,3 +791,98 @@ mean(gl.apls < g.apl)
 ```
 
 Great work! As you can see, the Forrest Gump network is far more interconnected than we would expect by chance as zero random networks have an average path length smaller than the Forrest Gump network's average path length.
+
+## Network substructures
+
+### Triangles and transitivity
+
+Another important measure of local connectivity in a network graph involves investigating _triangles_ (also known as _triads_). In this exercise you will find all closed triangles that exist in a network. This means that an edge exists between three given vertices. You can then calculate the transitivity of the network. This is equivalent to the proportion of all possible triangles in the network that are closed. You will also learn how to identify the number of closed triangles that any given vertex is a part of and its local transitivity - that is, the proportion of closed triangles that the vertex is a part of given the theoretical number of triangles it could be a part of.
+
+```{r}
+# Show all triangles in the network.
+gump_matrix <- matrix(triangles(g), nrow = 3)
+
+# Count the number of triangles that vertex "BUBBA" is in.
+count_triangles(g, vids='BUBBA')
+
+# Calculate  the global transitivity of the network.
+g.tr <- transitivity(g)
+g.tr
+
+# Calculate the local transitivity for vertex BUBBA.
+transitivity(g, vids='BUBBA', type = "local")
+```
+
+### Transitivity randomizations
+
+As you did for the average path length, let's investigate if the global transitivity of the Forrest Gump network is significantly higher than we would expect by chance for random networks of the same size and density. You can compare Forrest Gump's global transitivity to 1000 other random networks.
+
+```{r}
+# Calculate average transitivity of 1000 random graphs
+# gl.tr.map <- map(gl, transitivity)
+gl.tr <- lapply(gl, transitivity)
+gl.trs <- unlist(gl.tr)
+
+# Get summary statistics of transitivity scores
+summary(gl.trs)
+# skimr::skim(gl.trs)
+
+# Calculate the proportion of graphs with a transitivity score higher than Forrest Gump's network
+mean(gl.trs > g.tr)
+```
+
+### Cliques
+
+Identifying cliques is a common practice in undirected networks. In a clique every two unique nodes are adjacent - that means that every individual node is connected to every other individual node in the clique. In this exercise you will identify the largest cliques in the Forrest Gump network. You will also identify the number of maximal cliques of various sizes. A clique is maximal if it cannot be extended to a larger clique.
+
+```{r}
+# Identify the largest cliques in the network
+largest_cliques(g)
+
+# Determine all maximal cliques in the network and assign to object 'clq'
+clq <- max_cliques(g)
+
+# Calculate the size of each maximal clique.
+table(unlist(lapply(clq, length)))
+```
+
+### Visualize largest cliques
+
+Often in network visualization you will need to subset part of a network to inspect the inter-connections of particular vertices. Here, you will create a visualization of the largest cliques in the Forrest Gump network. In the last exercise you determined that there were two cliques of size 9. You will plot these side-by-side after creating two new igraph objects by subsetting out these cliques from the main network. The function subgraph() enables you to choose which vertices to keep in a new network object.
+
+```{r}
+# Assign largest cliques output to object 'lc'
+lc <- largest_cliques(g)
+
+# Create two new undirected subgraphs, each containing only the vertices of each largest clique.
+gs1 <- as.undirected(induced_subgraph(g, lc[[1]]))
+gs2 <- as.undirected(induced_subgraph(g, lc[[2]]))
+
+
+# Plot the two largest cliques side-by-side
+
+par(mfrow=c(1,2)) # To plot two plots side-by-side
+
+plot(gs1,
+     vertex.label.color = "black", 
+     vertex.label.cex = 0.9,
+     vertex.size = 0,
+     edge.color = 'gray28',
+     main = "Largest Clique 1",
+     layout = layout.circle(gs1)
+)
+
+plot(gs2,
+     vertex.label.color = "black", 
+     vertex.label.cex = 0.9,
+     vertex.size = 0,
+     edge.color = 'gray28',
+     main = "Largest Clique 2",
+     layout = layout.circle(gs2)
+)
+
+```
+
+# Close Relationships: Assortativity & Reciprocity
+
+
