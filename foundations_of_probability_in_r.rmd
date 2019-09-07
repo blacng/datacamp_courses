@@ -1229,29 +1229,29 @@ qplot(1:30, still_working)
 Great work! You've learned all the basics you need to start understanding the distributions underlying statistical models! 
 
 ```{r}
-k = 100  # number of people in room
-p <- numeric(k)  # create numeric vector to store probabilities
-for (i in 1:k)      {
-            q <- 1 - (0:(i - 1))/365  # 1 - prob(no matches)
-            p[i] <- 1 - prod(q)  }
-
-plot(p)
+# k = 100  # number of people in room
+# p <- numeric(k)  # create numeric vector to store probabilities
+# for (i in 1:k)      {
+#             q <- 1 - (0:(i - 1))/365  # 1 - prob(no matches)
+#             p[i] <- 1 - prod(q)  }
+# 
+# plot(p)
 ```
 
 ```{r}
-#The birthday Problem.
-
-#Simple computation:
-N <- 1:50
-pshare <- 1- exp(-(N*(N-1)/2)/365)
-cbind(N, pshare)
-
-#A nice plot of the results...
-library(ggplot2)
-
-qplot(N, pshare, geom="point", colour=pshare, xlab="\n Number of People",
-      ylab="Probability that two people share a birthday \n", main="The Birthday Problem \n") + geom_hline(y=.5, lty=2)   +
-  geom_vline(x=23, lty=2) + scale_colour_gradient(limits=c(0, 1), low="lightblue", high="red") +
-  scale_x_continuous(limits=c(0, 50),breaks=c(0, 10, 20, 23, 30, 40, 50)) + theme_bw()   + opts(legend.position="none")
+# #The birthday Problem.
+# 
+# #Simple computation:
+# N <- 1:50
+# pshare <- 1- exp(-(N*(N-1)/2)/365)
+# cbind(N, pshare)
+# 
+# #A nice plot of the results...
+# library(ggplot2)
+# 
+# qplot(N, pshare, geom="point", colour=pshare, xlab="\n Number of People",
+#       ylab="Probability that two people share a birthday \n", main="The Birthday Problem \n") + geom_hline(y=.5, lty=2)   +
+#   geom_vline(x=23, lty=2) + scale_colour_gradient(limits=c(0, 1), low="lightblue", high="red") +
+#   scale_x_continuous(limits=c(0, 50),breaks=c(0, 10, 20, 23, 30, 40, 50)) + theme_bw()   + opts(legend.position="none")
 ```
 
